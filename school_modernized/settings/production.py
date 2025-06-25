@@ -8,14 +8,19 @@ from .base import *
 # Security for production
 DEBUG = False
 
-# ROBUST ALLOWED_HOSTS - Always allow Render domains
+# Fallback ALLOWED_HOSTS for Render deployment
 ALLOWED_HOSTS = [
-    '*',  # Allow all for now
+    '*',  # Allow all hosts as fallback
     'school-system-kh8s.onrender.com',
     '.onrender.com',
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
+    '0.0.0.0',
 ]
+
+# Force ALLOWED_HOSTS even if environment variable is not set
+if 'onrender.com' in os.environ.get('RENDER_EXTERNAL_URL', ''):
+    ALLOWED_HOSTS = ['*']  # Force allow all for Render
 
 # Database - PostgreSQL for production
 DATABASES = {
