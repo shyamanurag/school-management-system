@@ -1,3 +1,21 @@
+# Build tools
+setuptools==69.5.1
+wheel==0.43.0
+
+# Core Dependencies
 Django==5.0.7
+djangorestframework==3.15.2
+
+# Configuration
+python-decouple==3.8
+
+# Database
+psycopg2-binary==2.9.9
+dj-database-url==2.2.0
+
+# File Handling
+Pillow==10.4.0
+
+# Production Server
 gunicorn==22.0.0
-psycopg2-binary==2.9.9 
+whitenoise==6.7.0 
