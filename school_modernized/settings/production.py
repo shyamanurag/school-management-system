@@ -8,12 +8,14 @@ from .base import *
 # Security for production
 DEBUG = False
 
-# Get allowed hosts from environment variable, fallback to Render domain patterns
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'school-system-kh8s.onrender.com,.onrender.com,*').split(',')
-
-# Ensure we include common patterns
-if '*' not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.extend(['*', '.onrender.com', 'school-system-kh8s.onrender.com'])
+# ROBUST ALLOWED_HOSTS - Always allow Render domains
+ALLOWED_HOSTS = [
+    '*',  # Allow all for now
+    'school-system-kh8s.onrender.com',
+    '.onrender.com',
+    'localhost',
+    '127.0.0.1'
+]
 
 # Database - PostgreSQL for production
 DATABASES = {
