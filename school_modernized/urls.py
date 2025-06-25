@@ -49,7 +49,6 @@ urlpatterns = [
     path('reports/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'Reports'})),
     path('mobile-app/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'Mobile App'})),
     path('biometric/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'Biometric'})),
-    path('system/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'System'})),
     
     # Legacy/placeholder routes (for backward compatibility)
     path('library/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'Library'})),
