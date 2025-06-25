@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'item-list' %}">Inventory</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ form.instance.pk|yesno:'Edit Item,Add Item' }}</li>
+  </ol>
+</nav>
+<div class="container mt-4">
+    <h2>{% if form.instance.pk %}Edit Item{% else %}Add Item{% endif %}</h2>
+    <form method="post" novalidate aria-label="Inventory Item Form" id="itemForm">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="id_name" name="name" value="{{ form.name.value|default:'' }}" required aria-required="true" aria-invalid="{{ form.name.errors|yesno:'true,false' }}">
+            {% if form.name.errors %}
+                <div class="invalid-feedback d-block" role="alert" aria-live="assertive">{{ form.name.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_category" class="form-label">Category</label>
+            <input type="text" class="form-control" id="id_category" name="category" value="{{ form.category.value|default:'' }}" required aria-required="true" aria-invalid="{{ form.category.errors|yesno:'true,false' }}">
+            {% if form.category.errors %}
+                <div class="invalid-feedback d-block" role="alert" aria-live="assertive">{{ form.category.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_quantity" class="form-label">Quantity</label>
+            <input type="number" class="form-control" id="id_quantity" name="quantity" value="{{ form.quantity.value|default:'' }}" required aria-required="true" aria-invalid="{{ form.quantity.errors|yesno:'true,false' }}">
+            {% if form.quantity.errors %}
+                <div class="invalid-feedback d-block" role="alert" aria-live="assertive">{{ form.quantity.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_location" class="form-label">Location</label>
+            <input type="text" class="form-control" id="id_location" name="location" value="{{ form.location.value|default:'' }}" required aria-required="true" aria-invalid="{{ form.location.errors|yesno:'true,false' }}">
+            {% if form.location.errors %}
+                <div class="invalid-feedback d-block" role="alert" aria-live="assertive">{{ form.location.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="d-flex flex-column flex-md-row gap-2 justify-content-between">
+            <button type="submit" class="btn btn-success" aria-label="Save Item" tabindex="0">
+                <i class="bi bi-check-circle" aria-hidden="true"></i> <span class="visually-hidden">Save</span> Save
+            </button>
+            <a href="{% url 'item-list' %}" class="btn btn-secondary" aria-label="Cancel and return to item list" tabindex="0">
+                <i class="bi bi-x-circle" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span> Cancel
+            </a>
+        </div>
+        <div id="formError" class="alert alert-danger d-none"></div>
+        <div id="formSuccess" class="alert alert-success d-none"></div>
+    </form>
+    <style>
+@media (max-width: 576px) {
+  .d-flex.flex-column.flex-md-row.gap-2.justify-content-between {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    align-items: stretch !important;
+  }
+}
+</style>
+    <script>
+        document.getElementById('formError').classList.add('d-none');
+        form.classList.add('was-validated');
+    </script>
+</div>
+{% endblock %}

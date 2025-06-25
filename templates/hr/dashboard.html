@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Dashboard - School Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+                <div class="sidebar-sticky">
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        HR Management
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{% url 'core:hr:dashboard' %}">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'core:hr:analytics_list' %}">
+                                <i class="fas fa-chart-bar"></i> Analytics
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/core/employee/">
+                                <i class="fas fa-users"></i> Employees
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/core/leaveapplication/">
+                                <i class="fas fa-calendar-alt"></i> Leave Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/core/performancereview/">
+                                <i class="fas fa-star"></i> Performance Reviews
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/core/trainingprogram/">
+                                <i class="fas fa-graduation-cap"></i> Training Programs
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/core/employeepayroll/">
+                                <i class="fas fa-money-bill"></i> Payroll
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main role="main" class="col-md-10 ml-sm-auto px-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">HR Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group mr-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="generateAnalytics()">
+                                <i class="fas fa-sync-alt"></i> Generate Analytics
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Metrics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h5 class="card-title">Total Employees</h5>
+                                        <h2>{{ total_employees }}</h2>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-users fa-2x"></i>
+                                    </div>
+                                </div>
+                                <small>{{ new_hires_this_month }} new hires this month</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h5 class="card-title">Pending Leaves</h5>
+                                        <h2>{{ pending_leaves }}</h2>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-calendar-alt fa-2x"></i>
+                                    </div>
+                                </div>
+                                <small>{{ approved_leaves_today }} on leave today</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h5 class="card-title">Pending Reviews</h5>
+                                        <h2>{{ pending_reviews }}</h2>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-star fa-2x"></i>
+                                    </div>
+                                </div>
+                                <small>Performance reviews due</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h5 class="card-title">Active Trainings</h5>
+                                        <h2>{{ active_trainings }}</h2>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-graduation-cap fa-2x"></i>
+                                    </div>
+                                </div>
+                                <small>Upcoming training sessions</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Department Distribution</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="departmentChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Employee Analytics</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="employeeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Analytics -->
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Recent HR Analytics Reports</h5>
+                                <a href="{% url 'core:hr:analytics_list' %}" class="btn btn-sm btn-primary float-right">View All</a>
+                            </div>
+                            <div class="card-body">
+                                {% if recent_analytics %}
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Type</th>
+                                                    <th>Department</th>
+                                                    <th>Period</th>
+                                                    <th>Risk Score</th>
+                                                    <th>Generated</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for analytics in recent_analytics %}
+                                                <tr>
+                                                    <td>
+                                                        <span class="badge badge-info">{{ analytics.get_analytics_type_display }}</span>
+                                                    </td>
+                                                    <td>{{ analytics.department.name|default:"All Departments" }}</td>
+                                                    <td>{{ analytics.analysis_period_start }} - {{ analytics.analysis_period_end }}</td>
+                                                    <td>
+                                                        {% if analytics.risk_score > 7 %}
+                                                            <span class="badge badge-danger">{{ analytics.risk_score|floatformat:1 }}</span>
+                                                        {% elif analytics.risk_score > 4 %}
+                                                            <span class="badge badge-warning">{{ analytics.risk_score|floatformat:1 }}</span>
+                                                        {% else %}
+                                                            <span class="badge badge-success">{{ analytics.risk_score|floatformat:1 }}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ analytics.created_at|date:"M d, Y" }}</td>
+                                                    <td>
+                                                        <a href="{% url 'core:hr:analytics_detail' analytics.id %}" class="btn btn-sm btn-outline-primary">
+                                                            <i class="fas fa-eye"></i> View
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted">No analytics reports generated yet. <a href="#" onclick="generateAnalytics()">Generate your first report</a></p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Quick Actions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <a href="/admin/core/employee/add/" class="btn btn-outline-primary">
+                                        <i class="fas fa-user-plus"></i> Add Employee
+                                    </a>
+                                    <a href="/admin/core/leaveapplication/" class="btn btn-outline-warning">
+                                        <i class="fas fa-calendar-check"></i> Review Leaves ({{ pending_leaves }})
+                                    </a>
+                                    <a href="/admin/core/performancereview/" class="btn btn-outline-info">
+                                        <i class="fas fa-star"></i> Performance Reviews ({{ pending_reviews }})
+                                    </a>
+                                    <a href="/admin/core/employeepayroll/" class="btn btn-outline-success">
+                                        <i class="fas fa-money-bill"></i> Process Payroll ({{ pending_payrolls }})
+                                    </a>
+                                    <button class="btn btn-outline-secondary" onclick="generateAnalytics()">
+                                        <i class="fas fa-chart-bar"></i> Generate Analytics
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Department Distribution Chart
+        const deptCtx = document.getElementById('departmentChart').getContext('2d');
+        const departmentChart = new Chart(deptCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [{% for dept in dept_distribution %}'{{ dept.department__name }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+                datasets: [{
+                    data: [{% for dept in dept_distribution %}{{ dept.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Employee Analytics Chart (placeholder)
+        const empCtx = document.getElementById('employeeChart').getContext('2d');
+        const employeeChart = new Chart(empCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Active', 'On Leave', 'New Hires'],
+                datasets: [{
+                    label: 'Employee Count',
+                    data: [{{ total_employees }}, {{ approved_leaves_today }}, {{ new_hires_this_month }}],
+                    backgroundColor: ['#36A2EB', '#FFCE56', '#4BC0C0']
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        function generateAnalytics() {
+            // This would typically make an AJAX call to generate analytics
+            alert('Analytics generation would be triggered here. Use the Django management command: python manage.py generate_hr_analytics');
+        }
+    </script>
+</body>
+</html> 

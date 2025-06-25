@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+{% block content %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Fees</li>
+  </ol>
+</nav>
+{% endblock %}
+<div class="container mt-4">
+    <h2 class="mb-3">Fee Categories</h2>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" id="feeCategorySearch" class="form-control" placeholder="Search by name or description...">
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'fee-category-add' %}" class="btn btn-primary" aria-label="Add Fee Category" tabindex="0">
+    <i class="bi bi-plus" aria-hidden="true"></i> <span class="visually-hidden">Add Fee Category</span> Add Fee Category
+</a>
+        </div>
+    </div>
+    <div id="feeCategoryError" class="alert alert-danger d-none"></div>
+    <div class="table-responsive">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <button id="batchDeleteBtn" class="btn btn-danger btn-sm" disabled aria-label="Delete selected categories">
+            <i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete Selected</span> Delete Selected
+        </button>
+    </div>
+</div>
+<table class="table table-hover align-middle" role="table" aria-label="Fee Category List" id="feeCategoriesTable">
+    <thead>
+        <tr>
+            <th scope="col"><input type="checkbox" id="selectAllCategories" aria-label="Select all categories"></th>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col" class="text-end">Actions</th>
+        </tr>
+    </thead>
+            <script>
+// Show toast if a success message is available in context (Django template variable)
+document.addEventListener('DOMContentLoaded', function() {
+  const successMsg = '{{ success_message|escapejs }}';
+  if (successMsg) {
+    showToast(successMsg, 'success');
+  }
+  const errorMsg = '{{ error_message|escapejs }}';
+  if (errorMsg) {
+    showToast(errorMsg, 'danger');
+  }
+});
+</script>
+            <tbody>
+                <!-- Populated by JS -->
+            </tbody>
+        </table>
+        <div id="feeCategoryLoading" class="text-center my-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+const apiUrl = '/api/feecategories/';
+const tableBody = document.querySelector('#feeCategoriesTable tbody');
+const loadingSpinner = document.getElementById('feeCategoryLoading');
+const errorDiv = document.getElementById('feeCategoryError');
+const searchInput = document.getElementById('feeCategorySearch');
+
+let categoriesData = [
+  {
+    id: 1,
+    name: "Tuition Fees",
+    description: "Annual tuition for all classes",
+    type: "Mandatory",
+    icon: "bi-cash-coin"
+  },
+  {
+    id: 2,
+    name: "Library Fees",
+    description: "Library maintenance and book lending",
+    type: "Optional",
+    icon: "bi-book"
+  },
+  {
+    id: 3,
+    name: "Lab Fees",
+    description: "Science and computer lab usage",
+    type: "Mandatory",
+    icon: "bi-beaker"
+  },
+  {
+    id: 4,
+    name: "Sports Fees",
+    description: "Access to sports facilities and coaching",
+    type: "Optional",
+    icon: "bi-trophy"
+  },
+  {
+    id: 5,
+    name: "Transport Fees",
+    description: "School bus and transport services",
+    type: "Optional",
+    icon: "bi-bus-front"
+  },
+  {
+    id: 6,
+    name: "Hostel Fees",
+    description: "Boarding and lodging for hostelers",
+    type: "Optional",
+    icon: "bi-house-door"
+  },
+  {
+    id: 7,
+    name: "Exam Fees",
+    description: "Board and internal examination fees",
+    type: "Mandatory",
+    icon: "bi-clipboard-check"
+  },
+  {
+    id: 8,
+    name: "Development Fees",
+    description: "Campus and infrastructure development",
+    type: "Mandatory",
+    icon: "bi-building"
+  }
+];
+let editingCategoryId = null;
+let selectedCategories = new Set();
+
+function renderTable(data) {
+    tableBody.innerHTML = '';
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center">No fee categories found.</td></tr>';
+        return;
+    }
+    data.forEach(function(category) {
+        var checked = selectedCategories.has(category.id) ? 'checked' : '';
+        var iconHtml = category.icon ? '<i class="bi ' + category.icon + ' fs-5 me-2 text-primary"></i>' : '';
+        var typeBadge = category.type === 'Mandatory'
+          ? '<span class="badge bg-danger">Mandatory</span>'
+          : '<span class="badge bg-info text-dark">Optional</span>';
+        if (editingCategoryId === category.id) {
+            tableBody.innerHTML += '<tr>' +
+                '<td></td>' +
+                '<td>' + (category.id || '') + '</td>' +
+                '<td>' + iconHtml + '<input type="text" class="form-control d-inline w-auto align-middle" id="editName" value="' + (category.name || '') + '" aria-label="Category Name"></td>' +
+                '<td><input type="text" class="form-control" id="editDesc" value="' + (category.description || '') + '" aria-label="Description"></td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-success btn-sm me-1" aria-label="Save" tabindex="0" onclick="saveCategoryInline(' + category.id + ')">' +
+                        '<i class="bi bi-check" aria-hidden="true"></i> <span class="visually-hidden">Save</span>' +
+                    '</button>' +
+                    '<button class="btn btn-secondary btn-sm" aria-label="Cancel" tabindex="0" onclick="cancelEditCategory()">' +
+                        '<i class="bi bi-x" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        } else {
+            tableBody.innerHTML += '<tr>' +
+                '<td><input type="checkbox" class="category-checkbox" data-id="' + category.id + '" aria-label="Select category ' + category.name + '" ' + checked + '></td>' +
+                '<td>' + (category.id || '') + '</td>' +
+                '<td>' + iconHtml + '<span class="fw-semibold">' + (category.name || '') + '</span><br>' + typeBadge + '</td>' +
+                '<td>' + (category.description || '') + '</td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-warning btn-sm me-1" aria-label="Edit ' + category.name + '" tabindex="0" onclick="editCategoryInline(' + category.id + ')">' +
+                        '<i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span>' +
+                    '</button>' +
+                    '<button class="btn btn-danger btn-sm" aria-label="Delete ' + category.name + '" tabindex="0" onclick="showFeeCategoryDeleteModal(' + category.id + ', \'' + category.name.replace(/'/g, "&#39;") + '\')">' +
+                        '<i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }
+    });
+    // Accessibility: focus management
+    if (editingCategoryId) {
+        setTimeout(function() {
+            var input = document.getElementById('editName');
+            if (input) input.focus();
+        }, 0);
+    }
+// (removed duplicate/unreachable renderTable)
+
+// Inline edit handlers
+window.editCategoryInline = function(categoryId) {
+    editingCategoryId = categoryId;
+    renderTable(categoriesData);
+};
+window.cancelEditCategory = function() {
+    editingCategoryId = null;
+    renderTable(categoriesData);
+};
+window.saveCategoryInline = async function(categoryId) {
+    var name = document.getElementById('editName').value.trim();
+    var description = document.getElementById('editDescription').value.trim();
+    var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    var csrf = csrfInput ? csrfInput.value : '';
+    try {
+        const resp = await fetch('/api/feecategories/' + categoryId + '/', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf
+            },
+            body: JSON.stringify({ name, description })
+        });
+        if (!resp.ok) throw new Error('Failed to update fee category');
+        const updated = await resp.json();
+        categoriesData = categoriesData.map(c => c.id === categoryId ? updated : c);
+        editingCategoryId = null;
+        renderTable(categoriesData);
+        showToast('Fee category updated successfully', 'success');
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+};
+}
+
+function filterCategories() {
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = categoriesData.filter(c =>
+        (c.name && c.name.toLowerCase().includes(q)) ||
+        (c.description && c.description.toLowerCase().includes(q))
+    );
+    renderTable(filtered);
+}
+
+function fetchCategories() {
+    loadingSpinner.classList.remove('d-none');
+    errorDiv.classList.add('d-none');
+    // For demo, just use the mock data
+    setTimeout(function() {
+        loadingSpinner.classList.add('d-none');
+        renderTable(categoriesData);
+    }, 600);
+}
+
+searchInput.addEventListener('input', filterCategories);
+window.addEventListener('DOMContentLoaded', fetchCategories);
+
+// Select all logic
+const selectAllCb = document.getElementById('selectAllCategories');
+const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+function updateBatchDeleteBtn() {
+    batchDeleteBtn.disabled = selectedCategories.size === 0;
+}
+function updateSelectAllCheckbox() {
+    const all = categoriesData.length > 0 && selectedCategories.size === categoriesData.length;
+    if (selectAllCb) selectAllCb.checked = all;
+}
+if (selectAllCb) {
+    selectAllCb.addEventListener('change', function() {
+        if (this.checked) {
+            categoriesData.forEach(c => selectedCategories.add(c.id));
+        } else {
+            selectedCategories.clear();
+        }
+        renderTable(categoriesData);
+        updateBatchDeleteBtn();
+    });
+}
+// Batch delete logic
+if (batchDeleteBtn) {
+    batchDeleteBtn.addEventListener('click', function() {
+        if (selectedCategories.size === 0) return;
+        showGlobalModal({
+            title: 'Delete Selected Categories',
+            body: '<p>Are you sure you want to delete <strong>' + selectedCategories.size + '</strong> selected category(s)?</p>',
+            footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+                    '<button type="button" class="btn btn-danger" id="confirmBatchDelete">Delete</button>'
+        });
+        setTimeout(function() {
+            const confirmBtn = document.getElementById('confirmBatchDelete');
+            if (confirmBtn) {
+                confirmBtn.focus();
+                confirmBtn.addEventListener('click', async function() {
+                    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+                    const csrf = csrfInput ? csrfInput.value : '';
+                    try {
+                        const resp = await fetch('/api/feecategories/batch_delete/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrf
+                            },
+                            body: JSON.stringify({ ids: Array.from(selectedCategories) })
+                        });
+                        if (!resp.ok) throw new Error('Failed to delete categories');
+                        selectedCategories.clear();
+                        closeGlobalModal();
+                        showToast('Selected categories deleted', 'success');
+                        fetchCategories();
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                });
+            }
+        }, 0);
+    });
+}
+
+// Modal dialog for fee category delete confirmation
+window.showFeeCategoryDeleteModal = function(categoryId, categoryName) {
+  var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+  var csrf = csrfInput ? csrfInput.value : '';
+  showGlobalModal({
+    title: 'Delete Fee Category',
+    body: '<p>Are you sure you want to delete <strong>' + categoryName + '</strong>?</p>' +
+          '<form id="deleteFeeCategoryForm" method="post" action="/fees/categories/' + categoryId + '/delete/">' +
+          '<input type="hidden" name="csrfmiddlewaretoken" value="' + csrf + '">' +
+          '</form>',
+    footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+           '<button type="submit" class="btn btn-danger" form="deleteFeeCategoryForm">Delete</button>'
+  });
+};
+</script>
+{% endblock %}

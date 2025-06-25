@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'fee-category-list' %}">Fees</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ form.instance.pk|yesno:'Edit Fee Category,Add Fee Category' }}</li>
+  </ol>
+</nav>
+<div class="container mt-4">
+    <h2>{% if form.instance.pk %}Edit Fee Category{% else %}Add Fee Category{% endif %}</h2>
+    <form method="post" novalidate aria-label="Fee Category Form" id="feeCategoryForm">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="id_name" name="name" value="{{ form.name.value|default:'' }}" required aria-required="true" aria-invalid="{{ form.name.errors|yesno:'true,false' }}">
+            {% if form.name.errors %}
+                <div class="invalid-feedback d-block" role="alert" aria-live="assertive">{{ form.name.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_description" class="form-label">Description</label>
+            <textarea class="form-control" id="id_description" name="description" required aria-required="true" aria-invalid="{{ form.description.errors|yesno:'true,false' }}">{{ form.description.value|default:'' }}</textarea>
+            {% if form.description.errors %}
+                <div class="invalid-feedback d-block" role="alert" aria-live="assertive">{{ form.description.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="d-flex flex-column flex-md-row gap-2 justify-content-between">
+            <button type="submit" class="btn btn-success" aria-label="Save Fee Category" tabindex="0">
+                <i class="bi bi-check-circle" aria-hidden="true"></i> <span class="visually-hidden">Save</span> Save
+            </button>
+            <a href="{% url 'fee-category-list' %}" class="btn btn-secondary" aria-label="Cancel and return to fee category list" tabindex="0">
+                <i class="bi bi-x-circle" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span> Cancel
+            </a>
+        </div>
+        <div id="formError" class="alert alert-danger d-none"></div>
+        <div id="formSuccess" class="alert alert-success d-none"></div>
+    </form>
+    <style>
+    @media (max-width: 576px) {
+      .d-flex.flex-column.flex-md-row.gap-2.justify-content-between {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+        align-items: stretch !important;
+      }
+        document.getElementById('formError').textContent = 'Please fill out all required fields.';
+        document.getElementById('formError').classList.remove('d-none');
+    } else {
+        document.getElementById('formError').classList.add('d-none');
+    }
+    form.classList.add('was-validated');
+});
+</script>
+</div>
+{% endblock %}

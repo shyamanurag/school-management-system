@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'route-list' %}">Transport</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Delete Route</li>
+  </ol>
+</nav>
+<script>
+// Show toast if a success message is available in context (Django template variable)
+document.addEventListener('DOMContentLoaded', function() {
+  const successMsg = '{{ success_message|escapejs }}';
+  if (successMsg) {
+    showToast(successMsg, 'success');
+  }
+  const errorMsg = '{{ error_message|escapejs }}';
+  if (errorMsg) {
+    showToast(errorMsg, 'danger');
+  }
+});
+</script>
+{% endblock %}
+<div class="container mt-4">
+    <h2>Delete Route</h2>
+    <div class="alert alert-warning" role="alert">
+        <strong>Warning:</strong> This action cannot be undone. Are you sure you want to delete the route <strong>"{{ object.name }}"</strong>?
+    </div>
+    <form method="post" class="d-flex gap-2 align-items-center">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{% url 'route-list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

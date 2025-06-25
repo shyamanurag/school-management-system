@@ -1,0 +1,17 @@
+# Core Dependencies
+Django==5.0.6
+djangorestframework==3.15.2
+
+# Configuration
+python-decouple==3.8
+
+# Database
+psycopg2-binary==2.9.9
+dj-database-url==2.2.0
+
+# File Handling
+Pillow==10.3.0
+
+# Production Server
+gunicorn==22.0.0
+whitenoise==6.6.0 

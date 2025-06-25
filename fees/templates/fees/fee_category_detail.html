@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'fee-category-list' %}">Fees</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Fee Category Details</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="container mt-4" id="feeCategoryDetailContainer">
+    <div id="feeCategoryLoading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    <div id="feeCategoryError" class="alert alert-danger d-none" role="alert"></div>
+    <!-- Profile card will be injected here -->
+</div>
+<script>
+// Mock fee category data for demo
+const mockFeeCategory = {
+    name: "Annual Tuition Fees",
+    code: "FEE2025",
+    description: "Covers tuition for the full academic year, payable in two installments.",
+    amount: 45000,
+    due_dates: ["2025-07-15", "2026-01-10"],
+    status: "Active",
+    created_by: "Admin",
+    created_at: "2025-06-01"
+};
+function renderFeeCategoryDetail(category) {
+    const container = document.getElementById('feeCategoryDetailContainer');
+    container.innerHTML = `
+    <h1>Fee Category Details</h1>
+    <div class="card mb-3 shadow-sm" aria-labelledby="fee-category-details-heading">
+      <div class="card-body">
+        <h2 id="fee-category-details-heading" class="card-title">${category.name}</h2>
+        <div class="row mb-2">
+          <div class="col-sm-6"><strong>Code:</strong> ${category.code}</div>
+          <div class="col-sm-6"><strong>Status:</strong> <span class="badge bg-${category.status === 'Active' ? 'success' : 'secondary'}">${category.status}</span></div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-6"><strong>Amount:</strong> ₹${category.amount.toLocaleString()}</div>
+          <div class="col-sm-6"><strong>Due Dates:</strong> ${category.due_dates.map(date => `<time datetime='${date}'>${new Date(date).toLocaleDateString('en-IN')}</time>`).join(', ')}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-12"><strong>Description:</strong> ${category.description}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-6"><strong>Created By:</strong> ${category.created_by}</div>
+          <div class="col-sm-6"><strong>Created At:</strong> <time datetime="${category.created_at}">${new Date(category.created_at).toLocaleDateString('en-IN')}</time></div>
+        </div>
+        <div class="card-footer d-flex flex-column flex-md-row gap-2 justify-content-between mt-3">
+          <a href="#" class="btn btn-secondary" aria-label="Back to Fee Category List" tabindex="0">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i> <span class="visually-hidden">Back to List</span> Back to List
+          </a>
+          <a href="#" class="btn btn-primary" aria-label="Edit Fee Category" tabindex="0">
+            <i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span> Edit
+          </a>
+          <button class="btn btn-danger" aria-label="Delete Fee Category" tabindex="0" onclick="showDeleteDemo()">
+            <i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span> Delete
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+function showDeleteDemo() {
+    const errorDiv = document.getElementById('feeCategoryError');
+    errorDiv.textContent = 'Demo: Delete action is disabled in mock mode.';
+    errorDiv.classList.remove('d-none');
+    setTimeout(() => errorDiv.classList.add('d-none'), 2000);
+}
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('feeCategoryLoading').classList.remove('d-none');
+    document.getElementById('feeCategoryError').classList.add('d-none');
+    setTimeout(function() {
+        document.getElementById('feeCategoryLoading').classList.add('d-none');
+        renderFeeCategoryDetail(mockFeeCategory);
+    }, 700);
+});
+</script>
+{% endblock %}

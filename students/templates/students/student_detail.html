@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'student-list' %}">Students</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Student Details</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="container mt-4" id="studentDetailContainer">
+    <div id="studentLoading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    <div id="studentError" class="alert alert-danger d-none" role="alert"></div>
+    <!-- Profile card will be injected here -->
+</div>
+<script>
+// Mock student data for demo
+const mockStudent = {
+    full_name: "Aarav Sharma",
+    admission_no: "S1001",
+    class_name: "10-A",
+    dob: "2008-04-15",
+    avatar: "https://randomuser.me/api/portraits/men/75.jpg",
+    gender: "Male",
+    email: "aarav.sharma@email.com",
+    phone: "+91 9876543210",
+    address: "123, Green Park, Delhi, India",
+    status: "Active",
+    guardian: {
+        name: "Ramesh Sharma",
+        relation: "Father",
+        phone: "+91 9812345678"
+    }
+};
+function renderStudentDetail(student) {
+    const container = document.getElementById('studentDetailContainer');
+    container.innerHTML = `
+    <h1>Student Details</h1>
+    <div class="card mb-3 shadow-sm" aria-labelledby="student-title">
+      <div class="row g-0 align-items-center">
+        <div class="col-md-3 text-center p-4">
+          <img src="${student.avatar}" alt="${student.full_name}" class="rounded-circle border border-2" width="120" height="120" style="object-fit:cover;">
+          <div class="mt-3">
+            <span class="badge bg-success" aria-label="Status">${student.status}</span>
+          </div>
+        </div>
+        <div class="col-md-9">
+          <div class="card-body">
+            <h2 id="student-title" class="card-title">${student.full_name}</h2>
+            <div class="row mb-2">
+              <div class="col-sm-6"><strong>Admission No:</strong> ${student.admission_no}</div>
+              <div class="col-sm-6"><strong>Class:</strong> ${student.class_name}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-sm-6"><strong>Date of Birth:</strong> <time datetime="${student.dob}">${new Date(student.dob).toLocaleDateString('en-IN', {year:'numeric', month:'long', day:'numeric'})}</time></div>
+              <div class="col-sm-6"><strong>Gender:</strong> ${student.gender}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-sm-6"><strong>Email:</strong> <a href="mailto:${student.email}">${student.email}</a></div>
+              <div class="col-sm-6"><strong>Phone:</strong> <a href="tel:${student.phone}">${student.phone}</a></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-12"><strong>Address:</strong> ${student.address}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-12"><strong>Guardian:</strong> ${student.guardian.name} (${student.guardian.relation}), <a href="tel:${student.guardian.phone}">${student.guardian.phone}</a></div>
+            </div>
+            <div class="card-footer d-flex flex-column flex-md-row gap-2 justify-content-between mt-3">
+              <a href="#" class="btn btn-secondary" aria-label="Back to Student List" tabindex="0">
+                <i class="bi bi-arrow-left" aria-hidden="true"></i> <span class="visually-hidden">Back to List</span> Back to List
+              </a>
+              <a href="#" class="btn btn-primary" aria-label="Edit Student" tabindex="0">
+                <i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span> Edit
+              </a>
+              <button class="btn btn-danger" aria-label="Delete Student" tabindex="0" onclick="showDeleteDemo()">
+                <i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span> Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+function showDeleteDemo() {
+    const errorDiv = document.getElementById('studentError');
+    errorDiv.textContent = 'Demo: Delete action is disabled in mock mode.';
+    errorDiv.classList.remove('d-none');
+    setTimeout(() => errorDiv.classList.add('d-none'), 2000);
+}
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('studentLoading').classList.remove('d-none');
+    document.getElementById('studentError').classList.add('d-none');
+    setTimeout(function() {
+        document.getElementById('studentLoading').classList.add('d-none');
+        renderStudentDetail(mockStudent);
+    }, 700);
+});
+</script>
+{% endblock %}

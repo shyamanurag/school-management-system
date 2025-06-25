@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% block content %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Library</li>
+  </ol>
+</nav>
+{% endblock %}
+<div class="container mt-4">
+    <h2 class="mb-3">Library Books</h2>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" id="bookSearch" class="form-control" placeholder="Search by title, author, ISBN...">
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'book-add' %}" class="btn btn-primary" aria-label="Add Book" tabindex="0">
+    <i class="bi bi-plus" aria-hidden="true"></i> <span class="visually-hidden">Add Book</span> Add Book
+</a>
+        </div>
+    </div>
+    <div id="bookError" class="alert alert-danger d-none"></div>
+    <div class="table-responsive">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <button id="batchDeleteBtn" class="btn btn-danger btn-sm" disabled aria-label="Delete selected books">
+            <i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete Selected</span> Delete Selected
+        </button>
+    </div>
+</div>
+<table class="table table-hover align-middle" role="table" aria-label="Book List">
+    <thead>
+        <tr>
+            <th scope="col"><input type="checkbox" id="selectAllBooks" aria-label="Select all books"></th>
+            <th scope="col">#</th>
+            <th scope="col">Title</th>
+            <th scope="col">Author</th>
+            <th scope="col">ISBN</th>
+            <th scope="col" class="text-end">Actions</th>
+        </tr>
+    </thead>
+            <script>
+// Show toast if a success message is available in context (Django template variable)
+document.addEventListener('DOMContentLoaded', function() {
+  const successMsg = '{{ success_message|escapejs }}';
+  if (successMsg) {
+    showToast(successMsg, 'success');
+  }
+  const errorMsg = '{{ error_message|escapejs }}';
+  if (errorMsg) {
+    showToast(errorMsg, 'danger');
+  }
+});
+</script>
+            <tbody>
+                <!-- Populated by JS -->
+            </tbody>
+        </table>
+        <div id="bookLoading" class="text-center my-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+const apiUrl = '/api/books/';
+const tableBody = document.querySelector('table[aria-label="Book List"] tbody');
+const loadingSpinner = document.getElementById('bookLoading');
+const errorDiv = document.getElementById('bookError');
+const searchInput = document.getElementById('bookSearch');
+
+let booksData = [
+  {
+    id: 1,
+    title: "The Great Gatsby",
+    author: "F. Scott Fitzgerald",
+    isbn: "9780743273565",
+    publisher: "Scribner",
+    cover: "https://covers.openlibrary.org/b/id/7222246-L.jpg",
+    available: true
+  },
+  {
+    id: 2,
+    title: "To Kill a Mockingbird",
+    author: "Harper Lee",
+    isbn: "9780060935467",
+    publisher: "Harper Perennial",
+    cover: "https://covers.openlibrary.org/b/id/8228691-L.jpg",
+    available: false
+  },
+  {
+    id: 3,
+    title: "1984",
+    author: "George Orwell",
+    isbn: "9780451524935",
+    publisher: "Signet Classics",
+    cover: "https://covers.openlibrary.org/b/id/7222246-L.jpg",
+    available: true
+  },
+  {
+    id: 4,
+    title: "Pride and Prejudice",
+    author: "Jane Austen",
+    isbn: "9780141439518",
+    publisher: "Penguin Classics",
+    cover: "https://covers.openlibrary.org/b/id/8231856-L.jpg",
+    available: true
+  },
+  {
+    id: 5,
+    title: "The Catcher in the Rye",
+    author: "J.D. Salinger",
+    isbn: "9780316769488",
+    publisher: "Little, Brown and Company",
+    cover: "https://covers.openlibrary.org/b/id/8235116-L.jpg",
+    available: false
+  },
+  {
+    id: 6,
+    title: "The Hobbit",
+    author: "J.R.R. Tolkien",
+    isbn: "9780547928227",
+    publisher: "Houghton Mifflin",
+    cover: "https://covers.openlibrary.org/b/id/6979861-L.jpg",
+    available: true
+  },
+  {
+    id: 7,
+    title: "Brave New World",
+    author: "Aldous Huxley",
+    isbn: "9780060850524",
+    publisher: "Harper Perennial",
+    cover: "https://covers.openlibrary.org/b/id/8315041-L.jpg",
+    available: false
+  },
+  {
+    id: 8,
+    title: "Moby-Dick",
+    author: "Herman Melville",
+    isbn: "9780142437247",
+    publisher: "Penguin Classics",
+    cover: "https://covers.openlibrary.org/b/id/8235115-L.jpg",
+    available: true
+  }
+];
+let editingBookId = null;
+let selectedBooks = new Set();
+
+function renderTable(data) {
+    tableBody.innerHTML = '';
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No books found.</td></tr>';
+        return;
+    }
+    data.forEach(function(book) {
+        var checked = selectedBooks.has(book.id) ? 'checked' : '';
+        var availabilityBadge = book.available
+          ? '<span class="badge bg-success">Available</span>'
+          : '<span class="badge bg-danger">Checked Out</span>';
+        var coverImg = book.cover ? '<img src="' + book.cover + '" alt="' + book.title + '" class="rounded shadow-sm me-2" width="36" height="48" style="object-fit:cover;">' : '';
+        if (editingBookId === book.id) {
+            tableBody.innerHTML += '<tr>' +
+                '<td></td>' +
+                '<td>' + (book.id || '') + '</td>' +
+                '<td>' + coverImg + '<input type="text" class="form-control d-inline w-auto align-middle" id="editTitle" value="' + (book.title || '') + '" aria-label="Book Title"></td>' +
+                '<td><input type="text" class="form-control" id="editAuthor" value="' + (book.author || '') + '" aria-label="Author"></td>' +
+                '<td><input type="text" class="form-control" id="editISBN" value="' + (book.isbn || '') + '" aria-label="ISBN"></td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-success btn-sm me-1" aria-label="Save" tabindex="0" onclick="saveBookInline(' + book.id + ')">' +
+                        '<i class="bi bi-check" aria-hidden="true"></i> <span class="visually-hidden">Save</span>' +
+                    '</button>' +
+                    '<button class="btn btn-secondary btn-sm" aria-label="Cancel" tabindex="0" onclick="cancelEditBook()">' +
+                        '<i class="bi bi-x" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        } else {
+            tableBody.innerHTML += '<tr>' +
+                '<td><input type="checkbox" class="book-checkbox" data-id="' + book.id + '" aria-label="Select book ' + book.title + '" ' + checked + '></td>' +
+                '<td>' + (book.id || '') + '</td>' +
+                '<td>' + coverImg + '<span class="fw-semibold">' + (book.title || '') + '</span><br>' + availabilityBadge + '</td>' +
+                '<td>' + (book.author || '') + '</td>' +
+                '<td><code>' + (book.isbn || '') + '</code></td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-warning btn-sm me-1" aria-label="Edit ' + book.title + '" tabindex="0" onclick="editBookInline(' + book.id + ')">' +
+                        '<i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span>' +
+                    '</button>' +
+                    '<button class="btn btn-danger btn-sm" aria-label="Delete ' + book.title + '" tabindex="0" onclick="showBookDeleteModal(' + book.id + ', \'' + book.title.replace(/'/g, "&#39;") + '\')">' +
+                        '<i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }
+    });
+    // Accessibility: focus management
+    if (editingBookId) {
+        setTimeout(function() {
+            var input = document.getElementById('editTitle');
+            if (input) input.focus();
+        }, 0);
+    }
+    // Wire up row checkboxes
+    document.querySelectorAll('.book-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            const id = parseInt(this.getAttribute('data-id'));
+            if (this.checked) {
+                selectedBooks.add(id);
+            } else {
+                selectedBooks.delete(id);
+            }
+            updateBatchDeleteBtn();
+            updateSelectAllCheckbox();
+        });
+    });
+    updateSelectAllCheckbox();
+}
+
+function filterBooks() {
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = booksData.filter(b =>
+        (b.title && b.title.toLowerCase().includes(q)) ||
+        (b.author && b.author.toLowerCase().includes(q)) ||
+        (b.isbn && b.isbn.toLowerCase().includes(q))
+    );
+    renderTable(filtered);
+}
+
+function fetchBooks() {
+    loadingSpinner.classList.remove('d-none');
+    errorDiv.classList.add('d-none');
+    // For demo, just use the mock data
+    setTimeout(function() {
+        loadingSpinner.classList.add('d-none');
+        renderTable(booksData);
+    }, 600);
+}
+
+searchInput.addEventListener('input', filterBooks);
+window.addEventListener('DOMContentLoaded', fetchBooks);
+
+// Select all logic
+const selectAllCb = document.getElementById('selectAllBooks');
+const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+function updateBatchDeleteBtn() {
+    batchDeleteBtn.disabled = selectedBooks.size === 0;
+}
+function updateSelectAllCheckbox() {
+    const all = booksData.length > 0 && selectedBooks.size === booksData.length;
+    if (selectAllCb) selectAllCb.checked = all;
+}
+if (selectAllCb) {
+    selectAllCb.addEventListener('change', function() {
+        if (this.checked) {
+            booksData.forEach(b => selectedBooks.add(b.id));
+        } else {
+            selectedBooks.clear();
+        }
+        renderTable(booksData);
+        updateBatchDeleteBtn();
+    });
+}
+// Batch delete logic
+if (batchDeleteBtn) {
+    batchDeleteBtn.addEventListener('click', function() {
+        if (selectedBooks.size === 0) return;
+        showGlobalModal({
+            title: 'Delete Selected Books',
+            body: '<p>Are you sure you want to delete <strong>' + selectedBooks.size + '</strong> selected book(s)?</p>',
+            footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+                    '<button type="button" class="btn btn-danger" id="confirmBatchDelete">Delete</button>'
+        });
+        setTimeout(function() {
+            const confirmBtn = document.getElementById('confirmBatchDelete');
+            if (confirmBtn) {
+                confirmBtn.focus();
+                confirmBtn.addEventListener('click', async function() {
+                    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+                    const csrf = csrfInput ? csrfInput.value : '';
+                    try {
+                        const resp = await fetch('/api/books/batch_delete/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrf
+                            },
+                            body: JSON.stringify({ ids: Array.from(selectedBooks) })
+                        });
+                        if (!resp.ok) throw new Error('Failed to delete books');
+                        selectedBooks.clear();
+                        closeGlobalModal();
+                        showToast('Selected books deleted', 'success');
+                        fetchBooks();
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                });
+            }
+        }, 0);
+    });
+}
+
+// Modal dialog for book delete confirmation
+window.showBookDeleteModal = function(bookId, bookTitle) {
+  var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+  var csrf = csrfInput ? csrfInput.value : '';
+  showGlobalModal({
+    title: 'Delete Book',
+    body: '<p>Are you sure you want to delete <strong>' + bookTitle + '</strong>?</p>' +
+          '<form id="deleteBookForm" method="post" action="/library/books/' + bookId + '/delete/">' +
+          '<input type="hidden" name="csrfmiddlewaretoken" value="' + csrf + '">' +
+          '</form>',
+    footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+           '<button type="submit" class="btn btn-danger" form="deleteBookForm">Delete</button>'
+  });
+};
+</script>
+{% endblock %}

@@ -1,0 +1,400 @@
+{% extends 'base.html' %}
+{% block content %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Hostel</li>
+  </ol>
+</nav>
+{% endblock %}
+<div class="container mt-4">
+    <h2 class="mb-3">Hostels</h2>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" id="hostelSearch" class="form-control" placeholder="Search by name or address...">
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'hostel-add' %}" class="btn btn-primary" aria-label="Add Hostel" tabindex="0">
+    <i class="bi bi-plus" aria-hidden="true"></i> <span class="visually-hidden">Add Hostel</span> Add Hostel
+</a>
+        </div>
+    </div>
+    <div id="hostelError" class="alert alert-danger d-none"></div>
+    <div class="table-responsive">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <button id="batchDeleteBtn" class="btn btn-danger btn-sm" disabled aria-label="Delete selected hostels">
+            <i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete Selected</span> Delete Selected
+        </button>
+    </div>
+</div>
+<table class="table table-hover align-middle" role="table" aria-label="Hostel List" id="hostelsTable">
+    <thead>
+        <tr>
+            <th scope="col"><input type="checkbox" id="selectAllHostels" aria-label="Select all hostels"></th>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Address</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+            <script>
+// Show toast if a success message is available in context (Django template variable)
+document.addEventListener('DOMContentLoaded', function() {
+  const successMsg = '{{ success_message|escapejs }}';
+  if (successMsg) {
+    showToast(successMsg, 'success');
+  }
+  const errorMsg = '{{ error_message|escapejs }}';
+  if (errorMsg) {
+    showToast(errorMsg, 'danger');
+  }
+});
+</script>
+            <tbody>
+                <!-- Populated by JS -->
+            </tbody>
+        </table>
+        <div id="hostelLoading" class="text-center my-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+const apiUrl = '/api/hostels/';
+const tableBody = document.querySelector('#hostelsTable tbody');
+const loadingSpinner = document.getElementById('hostelLoading');
+const errorDiv = document.getElementById('hostelError');
+const searchInput = document.getElementById('hostelSearch');
+
+let hostelsData = [
+  {
+    id: 1,
+    name: "Sunrise Boys Hostel",
+    address: "123 Main St, Sector 5",
+    capacity: 120,
+    warden: "Mr. Rajesh Kumar",
+    status: "Active",
+    icon: "bi-house"
+  },
+  {
+    id: 2,
+    name: "Lotus Girls Hostel",
+    address: "45 Lake Road, Block A",
+    capacity: 90,
+    warden: "Ms. Priya Sharma",
+    status: "Active",
+    icon: "bi-house-door"
+  },
+  {
+    id: 3,
+    name: "Green Valley Hostel",
+    address: "8 Park Avenue, North Wing",
+    capacity: 60,
+    warden: "Mr. Suresh Mehta",
+    status: "Inactive",
+    icon: "bi-building"
+  },
+  {
+    id: 4,
+    name: "Maple Hostel",
+    address: "22 Maple Lane, East Block",
+    capacity: 100,
+    warden: "Ms. Anjali Singh",
+    status: "Active",
+    icon: "bi-house-heart"
+  },
+  {
+    id: 5,
+    name: "Cedar Hostel",
+    address: "77 Cedar Street, South End",
+    capacity: 80,
+    warden: "Mr. Deepak Joshi",
+    status: "Active",
+    icon: "bi-house-check"
+  },
+  {
+    id: 6,
+    name: "Skyline Hostel",
+    address: "Skyline Towers, 10th Floor",
+    capacity: 70,
+    warden: "Ms. Kavita Rao",
+    status: "Inactive",
+    icon: "bi-building-add"
+  },
+  {
+    id: 7,
+    name: "Harmony Hostel",
+    address: "Harmony Complex, 3rd Ave",
+    capacity: 110,
+    warden: "Mr. Manoj Patel",
+    status: "Active",
+    icon: "bi-house-up"
+  },
+  {
+    id: 8,
+    name: "Riverfront Hostel",
+    address: "Riverside Road, Block C",
+    capacity: 85,
+    warden: "Ms. Sunita Desai",
+    status: "Active",
+    icon: "bi-house-fill"
+  }
+];
+let editingHostelId = null;
+let selectedHostels = new Set();
+
+function renderTable(data) {
+    tableBody.innerHTML = '';
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hostels found.</td></tr>';
+        return;
+    }
+    data.forEach(function(hostel) {
+        var checked = selectedHostels.has(hostel.id) ? 'checked' : '';
+        var iconHtml = hostel.icon ? '<i class="bi ' + hostel.icon + ' fs-5 me-2 text-primary"></i>' : '';
+        var statusBadge = hostel.status === 'Active'
+          ? '<span class="badge bg-success">Active</span>'
+          : '<span class="badge bg-secondary">Inactive</span>';
+        if (editingHostelId === hostel.id) {
+            tableBody.innerHTML += '<tr>' +
+                '<td></td>' +
+                '<td>' + (hostel.id || '') + '</td>' +
+                '<td>' + iconHtml + '<input type="text" class="form-control d-inline w-auto align-middle" id="editName" value="' + (hostel.name || '') + '" aria-label="Hostel Name"></td>' +
+                '<td><input type="text" class="form-control" id="editAddress" value="' + (hostel.address || '') + '" aria-label="Address"></td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-success btn-sm me-1" aria-label="Save" tabindex="0" onclick="saveHostelInline(' + hostel.id + ')">' +
+                        '<i class="bi bi-check" aria-hidden="true"></i> <span class="visually-hidden">Save</span>' +
+                    '</button>' +
+                    '<button class="btn btn-secondary btn-sm" aria-label="Cancel" tabindex="0" onclick="cancelEditHostel()">' +
+                        '<i class="bi bi-x" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        } else {
+            tableBody.innerHTML += '<tr>' +
+                '<td><input type="checkbox" class="hostel-checkbox" data-id="' + hostel.id + '" aria-label="Select hostel ' + hostel.name + '" ' + checked + '></td>' +
+                '<td>' + (hostel.id || '') + '</td>' +
+                '<td>' + iconHtml + '<span class="fw-semibold">' + (hostel.name || '') + '</span><br>' + statusBadge + '</td>' +
+                '<td>' + (hostel.address || '') + '</td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-warning btn-sm me-1" aria-label="Edit ' + hostel.name + '" tabindex="0" onclick="editHostelInline(' + hostel.id + ')">' +
+                        '<i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span>' +
+                    '</button>' +
+                    '<button class="btn btn-danger btn-sm" aria-label="Delete ' + hostel.name + '" tabindex="0" onclick="showHostelDeleteModal(' + hostel.id + ', \'' + hostel.name.replace(/'/g, "&#39;") + '\')">' +
+                        '<i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }
+    });
+    // Accessibility: focus management
+    if (editingHostelId) {
+        setTimeout(function() {
+            var input = document.getElementById('editName');
+            if (input) input.focus();
+        }, 0);
+    }
+}
+        var safeName = hostel.name ? String(hostel.name).replace(/'/g, '&#39;').replace(/"/g, '&quot;') : '';
+        var checked = selectedHostels.has(hostel.id) ? 'checked' : '';
+        if (editingHostelId === hostel.id) {
+            // Inline edit mode
+            tableBody.innerHTML += '<tr>' +
+                '<td></td>' +
+                '<td><input type="text" class="form-control" id="editName" value="' + (hostel.name || '') + '" aria-label="Hostel Name"></td>' +
+                '<td><input type="text" class="form-control" id="editAddress" value="' + (hostel.address || '') + '" aria-label="Address"></td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-success btn-sm me-1" aria-label="Save" tabindex="0" onclick="saveHostelInline(' + hostel.id + ')">' +
+                        '<i class="bi bi-check" aria-hidden="true"></i> <span class="visually-hidden">Save</span>' +
+                    '</button>' +
+                    '<button class="btn btn-secondary btn-sm" aria-label="Cancel" tabindex="0" onclick="cancelEditHostel()">' +
+                        '<i class="bi bi-x" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        } else {
+            tableBody.innerHTML += '<tr>' +
+                '<td><input type="checkbox" class="hostel-checkbox" data-id="' + hostel.id + '" aria-label="Select hostel ' + safeName + '" ' + checked + '></td>' +
+                '<td>' + (hostel.id || '') + '</td>' +
+                '<td>' + (hostel.name || '') + '</td>' +
+                '<td>' + (hostel.address || '') + '</td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-warning btn-sm me-1" aria-label="Edit ' + safeName + '" tabindex="0" onclick="editHostelInline(' + hostel.id + ')">' +
+                        '<i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span>' +
+                    '</button>' +
+                    '<button class="btn btn-danger btn-sm" aria-label="Delete ' + safeName + '" tabindex="0" onclick="showHostelDeleteModal(' + hostel.id + ', \'" + safeName + "\')">' +
+                        '<i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }
+    });
+    // Accessibility: focus management
+    if (editingHostelId) {
+        setTimeout(function() {
+            var input = document.getElementById('editName');
+            if (input) input.focus();
+        }, 0);
+    }
+    // Wire up row checkboxes
+    document.querySelectorAll('.hostel-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            const id = parseInt(this.getAttribute('data-id'));
+            if (this.checked) {
+                selectedHostels.add(id);
+            } else {
+                selectedHostels.delete(id);
+            }
+            updateBatchDeleteBtn();
+            updateSelectAllCheckbox();
+        });
+    });
+    updateSelectAllCheckbox();
+}
+
+// Inline edit handlers
+window.editHostelInline = function(hostelId) {
+    editingHostelId = hostelId;
+    renderTable(hostelsData);
+};
+window.cancelEditHostel = function() {
+    editingHostelId = null;
+    renderTable(hostelsData);
+};
+window.saveHostelInline = async function(hostelId) {
+    var name = document.getElementById('editName').value.trim();
+    var address = document.getElementById('editAddress').value.trim();
+    var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    var csrf = csrfInput ? csrfInput.value : '';
+    try {
+        const resp = await fetch('/api/hostels/' + hostelId + '/', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf
+            },
+            body: JSON.stringify({ name, address })
+        });
+        if (!resp.ok) throw new Error('Failed to update hostel');
+        const updated = await resp.json();
+        hostelsData = hostelsData.map(h => h.id === hostelId ? updated : h);
+        editingHostelId = null;
+        renderTable(hostelsData);
+        showToast('Hostel updated successfully', 'success');
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+};
+
+
+function filterHostels() {
+    // For demo, just use the mock data
+    renderTable(hostelsData.filter(h => {
+        const q = searchInput.value.trim().toLowerCase();
+        return (
+            (h.name && h.name.toLowerCase().includes(q)) ||
+            (h.address && h.address.toLowerCase().includes(q))
+        );
+    }));
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = hostelsData.filter(h =>
+        (h.name && h.name.toLowerCase().includes(q)) ||
+        (h.address && h.address.toLowerCase().includes(q))
+    );
+    renderTable(filtered);
+}
+
+function fetchHostels() {
+    loadingSpinner.classList.remove('d-none');
+    errorDiv.classList.add('d-none');
+    // For demo, just use the mock data
+    setTimeout(function() {
+        loadingSpinner.classList.add('d-none');
+        renderTable(hostelsData);
+    }, 600);
+}
+
+searchInput.addEventListener('input', filterHostels);
+window.addEventListener('DOMContentLoaded', fetchHostels);
+
+// Select all logic
+const selectAllCb = document.getElementById('selectAllHostels');
+const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+function updateBatchDeleteBtn() {
+    batchDeleteBtn.disabled = selectedHostels.size === 0;
+}
+function updateSelectAllCheckbox() {
+    const all = hostelsData.length > 0 && selectedHostels.size === hostelsData.length;
+    if (selectAllCb) selectAllCb.checked = all;
+}
+if (selectAllCb) {
+    selectAllCb.addEventListener('change', function() {
+        if (this.checked) {
+            hostelsData.forEach(h => selectedHostels.add(h.id));
+        } else {
+            selectedHostels.clear();
+        }
+        renderTable(hostelsData);
+        updateBatchDeleteBtn();
+    });
+}
+// Batch delete logic
+if (batchDeleteBtn) {
+    batchDeleteBtn.addEventListener('click', function() {
+        if (selectedHostels.size === 0) return;
+        showGlobalModal({
+            title: 'Delete Selected Hostels',
+            body: '<p>Are you sure you want to delete <strong>' + selectedHostels.size + '</strong> selected hostel(s)?</p>',
+            footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+                    '<button type="button" class="btn btn-danger" id="confirmBatchDelete">Delete</button>'
+        });
+        setTimeout(function() {
+            const confirmBtn = document.getElementById('confirmBatchDelete');
+            if (confirmBtn) {
+                confirmBtn.focus();
+                confirmBtn.addEventListener('click', async function() {
+                    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+                    const csrf = csrfInput ? csrfInput.value : '';
+                    try {
+                        const resp = await fetch('/api/hostels/batch_delete/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrf
+                            },
+                            body: JSON.stringify({ ids: Array.from(selectedHostels) })
+                        });
+                        if (!resp.ok) throw new Error('Failed to delete hostels');
+                        selectedHostels.clear();
+                        closeGlobalModal();
+                        showToast('Selected hostels deleted', 'success');
+                        fetchHostels();
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                });
+            }
+        }, 0);
+    });
+}
+
+// Modal dialog for hostel delete confirmation
+window.showHostelDeleteModal = function(hostelId, hostelName) {
+  var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+  var csrf = csrfInput ? csrfInput.value : '';
+  showGlobalModal({
+    title: 'Delete Hostel',
+    body: '<p>Are you sure you want to delete <strong>' + hostelName + '</strong>?</p>' +
+          '<form id="deleteHostelForm" method="post" action="/hostel/hostels/' + hostelId + '/delete/">' +
+          '<input type="hidden" name="csrfmiddlewaretoken" value="' + csrf + '">' +
+          '</form>',
+    footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+           '<button type="submit" class="btn btn-danger" form="deleteHostelForm">Delete</button>'
+  });
+};
+</script>
+{% endblock %}

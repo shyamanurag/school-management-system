@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'route-list' %}">Transport</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Route Details</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="container mt-4" id="routeDetailContainer">
+    <div id="routeLoading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    <div id="routeError" class="alert alert-danger d-none" role="alert"></div>
+    <!-- Profile card will be injected here -->
+</div>
+<script>
+// Mock route data for demo
+const mockRoute = {
+    name: "Route 1: Main Campus Loop",
+    code: "R001",
+    stops: ["Main Gate", "Science Block", "Library", "Sports Complex", "Hostel"],
+    driver: "Suresh Yadav",
+    driver_phone: "+91 9876543222",
+    vehicle: "Bus 12 (DL01AB1234)",
+    status: "Active",
+    distance_km: 7.8,
+    start_time: "07:30",
+    end_time: "16:00",
+    description: "Covers all major points from main gate to hostel with 5 stops."
+};
+function renderRouteDetail(route) {
+    const container = document.getElementById('routeDetailContainer');
+    container.innerHTML = `
+    <h1>Route Details</h1>
+    <div class="card mb-3 shadow-sm" aria-labelledby="route-details-heading">
+      <div class="card-body">
+        <h2 id="route-details-heading" class="card-title">${route.name}</h2>
+        <div class="row mb-2">
+          <div class="col-sm-6"><strong>Route Code:</strong> ${route.code}</div>
+          <div class="col-sm-6"><strong>Status:</strong> <span class="badge bg-${route.status === 'Active' ? 'success' : 'secondary'}">${route.status}</span></div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-6"><strong>Driver:</strong> ${route.driver} (<a href="tel:${route.driver_phone}">${route.driver_phone}</a>)</div>
+          <div class="col-sm-6"><strong>Vehicle:</strong> ${route.vehicle}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-6"><strong>Start Time:</strong> ${route.start_time}</div>
+          <div class="col-sm-6"><strong>End Time:</strong> ${route.end_time}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-6"><strong>Distance:</strong> ${route.distance_km} km</div>
+          <div class="col-sm-6"><strong>Stops:</strong> ${route.stops.join(", ")}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-12"><strong>Description:</strong> ${route.description}</div>
+        </div>
+        <div class="card-footer d-flex flex-column flex-md-row gap-2 justify-content-between mt-3">
+          <a href="#" class="btn btn-secondary" aria-label="Back to Route List" tabindex="0">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i> <span class="visually-hidden">Back to List</span> Back to List
+          </a>
+          <a href="#" class="btn btn-primary" aria-label="Edit Route" tabindex="0">
+            <i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span> Edit
+          </a>
+          <button class="btn btn-danger" aria-label="Delete Route" tabindex="0" onclick="showDeleteDemo()">
+            <i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span> Delete
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+function showDeleteDemo() {
+    const errorDiv = document.getElementById('routeError');
+    errorDiv.textContent = 'Demo: Delete action is disabled in mock mode.';
+    errorDiv.classList.remove('d-none');
+    setTimeout(() => errorDiv.classList.add('d-none'), 2000);
+}
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('routeLoading').classList.remove('d-none');
+    document.getElementById('routeError').classList.add('d-none');
+    setTimeout(function() {
+        document.getElementById('routeLoading').classList.add('d-none');
+        renderRouteDetail(mockRoute);
+    }, 700);
+});
+</script>
+{% endblock %}

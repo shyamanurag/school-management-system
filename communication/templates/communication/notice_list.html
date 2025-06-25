@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+{% block content %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Communication</li>
+  </ol>
+</nav>
+{% endblock %}
+<div class="container mt-4">
+    <h2 class="mb-3">Notices</h2>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" id="noticeSearch" class="form-control" placeholder="Search by title, content, or visible to...">
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'notice-add' %}" class="btn btn-primary" aria-label="Add Notice" tabindex="0">
+    <i class="bi bi-plus" aria-hidden="true"></i> <span class="visually-hidden">Add Notice</span> Add Notice
+</a>
+        </div>
+    </div>
+    <div id="noticeError" class="alert alert-danger d-none"></div>
+    <div class="table-responsive">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <button id="batchDeleteBtn" class="btn btn-danger btn-sm" disabled aria-label="Delete selected notices">
+            <i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete Selected</span> Delete Selected
+        </button>
+    </div>
+</div>
+<table class="table table-hover align-middle" role="table" aria-label="Notice List">
+    <thead>
+        <tr>
+            <th scope="col"><input type="checkbox" id="selectAllNotices" aria-label="Select all notices"></th>
+            <th scope="col">Title</th>
+            <th scope="col">Publish Date</th>
+            <th scope="col">Visible To</th>
+            <th scope="col" class="text-end">Actions</th>
+        </tr>
+    </thead>
+            <script>
+// Show toast if a success message is available in context (Django template variable)
+document.addEventListener('DOMContentLoaded', function() {
+  const successMsg = '{{ success_message|escapejs }}';
+  if (successMsg) {
+    showToast(successMsg, 'success');
+  }
+  const errorMsg = '{{ error_message|escapejs }}';
+  if (errorMsg) {
+    showToast(errorMsg, 'danger');
+  }
+});
+</script>
+            <tbody>
+                <!-- Populated by JS -->
+            </tbody>
+        </table>
+        <div id="noticeLoading" class="text-center my-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+const apiUrl = '/api/notices/';
+const tableBody = document.getElementById('noticesTable');
+const loadingSpinner = document.getElementById('noticeLoading');
+const errorDiv = document.getElementById('noticeError');
+const searchInput = document.getElementById('noticeSearch');
+
+// --- MOCK DATA INJECTION FOR DEMO ---
+let noticesData = [
+    {
+        id: 1,
+        title: 'Annual Sports Day',
+        content: 'All students are invited to participate in the Annual Sports Day on 15th July.',
+        publish_date: '2025-06-20',
+        visible_to: 'All Students, Staff',
+    },
+    {
+        id: 2,
+        title: 'Library Book Return',
+        content: 'Please return all borrowed library books by 30th June to avoid fines.',
+        publish_date: '2025-06-18',
+        visible_to: 'All Students',
+    },
+    {
+        id: 3,
+        title: 'PTA Meeting',
+        content: 'PTA meeting scheduled for 25th June at 10:00 AM in the auditorium.',
+        publish_date: '2025-06-17',
+        visible_to: 'Parents, Teachers',
+    },
+    {
+        id: 4,
+        title: 'Bus Route Change',
+        content: 'Bus route 3 will have a new pick-up point from 1st July.',
+        publish_date: '2025-06-15',
+        visible_to: 'Bus Route 3 Students',
+    },
+    {
+        id: 5,
+        title: 'Exam Timetable',
+        content: 'Final exam timetable has been published on the portal.',
+        publish_date: '2025-06-12',
+        visible_to: 'All Students',
+    },
+    {
+        id: 6,
+        title: 'Holiday Notice',
+        content: 'School will remain closed on 21st June for International Yoga Day.',
+        publish_date: '2025-06-10',
+        visible_to: 'All',
+    },
+    {
+        id: 7,
+        title: 'Vaccination Camp',
+        content: 'A free vaccination camp will be held in the school infirmary on 28th June.',
+        publish_date: '2025-06-08',
+        visible_to: 'All Students',
+    },
+    {
+        id: 8,
+        title: 'Fee Payment Reminder',
+        content: 'Second term fee payment deadline is 5th July. Pay online or at the office.',
+        publish_date: '2025-06-05',
+        visible_to: 'All Parents',
+    }
+];
+let editingNoticeId = null;
+let selectedNotices = new Set();
+
+function renderTable(data) {
+    tableBody.innerHTML = '';
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No notices found.</td></tr>';
+        return;
+    }
+    data.forEach(function(notice) {
+        var safeTitle = notice.title ? String(notice.title).replace(/'/g, '&#39;').replace(/"/g, '&quot;') : '';
+        var checked = selectedNotices.has(notice.id) ? 'checked' : '';
+        if (editingNoticeId === notice.id) {
+            tableBody.innerHTML += '<tr>' +
+                '<td></td>' +
+                '<td><input type="text" class="form-control" id="editTitle" value="' + (notice.title || '') + '" aria-label="Title"></td>' +
+                '<td><input type="text" class="form-control" id="editContent" value="' + (notice.content || '') + '" aria-label="Content"></td>' +
+                '<td><input type="date" class="form-control" id="editPublishDate" value="' + (notice.publish_date || '') + '" aria-label="Publish Date"></td>' +
+                '<td><input type="text" class="form-control" id="editVisibleTo" value="' + (notice.visible_to || '') + '" aria-label="Visible To"></td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-success btn-sm me-1" aria-label="Save" tabindex="0" onclick="saveNoticeInline(' + notice.id + ')">' +
+                        '<i class="bi bi-check" aria-hidden="true"></i> <span class="visually-hidden">Save</span>' +
+                    '</button>' +
+                    '<button class="btn btn-secondary btn-sm" aria-label="Cancel" tabindex="0" onclick="cancelEditNotice()">' +
+                        '<i class="bi bi-x" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        } else {
+            tableBody.innerHTML += '<tr>' +
+                '<td><input type="checkbox" class="notice-checkbox" data-id="' + notice.id + '" aria-label="Select notice ' + safeTitle + '" ' + checked + '></td>' +
+                '<td>' + (notice.title || '') + '</td>' +
+                '<td>' + (notice.content || '') + '</td>' +
+                '<td>' + (notice.publish_date || '') + '</td>' +
+                '<td>' + (notice.visible_to || '') + '</td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-warning btn-sm me-1" aria-label="Edit ' + safeTitle + '" tabindex="0" onclick="editNoticeInline(' + notice.id + ')">' +
+                        '<i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span>' +
+                    '</button>' +
+                    '<button class="btn btn-danger btn-sm" aria-label="Delete ' + safeTitle + '" tabindex="0" onclick="showNoticeDeleteModal(' + notice.id + ', \'" + safeTitle + "\')">' +
+                        '<i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }
+    });
+    // Accessibility: focus management
+    if (editingNoticeId) {
+        setTimeout(function() {
+            var input = document.getElementById('editTitle');
+            if (input) input.focus();
+        }, 0);
+    }
+    // Wire up row checkboxes
+    document.querySelectorAll('.notice-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            const id = parseInt(this.getAttribute('data-id'));
+            if (this.checked) {
+                selectedNotices.add(id);
+            } else {
+                selectedNotices.delete(id);
+            }
+            updateBatchDeleteBtn();
+            updateSelectAllCheckbox();
+        });
+    });
+    updateSelectAllCheckbox();
+} 
+
+// Inline edit handlers
+window.editNoticeInline = function(noticeId) {
+    editingNoticeId = noticeId;
+    renderTable(noticesData);
+};
+window.cancelEditNotice = function() {
+    editingNoticeId = null;
+    renderTable(noticesData);
+};
+window.saveNoticeInline = async function(noticeId) {
+    var title = document.getElementById('editTitle').value.trim();
+    var content = document.getElementById('editContent').value.trim();
+    var publish_date = document.getElementById('editPublishDate').value;
+    var visible_to = document.getElementById('editVisibleTo').value.trim();
+    var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    var csrf = csrfInput ? csrfInput.value : '';
+    try {
+        const resp = await fetch('/api/notices/' + noticeId + '/', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf
+            },
+            body: JSON.stringify({ title, content, publish_date, visible_to })
+        });
+        if (!resp.ok) throw new Error('Failed to update notice');
+        const updated = await resp.json();
+        noticesData = noticesData.map(n => n.id === noticeId ? updated : n);
+        editingNoticeId = null;
+        renderTable(noticesData);
+        showToast('Notice updated successfully', 'success');
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+};
+
+function filterNotices() {
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = noticesData.filter(n =>
+        (n.title && n.title.toLowerCase().includes(q)) ||
+        (n.content && n.content.toLowerCase().includes(q)) ||
+        (n.visible_to && n.visible_to.toLowerCase().includes(q))
+    );
+    renderTable(filtered);
+}
+
+function fetchNotices() {
+    loadingSpinner.classList.remove('d-none');
+    errorDiv.classList.add('d-none');
+    // Simulate API call with timeout
+    setTimeout(function() {
+        loadingSpinner.classList.add('d-none');
+        renderTable(noticesData);
+    }, 600);
+}
+
+searchInput.addEventListener('input', filterNotices);
+window.addEventListener('DOMContentLoaded', fetchNotices);
+
+// Select all logic
+const selectAllCb = document.getElementById('selectAllNotices');
+const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+function updateBatchDeleteBtn() {
+    batchDeleteBtn.disabled = selectedNotices.size === 0;
+}
+function updateSelectAllCheckbox() {
+    const all = noticesData.length > 0 && selectedNotices.size === noticesData.length;
+    if (selectAllCb) selectAllCb.checked = all;
+}
+if (selectAllCb) {
+    selectAllCb.addEventListener('change', function() {
+        if (this.checked) {
+            noticesData.forEach(n => selectedNotices.add(n.id));
+        } else {
+            selectedNotices.clear();
+        }
+        renderTable(noticesData);
+        updateBatchDeleteBtn();
+    });
+}
+// Batch delete logic
+if (batchDeleteBtn) {
+    batchDeleteBtn.addEventListener('click', function() {
+        if (selectedNotices.size === 0) return;
+        showGlobalModal({
+            title: 'Delete Selected Notices',
+            body: '<p>Are you sure you want to delete <strong>' + selectedNotices.size + '</strong> selected notice(s)?</p>',
+            footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+                    '<button type="button" class="btn btn-danger" id="confirmBatchDelete">Delete</button>'
+        });
+        setTimeout(function() {
+            const confirmBtn = document.getElementById('confirmBatchDelete');
+            if (confirmBtn) {
+                confirmBtn.focus();
+                confirmBtn.addEventListener('click', async function() {
+                    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+                    const csrf = csrfInput ? csrfInput.value : '';
+                    try {
+                        const resp = await fetch('/api/notices/batch_delete/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrf
+                            },
+                            body: JSON.stringify({ ids: Array.from(selectedNotices) })
+                        });
+                        if (!resp.ok) throw new Error('Failed to delete notices');
+                        selectedNotices.clear();
+                        closeGlobalModal();
+                        showToast('Selected notices deleted', 'success');
+                        fetchNotices();
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                });
+            }
+        }, 0);
+    });
+}
+
+// Modal dialog for notice delete confirmation
+window.showNoticeDeleteModal = function(noticeId, noticeTitle) {
+  var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+  var csrf = csrfInput ? csrfInput.value : '';
+  showGlobalModal({
+    title: 'Delete Notice',
+    body: '<p>Are you sure you want to delete <strong>' + noticeTitle + '</strong>?</p>' +
+          '<form id="deleteNoticeForm" method="post" action="/communication/notices/' + noticeId + '/delete/">' +
+          '<input type="hidden" name="csrfmiddlewaretoken" value="' + csrf + '">' +
+          '</form>',
+    footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+           '<button type="submit" class="btn btn-danger" form="deleteNoticeForm">Delete</button>'
+  });
+};
+</script>
+{% endblock %}

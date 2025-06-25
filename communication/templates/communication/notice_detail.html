@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'notice-list' %}">Communication</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Notice Details</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="container mt-4" id="noticeDetailContainer">
+    <div id="noticeLoading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    <div id="noticeError" class="alert alert-danger d-none" role="alert"></div>
+    <!-- Profile card will be injected here -->
+</div>
+<script>
+// Mock notice data for demo
+const mockNotice = {
+    title: "Annual Sports Day Announcement",
+    content: "We are pleased to announce the Annual Sports Day will be held on 15th August 2025 at the main sports ground. All students are encouraged to participate. For details, contact your class teacher.",
+    publish_date: "2025-07-01",
+    visible_to: "All Students, Staff, Parents",
+    status: "Published",
+    created_by: "Principal",
+    attachments: [
+        {name: "Event Schedule.pdf", url: "#"},
+        {name: "Rules & Regulations.pdf", url: "#"}
+    ]
+};
+function renderNoticeDetail(notice) {
+    const container = document.getElementById('noticeDetailContainer');
+    container.innerHTML = `
+    <h1>Notice Details</h1>
+    <div class="card mb-3 shadow-sm" aria-labelledby="notice-details-heading">
+      <div class="card-body">
+        <h2 id="notice-details-heading" class="card-title">${notice.title}</h2>
+        <div class="row mb-2">
+          <div class="col-12 mb-2"><strong>Status:</strong> <span class="badge bg-success">${notice.status}</span></div>
+          <div class="col-12 mb-2"><strong>Content:</strong><br><span>${notice.content}</span></div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-6"><strong>Publish Date:</strong> <time datetime="${notice.publish_date}">${new Date(notice.publish_date).toLocaleDateString('en-IN', {year:'numeric', month:'long', day:'numeric'})}</time></div>
+          <div class="col-sm-6"><strong>Visible To:</strong> ${notice.visible_to}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-6"><strong>Created By:</strong> ${notice.created_by}</div>
+          <div class="col-sm-6"><strong>Attachments:</strong> ${notice.attachments.map(a => `<a href='${a.url}' class='link-primary' tabindex='0'>${a.name}</a>`).join(', ')}</div>
+        </div>
+        <div class="card-footer d-flex flex-column flex-md-row gap-2 justify-content-between mt-3">
+          <a href="#" class="btn btn-secondary" aria-label="Back to Notices list" tabindex="0">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i> <span class="visually-hidden">Back to List</span> Back to List
+          </a>
+          <a href="#" class="btn btn-primary ms-2" aria-label="Edit this notice" tabindex="0">
+            <i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span> Edit
+          </a>
+          <button class="btn btn-danger ms-2" aria-label="Delete this notice" tabindex="0" onclick="showDeleteDemo()">
+            <i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span> Delete
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+function showDeleteDemo() {
+    const errorDiv = document.getElementById('noticeError');
+    errorDiv.textContent = 'Demo: Delete action is disabled in mock mode.';
+    errorDiv.classList.remove('d-none');
+    setTimeout(() => errorDiv.classList.add('d-none'), 2000);
+}
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('noticeLoading').classList.remove('d-none');
+    document.getElementById('noticeError').classList.add('d-none');
+    setTimeout(function() {
+        document.getElementById('noticeLoading').classList.add('d-none');
+        renderNoticeDetail(mockNotice);
+    }, 700);
+});
+</script>
+{% endblock %}

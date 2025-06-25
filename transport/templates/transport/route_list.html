@@ -1,0 +1,420 @@
+{% extends 'base.html' %}
+{% block content %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Transport</li>
+  </ol>
+</nav>
+{% endblock %}
+<div class="container mt-4">
+    <h2 class="mb-3">Transport Routes</h2>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" id="routeSearch" class="form-control" placeholder="Search by name, start, or end point...">
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'route-add' %}" class="btn btn-primary" aria-label="Add Route" tabindex="0">
+    <i class="bi bi-plus" aria-hidden="true"></i> <span class="visually-hidden">Add Route</span> Add Route
+</a>
+        </div>
+    </div>
+    <div id="routeError" class="alert alert-danger d-none"></div>
+    <div class="table-responsive">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <button id="batchDeleteBtn" class="btn btn-danger btn-sm" disabled aria-label="Delete selected routes">
+            <i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete Selected</span> Delete Selected
+        </button>
+    </div>
+</div>
+<table class="table table-hover align-middle" role="table" aria-label="Route List" id="routesTable">
+    <thead>
+        <tr>
+            <th scope="col"><input type="checkbox" id="selectAllRoutes" aria-label="Select all routes"></th>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Start Point</th>
+            <th scope="col">End Point</th>
+            <th scope="col">Distance</th>
+            <th scope="col" class="text-end">Actions</th>
+        </tr>
+    </thead>
+            <script>
+// Show toast if a success message is available in context (Django template variable)
+document.addEventListener('DOMContentLoaded', function() {
+  const successMsg = '{{ success_message|escapejs }}';
+  if (successMsg) {
+    showToast(successMsg, 'success');
+  }
+  const errorMsg = '{{ error_message|escapejs }}';
+  if (errorMsg) {
+    showToast(errorMsg, 'danger');
+  }
+});
+</script>
+            <tbody>
+                <!-- Populated by JS -->
+            </tbody>
+        </table>
+        <div id="routeLoading" class="text-center my-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+const apiUrl = '/api/routes/';
+const tableBody = document.querySelector('#routesTable tbody');
+const loadingSpinner = document.getElementById('routeLoading');
+const errorDiv = document.getElementById('routeError');
+const searchInput = document.getElementById('routeSearch');
+
+let routesData = [
+  {
+    id: 1,
+    name: "Route 1: City Center",
+    start: "School Campus",
+    end: "City Center",
+    distance: "12 km",
+    driver: "Mr. Amit Sharma",
+    status: "Active",
+    icon: "bi-geo-alt"
+  },
+  {
+    id: 2,
+    name: "Route 2: Green Park",
+    start: "School Campus",
+    end: "Green Park",
+    distance: "8 km",
+    driver: "Ms. Rina Patel",
+    status: "Active",
+    icon: "bi-tree"
+  },
+  {
+    id: 3,
+    name: "Route 3: River Road",
+    start: "School Campus",
+    end: "River Road",
+    distance: "15 km",
+    driver: "Mr. Sandeep Singh",
+    status: "Inactive",
+    icon: "bi-water"
+  },
+  {
+    id: 4,
+    name: "Route 4: Airport",
+    start: "School Campus",
+    end: "Airport",
+    distance: "20 km",
+    driver: "Ms. Kavya Nair",
+    status: "Active",
+    icon: "bi-airplane"
+  },
+  {
+    id: 5,
+    name: "Route 5: Old Town",
+    start: "School Campus",
+    end: "Old Town",
+    distance: "10 km",
+    driver: "Mr. Manoj Verma",
+    status: "Active",
+    icon: "bi-building"
+  },
+  {
+    id: 6,
+    name: "Route 6: Mall Road",
+    start: "School Campus",
+    end: "Mall Road",
+    distance: "11 km",
+    driver: "Ms. Leena D'Souza",
+    status: "Inactive",
+    icon: "bi-shop"
+  },
+  {
+    id: 7,
+    name: "Route 7: Hill View",
+    start: "School Campus",
+    end: "Hill View",
+    distance: "18 km",
+    driver: "Mr. Ravi Kumar",
+    status: "Active",
+    icon: "bi-mountain"
+  },
+  {
+    id: 8,
+    name: "Route 8: Tech Park",
+    start: "School Campus",
+    end: "Tech Park",
+    distance: "14 km",
+    driver: "Ms. Sneha Joshi",
+    status: "Active",
+    icon: "bi-cpu"
+  }
+];
+let editingRouteId = null;
+let selectedRoutes = new Set();
+
+function renderTable(data) {
+    tableBody.innerHTML = '';
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No routes found.</td></tr>';
+        return;
+    }
+    data.forEach(function(route) {
+        var checked = selectedRoutes.has(route.id) ? 'checked' : '';
+        var iconHtml = route.icon ? '<i class="bi ' + route.icon + ' fs-5 me-2 text-primary"></i>' : '';
+        var statusBadge = route.status === 'Active'
+          ? '<span class="badge bg-success">Active</span>'
+          : '<span class="badge bg-secondary">Inactive</span>';
+        if (editingRouteId === route.id) {
+            tableBody.innerHTML += '<tr>' +
+                '<td></td>' +
+                '<td>' + (route.id || '') + '</td>' +
+                '<td>' + iconHtml + '<input type="text" class="form-control d-inline w-auto align-middle" id="editName" value="' + (route.name || '') + '" aria-label="Route Name"></td>' +
+                '<td><input type="text" class="form-control" id="editStart" value="' + (route.start || '') + '" aria-label="Start Point"></td>' +
+                '<td><input type="text" class="form-control" id="editEnd" value="' + (route.end || '') + '" aria-label="End Point"></td>' +
+                '<td><input type="text" class="form-control" id="editDistance" value="' + (route.distance || '') + '" aria-label="Distance"></td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-success btn-sm me-1" aria-label="Save" tabindex="0" onclick="saveRouteInline(' + route.id + ')">' +
+                        '<i class="bi bi-check" aria-hidden="true"></i> <span class="visually-hidden">Save</span>' +
+                    '</button>' +
+                    '<button class="btn btn-secondary btn-sm" aria-label="Cancel" tabindex="0" onclick="cancelEditRoute()">' +
+                        '<i class="bi bi-x" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        } else {
+            tableBody.innerHTML += '<tr>' +
+                '<td><input type="checkbox" class="route-checkbox" data-id="' + route.id + '" aria-label="Select route ' + route.name + '" ' + checked + '></td>' +
+                '<td>' + (route.id || '') + '</td>' +
+                '<td>' + iconHtml + '<span class="fw-semibold">' + (route.name || '') + '</span><br>' + statusBadge + '</td>' +
+                '<td>' + (route.start || '') + '</td>' +
+                '<td>' + (route.end || '') + '</td>' +
+                '<td>' + (route.distance || '') + '</td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-warning btn-sm me-1" aria-label="Edit ' + route.name + '" tabindex="0" onclick="editRouteInline(' + route.id + ')">' +
+                        '<i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span>' +
+                    '</button>' +
+                    '<button class="btn btn-danger btn-sm" aria-label="Delete ' + route.name + '" tabindex="0" onclick="showRouteDeleteModal(' + route.id + ', \'' + route.name.replace(/'/g, "&#39;") + '\')">' +
+                        '<i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }
+    });
+    // Accessibility: focus management
+    if (editingRouteId) {
+        setTimeout(function() {
+            var input = document.getElementById('editName');
+            if (input) input.focus();
+        }, 0);
+    }
+}
+        var safeName = route.name ? String(route.name).replace(/'/g, '&#39;').replace(/"/g, '&quot;') : '';
+        var checked = selectedRoutes.has(route.id) ? 'checked' : '';
+        if (editingRouteId === route.id) {
+            // Inline edit mode
+            tableBody.innerHTML += '<tr>' +
+                '<td></td>' +
+                '<td>' + (route.id || '') + '</td>' +
+                '<td><input type="text" class="form-control" id="editName" value="' + (route.name || '') + '" aria-label="Route Name"></td>' +
+                '<td><input type="text" class="form-control" id="editStartPoint" value="' + (route.start_point || '') + '" aria-label="Start Point"></td>' +
+                '<td><input type="text" class="form-control" id="editEndPoint" value="' + (route.end_point || '') + '" aria-label="End Point"></td>' +
+                '<td><input type="number" min="0" class="form-control" id="editDistance" value="' + (route.distance || 0) + '" aria-label="Distance"></td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-success btn-sm me-1" aria-label="Save" tabindex="0" onclick="saveRouteInline(' + route.id + ')">' +
+                        '<i class="bi bi-check" aria-hidden="true"></i> <span class="visually-hidden">Save</span>' +
+                    '</button>' +
+                    '<button class="btn btn-secondary btn-sm" aria-label="Cancel" tabindex="0" onclick="cancelEditRoute()">' +
+                        '<i class="bi bi-x" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        } else {
+            tableBody.innerHTML += '<tr>' +
+                '<td><input type="checkbox" class="route-checkbox" data-id="' + route.id + '" aria-label="Select route ' + safeName + '" ' + checked + '></td>' +
+                '<td>' + (route.id || '') + '</td>' +
+                '<td>' + (route.name || '') + '</td>' +
+                '<td>' + (route.start_point || '') + '</td>' +
+                '<td>' + (route.end_point || '') + '</td>' +
+                '<td>' + (route.distance || 0) + '</td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-warning btn-sm me-1" aria-label="Edit ' + safeName + '" tabindex="0" onclick="editRouteInline(' + route.id + ')">' +
+                        '<i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span>' +
+                    '</button>' +
+                    '<button class="btn btn-danger btn-sm" aria-label="Delete ' + safeName + '" tabindex="0" onclick="showRouteDeleteModal(' + route.id + ', \'" + safeName + "\')">' +
+                        '<i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }
+    });
+    // Wire up row checkboxes
+    document.querySelectorAll('.route-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            const id = parseInt(this.getAttribute('data-id'));
+            if (this.checked) {
+                selectedRoutes.add(id);
+            } else {
+                selectedRoutes.delete(id);
+            }
+            updateBatchDeleteBtn();
+            updateSelectAllCheckbox();
+        });
+    });
+    updateSelectAllCheckbox();
+    // Accessibility: focus management
+    if (editingRouteId) {
+        setTimeout(function() {
+            var input = document.getElementById('editName');
+            if (input) input.focus();
+        }, 0);
+    }
+
+
+// Inline edit handlers
+window.editRouteInline = function(routeId) {
+    editingRouteId = routeId;
+    renderTable(routesData);
+};
+window.cancelEditRoute = function() {
+    editingRouteId = null;
+    renderTable(routesData);
+};
+window.saveRouteInline = async function(routeId) {
+    var name = document.getElementById('editName').value.trim();
+    var start_point = document.getElementById('editStartPoint').value.trim();
+    var end_point = document.getElementById('editEndPoint').value.trim();
+    var distance = parseInt(document.getElementById('editDistance').value, 10) || 0;
+    var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    var csrf = csrfInput ? csrfInput.value : '';
+    try {
+        const resp = await fetch('/api/routes/' + routeId + '/', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf
+            },
+            body: JSON.stringify({ name, start_point, end_point, distance })
+        });
+        if (!resp.ok) throw new Error('Failed to update route');
+        const updated = await resp.json();
+        routesData = routesData.map(r => r.id === routeId ? updated : r);
+        editingRouteId = null;
+        renderTable(routesData);
+        showToast('Route updated successfully', 'success');
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+};
+
+function filterRoutes() {
+    renderTable(routesData.filter(r => {
+        const q = searchInput.value.trim().toLowerCase();
+        return (
+            (r.name && r.name.toLowerCase().includes(q)) ||
+            (r.start && r.start.toLowerCase().includes(q)) ||
+            (r.end && r.end.toLowerCase().includes(q))
+        );
+    }));
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = routesData.filter(r =>
+        (r.name && r.name.toLowerCase().includes(q)) ||
+        (r.start_point && r.start_point.toLowerCase().includes(q)) ||
+        (r.end_point && r.end_point.toLowerCase().includes(q))
+    );
+    renderTable(filtered);
+
+function fetchRoutes() {
+    loadingSpinner.classList.remove('d-none');
+    errorDiv.classList.add('d-none');
+    // For demo, just use the mock data
+    setTimeout(function() {
+        loadingSpinner.classList.add('d-none');
+        renderTable(routesData);
+    }, 600);
+}
+
+searchInput.addEventListener('input', filterRoutes);
+window.addEventListener('DOMContentLoaded', fetchRoutes);
+
+// Select all logic
+const selectAllCb = document.getElementById('selectAllRoutes');
+const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+function updateBatchDeleteBtn() {
+    batchDeleteBtn.disabled = selectedRoutes.size === 0;
+}
+function updateSelectAllCheckbox() {
+    const all = routesData.length > 0 && selectedRoutes.size === routesData.length;
+    if (selectAllCb) selectAllCb.checked = all;
+}
+if (selectAllCb) {
+    selectAllCb.addEventListener('change', function() {
+        if (this.checked) {
+            routesData.forEach(r => selectedRoutes.add(r.id));
+        } else {
+            selectedRoutes.clear();
+        }
+        renderTable(routesData);
+        updateBatchDeleteBtn();
+    });
+}
+// Batch delete logic
+if (batchDeleteBtn) {
+    batchDeleteBtn.addEventListener('click', function() {
+        if (selectedRoutes.size === 0) return;
+        showGlobalModal({
+            title: 'Delete Selected Routes',
+            body: '<p>Are you sure you want to delete <strong>' + selectedRoutes.size + '</strong> selected route(s)?</p>',
+            footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+                    '<button type="button" class="btn btn-danger" id="confirmBatchDelete">Delete</button>'
+        });
+        setTimeout(function() {
+            const confirmBtn = document.getElementById('confirmBatchDelete');
+            if (confirmBtn) {
+                confirmBtn.focus();
+                confirmBtn.addEventListener('click', async function() {
+                    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+                    const csrf = csrfInput ? csrfInput.value : '';
+                    try {
+                        const resp = await fetch('/api/routes/batch_delete/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrf
+                            },
+                            body: JSON.stringify({ ids: Array.from(selectedRoutes) })
+                        });
+                        if (!resp.ok) throw new Error('Failed to delete routes');
+                        selectedRoutes.clear();
+                        closeGlobalModal();
+                        showToast('Selected routes deleted', 'success');
+                        fetchRoutes();
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                });
+            }
+        }, 0);
+    });
+}
+
+// Modal dialog for route delete confirmation
+window.showRouteDeleteModal = function(routeId, routeName) {
+  var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+  var csrf = csrfInput ? csrfInput.value : '';
+  showGlobalModal({
+    title: 'Delete Route',
+    body: '<p>Are you sure you want to delete <strong>' + routeName + '</strong>?</p>' +
+          '<form id="deleteRouteForm" method="post" action="/transport/routes/' + routeId + '/delete/">' +
+          '<input type="hidden" name="csrfmiddlewaretoken" value="' + csrf + '">' +
+          '</form>',
+    footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+           '<button type="submit" class="btn btn-danger" form="deleteRouteForm">Delete</button>'
+  });
+};
+</script>
+{% endblock %}

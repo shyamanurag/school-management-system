@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'book-list' %}">Library</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ form.instance.pk|yesno:'Edit Book,Add Book' }}</li>
+  </ol>
+</nav>
+<div class="container mt-4">
+    <h2>{% if form.instance.pk %}Edit Book{% else %}Add Book{% endif %}</h2>
+    <form method="post" novalidate aria-label="Book Form" id="bookForm">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="id_title" name="title" value="{{ form.title.value|default:'' }}" required aria-required="true" aria-invalid="{{ form.title.errors|yesno:'true,false' }}">
+            {% if form.title.errors %}
+                <div class="invalid-feedback d-block" role="alert" aria-live="assertive">{{ form.title.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_author" class="form-label">Author</label>
+            <input type="text" class="form-control" id="id_author" name="author" value="{{ form.author.value|default:'' }}" required aria-required="true" aria-invalid="{{ form.author.errors|yesno:'true,false' }}">
+            {% if form.author.errors %}
+                <div class="invalid-feedback d-block" role="alert" aria-live="assertive">{{ form.author.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_isbn" class="form-label">ISBN</label>
+            <input type="text" class="form-control" id="id_isbn" name="isbn" value="{{ form.isbn.value|default:'' }}" required aria-required="true" aria-invalid="{{ form.isbn.errors|yesno:'true,false' }}">
+            {% if form.isbn.errors %}
+                <div class="invalid-feedback d-block" role="alert" aria-live="assertive">{{ form.isbn.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_published_date" class="form-label">Published Date</label>
+            <input type="date" class="form-control" id="id_published_date" name="published_date" value="{{ form.published_date.value|default:'' }}" required aria-required="true" aria-invalid="{{ form.published_date.errors|yesno:'true,false' }}">
+            {% if form.published_date.errors %}
+                <div class="invalid-feedback d-block" role="alert" aria-live="assertive">{{ form.published_date.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="d-flex flex-column flex-md-row gap-2 justify-content-between">
+            <button type="submit" class="btn btn-success" aria-label="Save Book" tabindex="0">
+                <i class="bi bi-check-circle" aria-hidden="true"></i> <span class="visually-hidden">Save</span> Save
+            </button>
+            <a href="{% url 'book-list' %}" class="btn btn-secondary" aria-label="Cancel and return to book list" tabindex="0">
+                <i class="bi bi-x-circle" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span> Cancel
+            </a>
+        </div>
+        <div id="formError" class="alert alert-danger d-none"></div>
+        <div id="formSuccess" class="alert alert-success d-none"></div>
+    </form>
+    <style>
+@media (max-width: 576px) {
+  .d-flex.flex-column.flex-md-row.gap-2.justify-content-between {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    align-items: stretch !important;
+  }
+}
+</style>
+    </div>
+{% endblock %}

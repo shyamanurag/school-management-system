@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+{% block title %}{{ school_settings.name|default:"School Management System" }} - Dashboard{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <!-- Dashboard Header -->
+  <div class="row mb-5">
+    <div class="col-lg-12 text-center">
+      <h1 class="display-4 mb-3 fw-bold text-primary">
+        {% if school_settings %}
+          {{ school_settings.name }}
+        {% else %}
+          School Management System
+        {% endif %}
+      </h1>
+      <p class="lead mb-4">
+        {% if school_settings %}
+          {{ school_settings.city }}, {{ school_settings.state }} | {{ school_settings.board_affiliation }}
+        {% else %}
+          Modern, comprehensive solution for educational institution management
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="row g-4 mb-5">
+    <div class="col-lg-3 col-md-6">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h4 class="card-title">{{ total_campuses }}</h4>
+              <p class="card-text">Campuses</p>
+            </div>
+            <div class="align-self-center">
+              <i class="bi bi-geo-alt display-4 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h4 class="card-title">{{ total_departments }}</h4>
+              <p class="card-text">Departments</p>
+            </div>
+            <div class="align-self-center">
+              <i class="bi bi-diagram-3 display-4 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+      <div class="card bg-info text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h4 class="card-title">{{ total_rooms }}</h4>
+              <p class="card-text">Rooms</p>
+            </div>
+            <div class="align-self-center">
+              <i class="bi bi-door-open display-4 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+      <div class="card bg-warning text-dark">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h4 class="card-title">{{ total_academic_years }}</h4>
+              <p class="card-text">Academic Years</p>
+            </div>
+            <div class="align-self-center">
+              <i class="bi bi-calendar3 display-4 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Current Academic Year Info -->
+  {% if current_academic_year %}
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Current Academic Year:</strong> {{ current_academic_year.name }} 
+        ({{ current_academic_year.start_date }} to {{ current_academic_year.end_date }})
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Core Management Modules -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h2 class="mb-4 text-center">Core Management</h2>
+      <div class="row g-4">
+        <div class="col-lg-3 col-md-6">
+          <a href="{% url 'school_settings' %}" class="text-decoration-none">
+            <div class="card h-100 shadow-sm hover-shadow">
+              <div class="card-body text-center">
+                <i class="bi bi-gear display-4 text-primary mb-3"></i>
+                <h5 class="card-title">School Settings</h5>
+                <p class="card-text">Manage school information, principal details, and basic configuration</p>
+                <span class="btn btn-primary">School Settings</span>
+              </div>
+            </div>
+          </a>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+          <a href="{% url 'campuses_list' %}" class="text-decoration-none">
+            <div class="card h-100 shadow-sm hover-shadow">
+              <div class="card-body text-center">
+                <i class="bi bi-geo-alt display-4 text-success mb-3"></i>
+                <h5 class="card-title">Campuses</h5>
+                <p class="card-text">Manage campus locations, buildings, and facilities</p>
+                <span class="btn btn-success">View Campuses</span>
+              </div>
+            </div>
+          </a>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+          <a href="{% url 'departments_list' %}" class="text-decoration-none">
+            <div class="card h-100 shadow-sm hover-shadow">
+              <div class="card-body text-center">
+                <i class="bi bi-diagram-3 display-4 text-info mb-3"></i>
+                <h5 class="card-title">Departments</h5>
+                <p class="card-text">Academic departments and administrative divisions</p>
+                <span class="btn btn-info">View Departments</span>
+              </div>
+            </div>
+          </a>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+          <a href="{% url 'rooms_list' %}" class="text-decoration-none">
+            <div class="card h-100 shadow-sm hover-shadow">
+              <div class="card-body text-center">
+                <i class="bi bi-door-open display-4 text-warning mb-3"></i>
+                <h5 class="card-title">Rooms</h5>
+                <p class="card-text">Classroom and facility management system</p>
+                <span class="btn btn-warning">View Rooms</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Academic Management -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h2 class="mb-4 text-center">Academic Management</h2>
+      <div class="row g-4">
+        <div class="col-lg-3 col-md-6">
+          <a href="{% url 'academic_years_list' %}" class="text-decoration-none">
+            <div class="card h-100 shadow-sm hover-shadow">
+              <div class="card-body text-center">
+                <i class="bi bi-calendar3 display-4 text-primary mb-3"></i>
+                <h5 class="card-title">Academic Years</h5>
+                <p class="card-text">Manage academic sessions and year configurations</p>
+                <span class="btn btn-primary">View Years</span>
+              </div>
+            </div>
+          </a>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+          <a href="/students/" class="text-decoration-none">
+            <div class="card h-100 shadow-sm hover-shadow">
+              <div class="card-body text-center">
+                <i class="bi bi-people-fill display-4 text-secondary mb-3"></i>
+                <h5 class="card-title">Students</h5>
+                <p class="card-text">Student information, admission, and management</p>
+                <span class="btn btn-outline-secondary">Coming Soon</span>
+              </div>
+            </div>
+          </a>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+          <a href="/academics/" class="text-decoration-none">
+            <div class="card h-100 shadow-sm hover-shadow">
+              <div class="card-body text-center">
+                <i class="bi bi-book-half display-4 text-info mb-3"></i>
+                <h5 class="card-title">Academics</h5>
+                <p class="card-text">Curriculum, subjects, and academic planning</p>
+                <span class="btn btn-outline-info">Coming Soon</span>
+              </div>
+            </div>
+          </a>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+          <a href="/fees/" class="text-decoration-none">
+            <div class="card h-100 shadow-sm hover-shadow">
+              <div class="card-body text-center">
+                <i class="bi bi-cash-coin display-4 text-success mb-3"></i>
+                <h5 class="card-title">Fees</h5>
+                <p class="card-text">Fee structure, collection, and financial management</p>
+                <span class="btn btn-outline-success">Coming Soon</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Services -->
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-4 text-center">Additional Services</h2>
+      <div class="row g-4">
+        <div class="col-lg-3 col-md-6">
+          <a href="/library/" class="text-decoration-none">
+            <div class="card h-100 shadow-sm hover-shadow">
+              <div class="card-body text-center">
+                <i class="bi bi-journal-bookmark-fill display-4 text-info mb-3"></i>
+                <h5 class="card-title">Library</h5>
+                <p class="card-text">Book inventory and library management system</p>
+                <span class="btn btn-outline-info">Coming Soon</span>
+              </div>
+            </div>
+          </a>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+          <a href="/hostel/" class="text-decoration-none">
+            <div class="card h-100 shadow-sm hover-shadow">
+              <div class="card-body text-center">
+                <i class="bi bi-house-door-fill display-4 text-warning mb-3"></i>
+                <h5 class="card-title">Hostel</h5>
+                <p class="card-text">Hostel management and room allocation</p>
+                <span class="btn btn-outline-warning">Coming Soon</span>
+              </div>
+            </div>
+          </a>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+          <a href="/transport/" class="text-decoration-none">
+            <div class="card h-100 shadow-sm hover-shadow">
+              <div class="card-body text-center">
+                <i class="bi bi-bus-front-fill display-4 text-dark mb-3"></i>
+                <h5 class="card-title">Transport</h5>
+                <p class="card-text">School transport and route management</p>
+                <span class="btn btn-outline-dark">Coming Soon</span>
+              </div>
+            </div>
+          </a>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+          <a href="/communication/" class="text-decoration-none">
+            <div class="card h-100 shadow-sm hover-shadow">
+              <div class="card-body text-center">
+                <i class="bi bi-megaphone-fill display-4 text-success mb-3"></i>
+                <h5 class="card-title">Communication</h5>
+                <p class="card-text">Messaging and notification system</p>
+                <span class="btn btn-outline-success">Coming Soon</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Access -->
+  <div class="row mt-5">
+    <div class="col-12 text-center">
+      <div class="card bg-light">
+        <div class="card-body">
+          <h5 class="card-title">System Administration</h5>
+          <p class="card-text">Access the Django admin interface for advanced management</p>
+          <a href="/admin/" class="btn btn-danger">
+            <i class="bi bi-gear-fill me-2"></i>Django Admin
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.hover-shadow:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+</style>
+{% endblock %}
+

@@ -1,0 +1,344 @@
+{% extends 'base.html' %}
+{% block content %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Inventory</li>
+  </ol>
+</nav>
+{% endblock %}
+<div class="container mt-4">
+    <h2 class="mb-3">Inventory Items</h2>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" id="itemSearch" class="form-control" placeholder="Search by name, category, or description...">
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'item-add' %}" class="btn btn-primary" aria-label="Add Item" tabindex="0">
+    <i class="bi bi-plus" aria-hidden="true"></i> <span class="visually-hidden">Add Item</span> Add Item
+</a>
+        </div>
+    </div>
+    <div id="itemError" class="alert alert-danger d-none"></div>
+    <div class="table-responsive">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <button id="batchDeleteBtn" class="btn btn-danger btn-sm" disabled aria-label="Delete selected items">
+            <i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete Selected</span> Delete Selected
+        </button>
+    </div>
+</div>
+<table class="table table-hover align-middle" role="table" aria-label="Inventory Item List" id="itemsTable">
+    <thead>
+        <tr>
+            <th scope="col"><input type="checkbox" id="selectAllItems" aria-label="Select all items"></th>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Category</th>
+            <th scope="col">Description</th>
+            <th scope="col">Quantity</th>
+            <th scope="col" class="text-end">Actions</th>
+        </tr>
+    </thead>
+            <script>
+// Show toast if a success message is available in context (Django template variable)
+document.addEventListener('DOMContentLoaded', function() {
+  const successMsg = '{{ success_message|escapejs }}';
+  if (successMsg) {
+    showToast(successMsg, 'success');
+  }
+  const errorMsg = '{{ error_message|escapejs }}';
+  if (errorMsg) {
+    showToast(errorMsg, 'danger');
+  }
+});
+</script>
+            <tbody>
+                <!-- Populated by JS -->
+            </tbody>
+        </table>
+        <div id="itemLoading" class="text-center my-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+const apiUrl = '/api/items/';
+const tableBody = document.querySelector('#itemsTable tbody');
+const loadingSpinner = document.getElementById('itemLoading');
+const errorDiv = document.getElementById('itemError');
+const searchInput = document.getElementById('itemSearch');
+
+let itemsData = [
+  {
+    id: 1,
+    name: "Dell Inspiron Laptop",
+    category: "Electronics",
+    description: "15.6\" FHD, Intel i5, 8GB RAM, 512GB SSD",
+    quantity: 12,
+    icon: "bi-laptop",
+    status: "Available"
+  },
+  {
+    id: 2,
+    name: "Projector Epson XGA",
+    category: "Electronics",
+    description: "Classroom projector, 3300 lumens",
+    quantity: 3,
+    icon: "bi-projector",
+    status: "Low Stock"
+  },
+  {
+    id: 3,
+    name: "Whiteboard Markers",
+    category: "Stationery",
+    description: "Pack of assorted color markers",
+    quantity: 50,
+    icon: "bi-pencil-fill",
+    status: "Available"
+  },
+  {
+    id: 4,
+    name: "Chemistry Lab Kit",
+    category: "Lab Equipment",
+    description: "Standard school chemistry kit",
+    quantity: 6,
+    icon: "bi-beaker",
+    status: "Available"
+  },
+  {
+    id: 5,
+    name: "Office Chairs",
+    category: "Furniture",
+    description: "Ergonomic swivel chairs",
+    quantity: 24,
+    icon: "bi-chair",
+    status: "Available"
+  },
+  {
+    id: 6,
+    name: "Basketballs",
+    category: "Sports",
+    description: "Official size, synthetic leather",
+    quantity: 15,
+    icon: "bi-basket",
+    status: "Available"
+  },
+  {
+    id: 7,
+    name: "Printer Paper Reams",
+    category: "Stationery",
+    description: "A4 size, 500 sheets per ream",
+    quantity: 40,
+    icon: "bi-file-earmark-text",
+    status: "Available"
+  },
+  {
+    id: 8,
+    name: "Digital Thermometer",
+    category: "Medical",
+    description: "Infrared, contactless",
+    quantity: 2,
+    icon: "bi-thermometer-half",
+    status: "Low Stock"
+  }
+];
+let editingItemId = null;
+let selectedItems = new Set();
+
+function renderTable(data) {
+    tableBody.innerHTML = '';
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No items found.</td></tr>';
+        return;
+    }
+    data.forEach(function(item) {
+        var checked = selectedItems.has(item.id) ? 'checked' : '';
+        var statusBadge = item.status === 'Available'
+          ? '<span class="badge bg-success">Available</span>'
+          : '<span class="badge bg-warning text-dark">Low Stock</span>';
+        var iconHtml = item.icon ? '<i class="bi ' + item.icon + ' fs-4 me-2 text-primary"></i>' : '';
+        if (editingItemId === item.id) {
+            tableBody.innerHTML += '<tr>' +
+                '<td></td>' +
+                '<td>' + (item.id || '') + '</td>' +
+                '<td>' + iconHtml + '<input type="text" class="form-control d-inline w-auto align-middle" id="editName" value="' + (item.name || '') + '" aria-label="Item Name"></td>' +
+                '<td><input type="text" class="form-control" id="editCategory" value="' + (item.category || '') + '" aria-label="Category"></td>' +
+                '<td><input type="text" class="form-control" id="editDesc" value="' + (item.description || '') + '" aria-label="Description"></td>' +
+                '<td><input type="number" class="form-control" id="editQty" value="' + (item.quantity || 0) + '" aria-label="Quantity"></td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-success btn-sm me-1" aria-label="Save" tabindex="0" onclick="saveItemInline(' + item.id + ')">' +
+                        '<i class="bi bi-check" aria-hidden="true"></i> <span class="visually-hidden">Save</span>' +
+                    '</button>' +
+                    '<button class="btn btn-secondary btn-sm" aria-label="Cancel" tabindex="0" onclick="cancelEditItem()">' +
+                        '<i class="bi bi-x" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        } else {
+            tableBody.innerHTML += '<tr>' +
+                '<td><input type="checkbox" class="item-checkbox" data-id="' + item.id + '" aria-label="Select item ' + item.name + '" ' + checked + '></td>' +
+                '<td>' + (item.id || '') + '</td>' +
+                '<td>' + iconHtml + '<span class="fw-semibold">' + (item.name || '') + '</span><br>' + statusBadge + '</td>' +
+                '<td>' + (item.category || '') + '</td>' +
+                '<td>' + (item.description || '') + '</td>' +
+                '<td>' + (item.quantity || 0) + '</td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-warning btn-sm me-1" aria-label="Edit ' + item.name + '" tabindex="0" onclick="editItemInline(' + item.id + ')">' +
+                        '<i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span>' +
+                    '</button>' +
+                    '<button class="btn btn-danger btn-sm" aria-label="Delete ' + item.name + '" tabindex="0" onclick="showItemDeleteModal(' + item.id + ', \'' + item.name.replace(/'/g, "&#39;") + '\')">' +
+                        '<i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }
+    });
+    // Accessibility: focus management
+    if (editingItemId) {
+        setTimeout(function() {
+            var input = document.getElementById('editName');
+            if (input) input.focus();
+        }, 0);
+    }
+}
+
+// Inline edit handlers
+window.editItemInline = function(itemId) {
+    editingItemId = itemId;
+    renderTable(itemsData);
+};
+window.cancelEditItem = function() {
+    editingItemId = null;
+    renderTable(itemsData);
+};
+window.saveItemInline = async function(itemId) {
+    var name = document.getElementById('editName').value.trim();
+    var category = document.getElementById('editCategory').value.trim();
+    var description = document.getElementById('editDesc').value.trim();
+    var quantity = parseInt(document.getElementById('editQty').value, 10) || 0;
+    var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    var csrf = csrfInput ? csrfInput.value : '';
+    try {
+        const resp = await fetch('/api/items/' + itemId + '/', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf
+            },
+            body: JSON.stringify({ name, category, description, quantity })
+        });
+        if (!resp.ok) throw new Error('Failed to update item');
+        const updated = await resp.json();
+        itemsData = itemsData.map(i => i.id === itemId ? updated : i);
+        editingItemId = null;
+        renderTable(itemsData);
+        showToast('Item updated successfully', 'success');
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+};
+
+function filterItems() {
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = itemsData.filter(i =>
+        (i.name && i.name.toLowerCase().includes(q)) ||
+        (i.category && i.category.toLowerCase().includes(q)) ||
+        (i.description && i.description.toLowerCase().includes(q))
+    );
+    renderTable(filtered);
+}
+
+function fetchItems() {
+    loadingSpinner.classList.remove('d-none');
+    errorDiv.classList.add('d-none');
+    // For demo, just use the mock data
+    setTimeout(function() {
+        loadingSpinner.classList.add('d-none');
+        renderTable(itemsData);
+    }, 600);
+}
+
+searchInput.addEventListener('input', filterItems);
+window.addEventListener('DOMContentLoaded', fetchItems);
+
+// Select all logic
+const selectAllCb = document.getElementById('selectAllItems');
+const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+function updateBatchDeleteBtn() {
+    batchDeleteBtn.disabled = selectedItems.size === 0;
+}
+function updateSelectAllCheckbox() {
+    const all = itemsData.length > 0 && selectedItems.size === itemsData.length;
+    if (selectAllCb) selectAllCb.checked = all;
+}
+if (selectAllCb) {
+    selectAllCb.addEventListener('change', function() {
+        if (this.checked) {
+            itemsData.forEach(i => selectedItems.add(i.id));
+        } else {
+            selectedItems.clear();
+        }
+        renderTable(itemsData);
+        updateBatchDeleteBtn();
+    });
+}
+// Batch delete logic
+if (batchDeleteBtn) {
+    batchDeleteBtn.addEventListener('click', function() {
+        if (selectedItems.size === 0) return;
+        showGlobalModal({
+            title: 'Delete Selected Items',
+            body: '<p>Are you sure you want to delete <strong>' + selectedItems.size + '</strong> selected item(s)?</p>',
+            footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+                    '<button type="button" class="btn btn-danger" id="confirmBatchDelete">Delete</button>'
+        });
+        setTimeout(function() {
+            const confirmBtn = document.getElementById('confirmBatchDelete');
+            if (confirmBtn) {
+                confirmBtn.focus();
+                confirmBtn.addEventListener('click', async function() {
+                    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+                    const csrf = csrfInput ? csrfInput.value : '';
+                    try {
+                        const resp = await fetch('/api/items/batch_delete/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrf
+                            },
+                            body: JSON.stringify({ ids: Array.from(selectedItems) })
+                        });
+                        if (!resp.ok) throw new Error('Failed to delete items');
+                        selectedItems.clear();
+                        closeGlobalModal();
+                        showToast('Selected items deleted', 'success');
+                        fetchItems();
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                });
+            }
+        }, 0);
+    });
+}
+
+// Modal dialog for item delete confirmation
+window.showItemDeleteModal = function(itemId, itemName) {
+  var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+  var csrf = csrfInput ? csrfInput.value : '';
+  showGlobalModal({
+    title: 'Delete Item',
+    body: '<p>Are you sure you want to delete <strong>' + itemName + '</strong>?</p>' +
+          '<form id="deleteItemForm" method="post" action="/inventory/items/' + itemId + '/delete/">' +
+          '<input type="hidden" name="csrfmiddlewaretoken" value="' + csrf + '">' +
+          '</form>',
+    footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+           '<button type="submit" class="btn btn-danger" form="deleteItemForm">Delete</button>'
+  });
+};
+</script>
+{% endblock %}

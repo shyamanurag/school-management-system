@@ -1,0 +1,404 @@
+{% extends 'base.html' %}
+{% block content %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Students</li>
+  </ol>
+</nav>
+{% endblock %}
+<div class="container mt-4">
+    <h2 class="mb-3">Student List</h2>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" id="studentSearch" class="form-control" placeholder="Search by name, admission no, class...">
+        </div>
+    </div>
+    <div id="studentError" class="alert alert-danger d-none"></div>
+    <div class="table-responsive">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <button id="batchDeleteBtn" class="btn btn-danger btn-sm" disabled aria-label="Delete selected students">
+            <i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete Selected</span> Delete Selected
+        </button>
+    </div>
+</div>
+<table class="table table-hover align-middle" role="table" aria-label="Student List">
+    <thead>
+        <tr>
+            <th scope="col"><input type="checkbox" id="selectAllStudents" aria-label="Select all students"></th>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Roll Number</th>
+            <th scope="col">Class</th>
+            <th scope="col">Section</th>
+            <th scope="col" class="text-end">Actions</th>
+        </tr>
+    </thead>
+            <script>
+// Show toast if a success message is available in context (Django template variable)
+document.addEventListener('DOMContentLoaded', function() {
+  const successMsg = '{{ success_message|escapejs }}';
+  if (successMsg) {
+    showToast(successMsg, 'success');
+  }
+  const errorMsg = '{{ error_message|escapejs }}';
+  if (errorMsg) {
+    showToast(errorMsg, 'danger');
+  }
+});
+</script>
+            <tbody>
+                <!-- Populated by JS -->
+            </tbody>
+        </table>
+        <div id="studentLoading" class="text-center my-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+const apiUrl = '/api/students/';
+const tableBody = document.getElementById('studentsTable');
+const loadingSpinner = document.getElementById('studentLoading');
+const errorDiv = document.getElementById('studentError');
+const searchInput = document.getElementById('studentSearch');
+
+let studentsData = [
+  {
+    id: 1,
+    name: "Aarav Sharma",
+    roll_number: "S1001",
+    class: "10",
+    section: "A",
+    avatar: "https://randomuser.me/api/portraits/men/75.jpg",
+    status: "Active"
+  },
+  {
+    id: 2,
+    name: "Priya Verma",
+    roll_number: "S1002",
+    class: "10",
+    section: "B",
+    avatar: "https://randomuser.me/api/portraits/women/65.jpg",
+    status: "Active"
+  },
+  {
+    id: 3,
+    name: "Rohan Gupta",
+    roll_number: "S1003",
+    class: "9",
+    section: "A",
+    avatar: "https://randomuser.me/api/portraits/men/43.jpg",
+    status: "Inactive"
+  },
+  {
+    id: 4,
+    name: "Simran Kaur",
+    roll_number: "S1004",
+    class: "8",
+    section: "C",
+    avatar: "https://randomuser.me/api/portraits/women/50.jpg",
+    status: "Active"
+  },
+  {
+    id: 5,
+    name: "Aditya Singh",
+    roll_number: "S1005",
+    class: "11",
+    section: "A",
+    avatar: "https://randomuser.me/api/portraits/men/60.jpg",
+    status: "Active"
+  },
+  {
+    id: 6,
+    name: "Neha Joshi",
+    roll_number: "S1006",
+    class: "12",
+    section: "B",
+    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+    status: "Active"
+  },
+  {
+    id: 7,
+    name: "Rahul Mehra",
+    roll_number: "S1007",
+    class: "9",
+    section: "C",
+    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+    status: "Inactive"
+  },
+  {
+    id: 8,
+    name: "Isha Patel",
+    roll_number: "S1008",
+    class: "10",
+    section: "A",
+    avatar: "https://randomuser.me/api/portraits/women/68.jpg",
+    status: "Active"
+  }
+];
+let editingStudentId = null;
+let selectedStudents = new Set();
+
+function renderTable(data) {
+    tableBody.innerHTML = '';
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No students found.</td></tr>';
+        return;
+    }
+    data.forEach(function(student) {
+        var checked = selectedStudents.has(student.id) ? 'checked' : '';
+        var statusBadge = student.status === 'Active'
+          ? '<span class="badge bg-success">Active</span>'
+          : '<span class="badge bg-secondary">Inactive</span>';
+        var avatarImg = student.avatar ? '<img src="' + student.avatar + '" alt="' + student.name + '" class="rounded-circle me-2" width="36" height="36" style="object-fit:cover;">' : '';
+        if (editingStudentId === student.id) {
+            tableBody.innerHTML += '<tr>' +
+                '<td></td>' +
+                '<td>' + (student.id || '') + '</td>' +
+                '<td>' + avatarImg + '<input type="text" class="form-control d-inline w-auto align-middle" id="editName" value="' + (student.name || '') + '" aria-label="Student Name"></td>' +
+                '<td><input type="text" class="form-control" id="editRoll" value="' + (student.roll_number || '') + '" aria-label="Roll Number"></td>' +
+                '<td><input type="text" class="form-control" id="editClass" value="' + (student.class || '') + '" aria-label="Class"></td>' +
+                '<td><input type="text" class="form-control" id="editSection" value="' + (student.section || '') + '" aria-label="Section"></td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-success btn-sm me-1" aria-label="Save" tabindex="0" onclick="saveStudentInline(' + student.id + ')">' +
+                        '<i class="bi bi-check" aria-hidden="true"></i> <span class="visually-hidden">Save</span>' +
+                    '</button>' +
+                    '<button class="btn btn-secondary btn-sm" aria-label="Cancel" tabindex="0" onclick="cancelEditStudent()">' +
+                        '<i class="bi bi-x" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        } else {
+            tableBody.innerHTML += '<tr>' +
+                '<td><input type="checkbox" class="student-checkbox" data-id="' + student.id + '" aria-label="Select student ' + student.name + '" ' + checked + '></td>' +
+                '<td>' + (student.id || '') + '</td>' +
+                '<td>' + avatarImg + '<span class="fw-semibold">' + (student.name || '') + '</span><br>' + statusBadge + '</td>' +
+                '<td>' + (student.roll_number || '') + '</td>' +
+                '<td>' + (student.class || '') + '</td>' +
+                '<td>' + (student.section || '') + '</td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-warning btn-sm me-1" aria-label="Edit ' + student.name + '" tabindex="0" onclick="editStudentInline(' + student.id + ')">' +
+                        '<i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span>' +
+                    '</button>' +
+                    '<button class="btn btn-danger btn-sm" aria-label="Delete ' + student.name + '" tabindex="0" onclick="showStudentDeleteModal(' + student.id + ', \'' + student.name.replace(/'/g, "&#39;") + '\')">' +
+                        '<i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }
+    });
+    // Accessibility: focus management
+    if (editingStudentId) {
+        setTimeout(function() {
+            var input = document.getElementById('editName');
+            if (input) input.focus();
+        }, 0);
+    }
+}
+        var safeName = student.firstname && student.lastname ? String(student.firstname + ' ' + student.lastname).replace(/'/g, '&#39;').replace(/"/g, '&quot;') : '';
+        var checked = selectedStudents.has(student.id) ? 'checked' : '';
+        if (editingStudentId === student.id) {
+            // Inline edit mode
+            tableBody.innerHTML += '<tr>' +
+                '<td></td>' +
+                '<td>' + (student.admission_no || '') + '</td>' +
+                '<td><input type="text" class="form-control" id="editFirstname" value="' + (student.firstname || '') + '" aria-label="First Name"> ' +
+                    '<input type="text" class="form-control mt-1" id="editLastname" value="' + (student.lastname || '') + '" aria-label="Last Name"></td>' +
+                '<td><input type="text" class="form-control" id="editRollNumber" value="' + (student.roll_number || '') + '" aria-label="Roll Number"></td>' +
+                '<td><input type="text" class="form-control" id="editClass" value="' + (student.class_enrolled && student.class_enrolled.name ? student.class_enrolled.name : '') + '" aria-label="Class"></td>' +
+                '<td><input type="text" class="form-control" id="editSection" value="' + (student.section || '') + '" aria-label="Section"></td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-success btn-sm me-1" aria-label="Save" tabindex="0" onclick="saveStudentInline(' + student.id + ')">' +
+                        '<i class="bi bi-check" aria-hidden="true"></i> <span class="visually-hidden">Save</span>' +
+                    '</button>' +
+                    '<button class="btn btn-secondary btn-sm" aria-label="Cancel" tabindex="0" onclick="cancelEditStudent()">' +
+                        '<i class="bi bi-x" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        } else {
+            tableBody.innerHTML += '<tr>' +
+                '<td><input type="checkbox" class="student-checkbox" data-id="' + student.id + '" aria-label="Select student ' + safeName + '" ' + checked + '></td>' +
+                '<td>' + (student.admission_no || '') + '</td>' +
+                '<td>' + (student.firstname || '') + ' ' + (student.lastname || '') + '</td>' +
+                '<td>' + (student.roll_number || '') + '</td>' +
+                '<td>' + (student.class_enrolled && student.class_enrolled.name ? student.class_enrolled.name : '') + '</td>' +
+                '<td>' + (student.section || '') + '</td>' +
+                '<td class="text-end">' +
+                    '<button class="btn btn-warning btn-sm me-1" aria-label="Edit ' + safeName + '" tabindex="0" onclick="editStudentInline(' + student.id + ')">' +
+                        '<i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span>' +
+                    '</button>' +
+                    '<button class="btn btn-danger btn-sm" aria-label="Delete ' + safeName + '" tabindex="0" onclick="showStudentDeleteModal(' + student.id + ', \'" + safeName + "\')">' +
+                        '<i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }
+    });
+    // Accessibility: focus management
+    if (editingStudentId) {
+        setTimeout(function() {
+            var input = document.getElementById('editFirstname');
+            if (input) input.focus();
+        }, 0);
+    }
+    // Wire up row checkboxes
+    document.querySelectorAll('.student-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            const id = parseInt(this.getAttribute('data-id'));
+            if (this.checked) {
+                selectedStudents.add(id);
+            } else {
+                selectedStudents.delete(id);
+            }
+            updateBatchDeleteBtn();
+            updateSelectAllCheckbox();
+        });
+    });
+    updateSelectAllCheckbox();
+}
+
+// Inline edit handlers
+window.editStudentInline = function(studentId) {
+    editingStudentId = studentId;
+    renderTable(studentsData);
+};
+window.cancelEditStudent = function() {
+    editingStudentId = null;
+    renderTable(studentsData);
+};
+window.saveStudentInline = async function(studentId) {
+    var firstname = document.getElementById('editFirstname').value.trim();
+    var lastname = document.getElementById('editLastname').value.trim();
+    var roll_number = document.getElementById('editRollNumber').value.trim();
+    var class_name = document.getElementById('editClass').value.trim();
+    var section_name = document.getElementById('editSection').value.trim();
+    var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    var csrf = csrfInput ? csrfInput.value : '';
+    try {
+        const resp = await fetch('/api/students/' + studentId + '/', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf
+            },
+            body: JSON.stringify({ firstname, lastname, roll_number, class_name, section_name })
+        });
+        if (!resp.ok) throw new Error('Failed to update student');
+        const updated = await resp.json();
+        studentsData = studentsData.map(s => s.id === studentId ? updated : s);
+        editingStudentId = null;
+        renderTable(studentsData);
+        showToast('Student updated successfully', 'success');
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+};
+
+function filterStudents() {
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = studentsData.filter(s =>
+        (s.firstname && s.firstname.toLowerCase().includes(q)) ||
+        (s.lastname && s.lastname.toLowerCase().includes(q)) ||
+        (s.admission_no && s.admission_no.toLowerCase().includes(q)) ||
+        (s.class_enrolled && s.class_enrolled.name && s.class_enrolled.name.toLowerCase().includes(q)) ||
+        (s.section_enrolled && s.section_enrolled.name && s.section_enrolled.name.toLowerCase().includes(q))
+    );
+    renderTable(filtered);
+}
+
+function fetchStudents() {
+    loadingSpinner.classList.remove('d-none');
+    errorDiv.classList.add('d-none');
+    // For demo, just use the mock data
+    setTimeout(function() {
+        loadingSpinner.classList.add('d-none');
+        renderTable(studentsData);
+    }, 600);
+}
+
+searchInput.addEventListener('input', filterStudents);
+window.addEventListener('DOMContentLoaded', fetchStudents);
+
+// Select all logic
+const selectAllCb = document.getElementById('selectAllStudents');
+const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+function updateBatchDeleteBtn() {
+    batchDeleteBtn.disabled = selectedStudents.size === 0;
+}
+function updateSelectAllCheckbox() {
+    const all = studentsData.length > 0 && selectedStudents.size === studentsData.length;
+    if (selectAllCb) selectAllCb.checked = all;
+}
+if (selectAllCb) {
+    selectAllCb.addEventListener('change', function() {
+        if (this.checked) {
+            studentsData.forEach(s => selectedStudents.add(s.id));
+        } else {
+            selectedStudents.clear();
+        }
+        renderTable(studentsData);
+        updateBatchDeleteBtn();
+    });
+}
+// Batch delete logic
+if (batchDeleteBtn) {
+    batchDeleteBtn.addEventListener('click', function() {
+        if (selectedStudents.size === 0) return;
+        showGlobalModal({
+            title: 'Delete Selected Students',
+            body: '<p>Are you sure you want to delete <strong>' + selectedStudents.size + '</strong> selected student(s)?</p>',
+            footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+                    '<button type="button" class="btn btn-danger" id="confirmBatchDelete">Delete</button>'
+        });
+        setTimeout(function() {
+            const confirmBtn = document.getElementById('confirmBatchDelete');
+            if (confirmBtn) {
+                confirmBtn.focus();
+                confirmBtn.addEventListener('click', async function() {
+                    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+                    const csrf = csrfInput ? csrfInput.value : '';
+                    try {
+                        const resp = await fetch('/api/students/batch_delete/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrf
+                            },
+                            body: JSON.stringify({ ids: Array.from(selectedStudents) })
+                        });
+                        if (!resp.ok) throw new Error('Failed to delete students');
+                        selectedStudents.clear();
+                        closeGlobalModal();
+                        showToast('Selected students deleted', 'success');
+                        fetchStudents();
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                });
+            }
+        }, 0);
+    });
+}
+
+// Modal dialog for student delete confirmation
+window.showStudentDeleteModal = function(studentId, studentName) {
+  var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+  var csrf = csrfInput ? csrfInput.value : '';
+  showGlobalModal({
+    title: 'Delete Student',
+    body: '<p>Are you sure you want to delete <strong>' + studentName + '</strong>?</p>' +
+          '<form id="deleteStudentForm" method="post" action="/students/' + studentId + '/delete/">' +
+          '<input type="hidden" name="csrfmiddlewaretoken" value="' + csrf + '">' +
+          '</form>',
+    footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
+           '<button type="submit" class="btn btn-danger" form="deleteStudentForm">Delete</button>'
+  });
+};
+</script>
+{% endblock %}
