@@ -4,6 +4,14 @@
 echo "=== Django App Startup ==="
 echo "Python version: $(python --version)"
 
+# Debug environment variables
+echo "=== Environment Variables Debug ==="
+echo "DATABASE_URL: ${DATABASE_URL:-NOT SET}"
+echo "DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE:-NOT SET}"
+echo "DEBUG: ${DEBUG:-NOT SET}"
+echo "SECRET_KEY: ${SECRET_KEY:+SET}"
+echo "ALLOWED_HOSTS: ${ALLOWED_HOSTS:-NOT SET}"
+
 # Run database migrations if needed
 echo "Ensuring database migrations are applied..."
 python manage.py migrate --noinput --run-syncdb 2>/dev/null || echo "Migrations completed or not needed"
