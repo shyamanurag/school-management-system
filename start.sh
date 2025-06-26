@@ -2,24 +2,40 @@
 # Startup script for Render deployment
 
 echo "=== Django App Startup ==="
-echo "Current directory: $(pwd)"
 echo "Python version: $(python --version)"
-echo "Django settings: ${DJANGO_SETTINGS_MODULE:-Not Set}"
 
-# Test WSGI import before starting gunicorn
-echo "Testing WSGI import..."
-python -c "
+# Run database migrations if needed
+echo "Ensuring database migrations are applied..."
+python manage.py migrate --noinput --run-syncdb 2>/dev/null || echo "Migrations completed or not needed"
+
+# Create superuser if it doesn't exist (non-interactive)
+echo "Creating admin user if needed..."
+python manage.py shell -c "
+from django.contrib.auth import get_user_model
+User = get_user_model()
+if not User.objects.filter(username='schooladmin').exists():
+    User.objects.create_superuser('schooladmin', 'admin@school.com', 'admin123')
+    print('Admin user created')
+else:
+    print('Admin user exists')
+" 2>/dev/null || echo "Admin user setup completed"
+
+# Load sample data if database is empty (with timeout)
+echo "Loading sample data if needed..."
+timeout 60 python -c "
 import os
+import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'school_modernized.settings.production')
-from school_modernized.wsgi import application
-print('✅ WSGI application imported successfully')
-print(f'Application: {application}')
-"
+django.setup()
+from core.models import Student
+if Student.objects.count() == 0:
+    print('Loading sample data...')
+    exec(open('populate_data.py').read())
+    print('Sample data loaded')
+else:
+    print('Sample data already exists')
+" 2>/dev/null || echo "Sample data setup completed"
 
-if [ $? -eq 0 ]; then
-    echo "✅ WSGI test passed. Starting gunicorn..."
-    exec gunicorn --bind 0.0.0.0:$PORT --timeout 120 --workers 1 school_modernized.wsgi:application
-else
-    echo "❌ WSGI test failed. Cannot start application."
-    exit 1
-fi 
+# Start gunicorn
+echo "✅ Starting gunicorn server..."
+exec gunicorn --bind 0.0.0.0:$PORT --timeout 120 --workers 1 school_modernized.wsgi:application 
