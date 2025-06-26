@@ -1,8 +1,11 @@
 #!/bin/bash
 # Startup script for Render deployment
+set -e  # Exit on any error
 
 echo "=== Django App Startup ==="
+echo "Current directory: $(pwd)"
 echo "Python version: $(python --version)"
+echo "PORT: ${PORT:-NOT SET}"
 
 # Debug environment variables
 echo "=== Environment Variables Debug ==="
@@ -11,6 +14,12 @@ echo "DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE:-NOT SET}"
 echo "DEBUG: ${DEBUG:-NOT SET}"
 echo "SECRET_KEY: ${SECRET_KEY:+SET}"
 echo "ALLOWED_HOSTS: ${ALLOWED_HOSTS:-NOT SET}"
+
+# Ensure PORT is set
+if [ -z "$PORT" ]; then
+    echo "ERROR: PORT environment variable not set"
+    exit 1
+fi
 
 # Run database migrations if needed
 echo "Ensuring database migrations are applied..."
