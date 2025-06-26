@@ -11,7 +11,7 @@ import uuid
 
 class LibrarySection(TimeStampedModel):
     """Library sections (Fiction, Non-Fiction, Reference, etc.)"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='library_sections')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='library_sections')
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=20)
     description = models.TextField(blank=True, null=True)
@@ -62,7 +62,7 @@ class Publisher(TimeStampedModel):
 
 class Subject(TimeStampedModel):
     """Book subjects/categories"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='library_subjects')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='library_subjects')
     name = models.CharField(max_length=100)
     dewey_decimal_code = models.CharField(max_length=10, blank=True, null=True)
     parent_subject = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_subjects')
@@ -99,7 +99,7 @@ class Book(UUIDModel, TimeStampedModel):
         ('LOST', 'Lost'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='library_books')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='library_books')
     
     # Book identification
     accession_number = models.CharField(max_length=50, unique=True)
@@ -189,7 +189,7 @@ class LibraryMember(TimeStampedModel):
         ('CANCELLED', 'Cancelled'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='library_members')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='library_members')
     member_id = models.CharField(max_length=50, unique=True)
     member_type = models.CharField(max_length=20, choices=MEMBER_TYPES)
     
@@ -258,7 +258,7 @@ class BookIssue(UUIDModel, TimeStampedModel):
         ('RENEWED', 'Renewed'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='book_issues')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='book_issues')
     issue_number = models.CharField(max_length=50, unique=True)
     
     # Issue details
@@ -331,7 +331,7 @@ class BookReservation(UUIDModel, TimeStampedModel):
         ('EXPIRED', 'Expired'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='book_reservations')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='book_reservations')
     reservation_number = models.CharField(max_length=50, unique=True)
     
     # Reservation details
@@ -375,7 +375,7 @@ class LibraryFine(UUIDModel, TimeStampedModel):
         ('PARTIAL', 'Partially Paid'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='library_fines')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='library_fines')
     fine_number = models.CharField(max_length=50, unique=True)
     
     # Fine details
@@ -431,7 +431,7 @@ class DigitalResource(UUIDModel, TimeStampedModel):
         ('WEBSITE', 'Educational Website'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='digital_resources')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='digital_resources')
     
     # Resource details
     title = models.CharField(max_length=500)
@@ -486,7 +486,7 @@ class LibraryEvent(UUIDModel, TimeStampedModel):
         ('OTHER', 'Other'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='library_events')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='library_events')
     
     # Event details
     title = models.CharField(max_length=200)
@@ -539,7 +539,7 @@ class LibraryReport(UUIDModel, TimeStampedModel):
         ('ANNUAL_REPORT', 'Annual Report'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='library_reports')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='library_reports')
     report_type = models.CharField(max_length=30, choices=REPORT_TYPES)
     generated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='generated_library_reports')
     

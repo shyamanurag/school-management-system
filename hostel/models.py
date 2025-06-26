@@ -19,7 +19,7 @@ class HostelBlock(TimeStampedModel):
         ('STAFF', 'Staff Quarters'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='hostel_blocks')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='hostel_blocks')
     
     # Block details
     name = models.CharField(max_length=100)
@@ -580,7 +580,7 @@ class HostelReport(UUIDModel, TimeStampedModel):
         ('ANNUAL_REPORT', 'Annual Report'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='hostel_reports')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='hostel_reports')
     report_type = models.CharField(max_length=30, choices=REPORT_TYPES)
     generated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='generated_hostel_reports')
     

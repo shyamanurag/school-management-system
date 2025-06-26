@@ -10,7 +10,7 @@ import uuid
 
 class InventoryCategory(TimeStampedModel):
     """Inventory item categories"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='inventory_categories')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='inventory_categories')
     
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=20)
@@ -35,7 +35,7 @@ class InventoryCategory(TimeStampedModel):
 
 class Supplier(TimeStampedModel):
     """Suppliers/Vendors for inventory items"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='suppliers')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='suppliers')
     
     # Supplier details
     name = models.CharField(max_length=200)
@@ -126,7 +126,7 @@ class InventoryItem(UUIDModel, TimeStampedModel):
         ('PAIR', 'Pair'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='inventory_items')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='inventory_items')
     category = models.ForeignKey(InventoryCategory, on_delete=models.CASCADE, related_name='items')
     
     # Item identification
@@ -214,7 +214,7 @@ class PurchaseOrder(UUIDModel, TimeStampedModel):
         ('REJECTED', 'Rejected'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='purchase_orders')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='purchase_orders')
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='purchase_orders')
     
     # Order identification
@@ -300,7 +300,7 @@ class GoodsReceipt(UUIDModel, TimeStampedModel):
         ('RETURNED', 'Returned'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='goods_receipts')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='goods_receipts')
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='receipts')
     
     # Receipt details
@@ -380,7 +380,7 @@ class StockTransaction(UUIDModel, TimeStampedModel):
         ('OPENING', 'Opening Stock'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='stock_transactions')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='stock_transactions')
     inventory_item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, related_name='transactions')
     
     # Transaction details
@@ -438,7 +438,7 @@ class StockIssue(UUIDModel, TimeStampedModel):
         ('CANCELLED', 'Cancelled'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='stock_issues')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='stock_issues')
     
     # Issue details
     issue_number = models.CharField(max_length=50, unique=True)
@@ -516,7 +516,7 @@ class InventoryAudit(UUIDModel, TimeStampedModel):
         ('CANCELLED', 'Cancelled'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='inventory_audits')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='inventory_audits')
     
     # Audit details
     audit_number = models.CharField(max_length=50, unique=True)
@@ -610,7 +610,7 @@ class InventoryReport(UUIDModel, TimeStampedModel):
         ('ASSET_REGISTER', 'Asset Register'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='inventory_reports')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='inventory_reports')
     report_type = models.CharField(max_length=30, choices=REPORT_TYPES)
     generated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='generated_inventory_reports')
     

@@ -122,7 +122,7 @@ class Notification(UUIDModel, TimeStampedModel):
 
 class NotificationGroup(TimeStampedModel):
     """Group notifications for batch sending"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='notification_groups')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='notification_groups')
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     template = models.ForeignKey(NotificationTemplate, on_delete=models.CASCADE)
@@ -164,7 +164,7 @@ class AnnouncementBoard(TimeStampedModel):
         ('EMERGENCY', 'Emergency'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='announcements')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='announcements')
     title = models.CharField(max_length=300)
     content = models.TextField()
     announcement_type = models.CharField(max_length=20, choices=ANNOUNCEMENT_TYPES, default='GENERAL')
@@ -215,7 +215,7 @@ class Message(UUIDModel, TimeStampedModel):
         ('BROADCAST', 'Broadcast'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='messages')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='messages')
     message_type = models.CharField(max_length=20, choices=MESSAGE_TYPES, default='DIRECT')
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     recipients = models.ManyToManyField(User, through='MessageRecipient', related_name='received_messages')
@@ -270,7 +270,7 @@ class EmergencyAlert(UUIDModel, TimeStampedModel):
         ('EMERGENCY', 'Emergency'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='emergency_alerts')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='emergency_alerts')
     title = models.CharField(max_length=200)
     message = models.TextField()
     alert_level = models.CharField(max_length=10, choices=ALERT_LEVELS, default='INFO')
