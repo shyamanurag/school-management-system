@@ -1,10 +1,15 @@
 from rest_framework import serializers, viewsets
-from .models import Route, Vehicle, TransportAssignment
+from .models import (
+    TransportVendor,
+    Vehicle,
+    TransportRoute,
+    StudentTransport
+)
 
 # Serializers
-class RouteSerializer(serializers.ModelSerializer):
+class TransportVendorSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Route
+        model = TransportVendor
         fields = '__all__'
 
 class VehicleSerializer(serializers.ModelSerializer):
@@ -12,20 +17,29 @@ class VehicleSerializer(serializers.ModelSerializer):
         model = Vehicle
         fields = '__all__'
 
-class TransportAssignmentSerializer(serializers.ModelSerializer):
+class TransportRouteSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TransportAssignment
+        model = TransportRoute
+        fields = '__all__'
+
+class StudentTransportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentTransport
         fields = '__all__'
 
 # ViewSets
-class RouteViewSet(viewsets.ModelViewSet):
-    queryset = Route.objects.all()
-    serializer_class = RouteSerializer
+class TransportVendorViewSet(viewsets.ModelViewSet):
+    queryset = TransportVendor.objects.all()
+    serializer_class = TransportVendorSerializer
 
 class VehicleViewSet(viewsets.ModelViewSet):
     queryset = Vehicle.objects.all()
     serializer_class = VehicleSerializer
 
-class TransportAssignmentViewSet(viewsets.ModelViewSet):
-    queryset = TransportAssignment.objects.all()
-    serializer_class = TransportAssignmentSerializer
+class TransportRouteViewSet(viewsets.ModelViewSet):
+    queryset = TransportRoute.objects.all()
+    serializer_class = TransportRouteSerializer
+
+class StudentTransportViewSet(viewsets.ModelViewSet):
+    queryset = StudentTransport.objects.all()
+    serializer_class = StudentTransportSerializer 

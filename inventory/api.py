@@ -1,40 +1,115 @@
 from rest_framework import serializers, viewsets
-from .models import ItemCategory, Item, ItemStock, ItemIssue
+from .models import (
+    InventoryCategory,
+    Supplier,
+    Brand,
+    InventoryItem,
+    PurchaseOrder,
+    PurchaseOrderItem,
+    GoodsReceipt,
+    StockTransaction,
+    StockIssue,
+    InventoryAudit,
+    InventoryReport
+)
 
 # Serializers
-class ItemCategorySerializer(serializers.ModelSerializer):
+class InventoryCategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = ItemCategory
+        model = InventoryCategory
         fields = '__all__'
 
-class ItemSerializer(serializers.ModelSerializer):
+class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Item
+        model = Supplier
         fields = '__all__'
 
-class ItemStockSerializer(serializers.ModelSerializer):
+class BrandSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ItemStock
+        model = Brand
         fields = '__all__'
 
-class ItemIssueSerializer(serializers.ModelSerializer):
+class InventoryItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ItemIssue
+        model = InventoryItem
+        fields = '__all__'
+
+class PurchaseOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PurchaseOrder
+        fields = '__all__'
+
+class PurchaseOrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PurchaseOrderItem
+        fields = '__all__'
+
+class GoodsReceiptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GoodsReceipt
+        fields = '__all__'
+
+class StockTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StockTransaction
+        fields = '__all__'
+
+class StockIssueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StockIssue
+        fields = '__all__'
+
+class InventoryAuditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InventoryAudit
+        fields = '__all__'
+
+class InventoryReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InventoryReport
         fields = '__all__'
 
 # ViewSets
-class ItemCategoryViewSet(viewsets.ModelViewSet):
-    queryset = ItemCategory.objects.all()
-    serializer_class = ItemCategorySerializer
+class InventoryCategoryViewSet(viewsets.ModelViewSet):
+    queryset = InventoryCategory.objects.all()
+    serializer_class = InventoryCategorySerializer
 
-class ItemViewSet(viewsets.ModelViewSet):
-    queryset = Item.objects.all()
-    serializer_class = ItemSerializer
+class SupplierViewSet(viewsets.ModelViewSet):
+    queryset = Supplier.objects.all()
+    serializer_class = SupplierSerializer
 
-class ItemStockViewSet(viewsets.ModelViewSet):
-    queryset = ItemStock.objects.all()
-    serializer_class = ItemStockSerializer
+class BrandViewSet(viewsets.ModelViewSet):
+    queryset = Brand.objects.all()
+    serializer_class = BrandSerializer
 
-class ItemIssueViewSet(viewsets.ModelViewSet):
-    queryset = ItemIssue.objects.all()
-    serializer_class = ItemIssueSerializer
+class InventoryItemViewSet(viewsets.ModelViewSet):
+    queryset = InventoryItem.objects.all()
+    serializer_class = InventoryItemSerializer
+
+class PurchaseOrderViewSet(viewsets.ModelViewSet):
+    queryset = PurchaseOrder.objects.all()
+    serializer_class = PurchaseOrderSerializer
+
+class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
+    queryset = PurchaseOrderItem.objects.all()
+    serializer_class = PurchaseOrderItemSerializer
+
+class GoodsReceiptViewSet(viewsets.ModelViewSet):
+    queryset = GoodsReceipt.objects.all()
+    serializer_class = GoodsReceiptSerializer
+
+class StockTransactionViewSet(viewsets.ModelViewSet):
+    queryset = StockTransaction.objects.all()
+    serializer_class = StockTransactionSerializer
+
+class StockIssueViewSet(viewsets.ModelViewSet):
+    queryset = StockIssue.objects.all()
+    serializer_class = StockIssueSerializer
+
+class InventoryAuditViewSet(viewsets.ModelViewSet):
+    queryset = InventoryAudit.objects.all()
+    serializer_class = InventoryAuditSerializer
+
+class InventoryReportViewSet(viewsets.ModelViewSet):
+    queryset = InventoryReport.objects.all()
+    serializer_class = InventoryReportSerializer 

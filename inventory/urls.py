@@ -1,18 +1,32 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from . import views
-from .api import ItemCategoryViewSet, ItemViewSet, ItemStockViewSet, ItemIssueViewSet
+from .api import (
+    InventoryCategoryViewSet,
+    SupplierViewSet,
+    BrandViewSet,
+    InventoryItemViewSet,
+    PurchaseOrderViewSet,
+    PurchaseOrderItemViewSet,
+    GoodsReceiptViewSet,
+    StockTransactionViewSet,
+    StockIssueViewSet,
+    InventoryAuditViewSet,
+    InventoryReportViewSet
+)
 
 router = DefaultRouter()
-router.register(r'api/itemcategories', ItemCategoryViewSet)
-router.register(r'api/items', ItemViewSet)
-router.register(r'api/itemstocks', ItemStockViewSet)
-router.register(r'api/itemissues', ItemIssueViewSet)
+router.register(r'categories', InventoryCategoryViewSet, basename='inventorycategory')
+router.register(r'suppliers', SupplierViewSet, basename='supplier')
+router.register(r'brands', BrandViewSet, basename='brand')
+router.register(r'items', InventoryItemViewSet, basename='inventoryitem')
+router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchaseorder')
+router.register(r'purchase-order-items', PurchaseOrderItemViewSet, basename='purchaseorderitem')
+router.register(r'goods-receipts', GoodsReceiptViewSet, basename='goodsreceipt')
+router.register(r'stock-transactions', StockTransactionViewSet, basename='stocktransaction')
+router.register(r'stock-issues', StockIssueViewSet, basename='stockissue')
+router.register(r'audits', InventoryAuditViewSet, basename='inventoryaudit')
+router.register(r'reports', InventoryReportViewSet, basename='inventoryreport')
 
 urlpatterns = [
-    path('', views.ItemListView.as_view(), name='item-list'),
-    path('add/', views.ItemCreateView.as_view(), name='item-add'),
-    path('<int:pk>/edit/', views.ItemUpdateView.as_view(), name='item-edit'),
-    path('<int:pk>/delete/', views.ItemDeleteView.as_view(), name='item-delete'),
     path('', include(router.urls)),
-]
+] 

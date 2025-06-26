@@ -74,25 +74,25 @@ urlpatterns = [
     path('api/academics/', include('academics.urls')),
     
     # Student Management API
-    path('api/students/', include('students.api')),
+    path('api/students/', include('students.urls')),
     
     # Fee Management API
-    path('api/fees/', include('fees.api')),
+    path('api/fees/', include('fees.urls')),
     
     # Library Management API
-    path('api/library/', include('library.api')),
+    path('api/library/', include('library.urls')),
     
     # Transport Management API
-    path('api/transport/', include('transport.api')),
+    path('api/transport/', include('transport.urls')),
     
     # Hostel Management API
-    path('api/hostel/', include('hostel.api')),
+    path('api/hostel/', include('hostel.urls')),
     
     # Inventory Management API
-    path('api/inventory/', include('inventory.api')),
+    path('api/inventory/', include('inventory.urls')),
     
     # Communication API
-    path('api/communication/', include('communication.api')),
+    path('api/communication/', include('communication.urls')),
     
     # HR Management API (Enterprise HRMS)
     path('api/hr/', include('hr.urls')),
@@ -104,7 +104,7 @@ urlpatterns = [
     path('api/admissions/', include('admissions.urls')),
     
     # AI Analytics API (Machine Learning Insights)
-    path('api/analytics/', include('analytics.api')),
+    path('api/analytics/', include('analytics.urls')),
 ]
 
 # Serve media files in development

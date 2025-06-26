@@ -1,15 +1,21 @@
 from rest_framework import serializers, viewsets
-from .models import Hostel, RoomType, HostelRoom, HostelAssignment
+from .models import (
+    HostelBlock,
+    HostelRoom,
+    HostelAdmission,
+    HostelResident,
+    MessMenu,
+    MessAttendance,
+    HostelVisitor,
+    HostelDisciplinary,
+    HostelFeedback,
+    HostelReport
+)
 
 # Serializers
-class HostelSerializer(serializers.ModelSerializer):
+class HostelBlockSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Hostel
-        fields = '__all__'
-
-class RoomTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RoomType
+        model = HostelBlock
         fields = '__all__'
 
 class HostelRoomSerializer(serializers.ModelSerializer):
@@ -17,24 +23,65 @@ class HostelRoomSerializer(serializers.ModelSerializer):
         model = HostelRoom
         fields = '__all__'
 
-class HostelAssignmentSerializer(serializers.ModelSerializer):
+class HostelAdmissionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = HostelAssignment
+        model = HostelAdmission
+        fields = '__all__'
+
+class HostelResidentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostelResident
+        fields = '__all__'
+
+class MessMenuSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MessMenu
+        fields = '__all__'
+
+class MessAttendanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MessAttendance
+        fields = '__all__'
+
+class HostelVisitorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostelVisitor
+        fields = '__all__'
+
+class HostelFeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HostelFeedback
         fields = '__all__'
 
 # ViewSets
-class HostelViewSet(viewsets.ModelViewSet):
-    queryset = Hostel.objects.all()
-    serializer_class = HostelSerializer
-
-class RoomTypeViewSet(viewsets.ModelViewSet):
-    queryset = RoomType.objects.all()
-    serializer_class = RoomTypeSerializer
+class HostelBlockViewSet(viewsets.ModelViewSet):
+    queryset = HostelBlock.objects.all()
+    serializer_class = HostelBlockSerializer
 
 class HostelRoomViewSet(viewsets.ModelViewSet):
     queryset = HostelRoom.objects.all()
     serializer_class = HostelRoomSerializer
 
-class HostelAssignmentViewSet(viewsets.ModelViewSet):
-    queryset = HostelAssignment.objects.all()
-    serializer_class = HostelAssignmentSerializer
+class HostelAdmissionViewSet(viewsets.ModelViewSet):
+    queryset = HostelAdmission.objects.all()
+    serializer_class = HostelAdmissionSerializer
+
+class HostelResidentViewSet(viewsets.ModelViewSet):
+    queryset = HostelResident.objects.all()
+    serializer_class = HostelResidentSerializer
+
+class MessMenuViewSet(viewsets.ModelViewSet):
+    queryset = MessMenu.objects.all()
+    serializer_class = MessMenuSerializer
+
+class MessAttendanceViewSet(viewsets.ModelViewSet):
+    queryset = MessAttendance.objects.all()
+    serializer_class = MessAttendanceSerializer
+
+class HostelVisitorViewSet(viewsets.ModelViewSet):
+    queryset = HostelVisitor.objects.all()
+    serializer_class = HostelVisitorSerializer
+
+class HostelFeedbackViewSet(viewsets.ModelViewSet):
+    queryset = HostelFeedback.objects.all()
+    serializer_class = HostelFeedbackSerializer 
