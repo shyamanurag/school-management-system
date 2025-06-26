@@ -1,0 +1,32 @@
+services:
+  # PostgreSQL Database Service
+  - type: pserv
+    name: school-system-db
+    env: python
+    plan: free
+    databaseName: school_system
+    databaseUser: school_admin
+
+  # Web Service
+  - type: web
+    name: school-system
+    env: python
+    plan: free
+    region: oregon
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn school_modernized.wsgi:application --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DJANGO_SETTINGS_MODULE
+        value: school_modernized.settings.production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: school-system-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: school-system-kh8s.onrender.com,.onrender.com,* 

@@ -25,13 +25,29 @@ if 'onrender.com' in os.environ.get('RENDER_EXTERNAL_URL', ''):
 # Database - PostgreSQL for production
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
-if DATABASE_URL:
-    # Use PostgreSQL from environment
-    DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL)
-    }
+if DATABASE_URL and DATABASE_URL.strip():
+    try:
+        # Use PostgreSQL from environment
+        DATABASES = {
+            'default': dj_database_url.parse(DATABASE_URL)
+        }
+        print(f"Using PostgreSQL database from DATABASE_URL")
+    except Exception as e:
+        print(f"Error parsing DATABASE_URL: {e}")
+        # Force PostgreSQL configuration if DATABASE_URL parsing fails
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.environ.get('DB_NAME', 'school_system'),
+                'USER': os.environ.get('DB_USER', 'school_admin'),
+                'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+                'HOST': os.environ.get('DB_HOST', 'localhost'),
+                'PORT': os.environ.get('DB_PORT', '5432'),
+            }
+        }
 else:
-    # Fallback to SQLite for development/testing
+    # Fallback to SQLite for development/testing only
+    print("Warning: Using SQLite database - not recommended for production")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
