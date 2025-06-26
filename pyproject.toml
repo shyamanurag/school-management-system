@@ -1,0 +1,24 @@
+[tool.pyright]
+# Django compatibility settings
+reportArgumentType = "warning"  # Downgrade from error to warning
+reportIncompatibleMethodOverride = "warning"
+reportIncompatibleVariableOverride = "warning"
+
+# Python version and path settings
+pythonVersion = "3.11"
+pythonPlatform = "Windows"
+
+# Include/exclude paths
+include = [
+    "."
+]
+
+exclude = [
+    "**/migrations/**",
+    "**/venv/**",
+    "**/node_modules/**",
+    "**/__pycache__/**"
+]
+
+[tool.django-stubs]
+django_settings_module = "school_modernized.settings.local" 

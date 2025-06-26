@@ -44,7 +44,7 @@ class NotificationTemplate(TimeStampedModel):
         ('CUSTOM', 'Custom'),
     ]
     
-    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='notification_templates')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='notifications_templates')
     name = models.CharField(max_length=200)
     category = models.CharField(max_length=20, choices=TEMPLATE_CATEGORIES)
     channel = models.ForeignKey(NotificationChannel, on_delete=models.CASCADE, related_name='templates')

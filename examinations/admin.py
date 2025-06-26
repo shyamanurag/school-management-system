@@ -27,9 +27,9 @@ class ExamTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Exam)
 class ExamAdmin(admin.ModelAdmin):
-    list_display = ['exam_name', 'exam_type', 'school_class', 'start_date', 'end_date', 'status']
-    list_filter = ['exam_type', 'school_class', 'status']
-    search_fields = ['exam_name', 'exam_code']
+    list_display = ['exam_name', 'subject', 'school_class', 'exam_date', 'is_completed', 'is_cancelled']
+    list_filter = ['subject', 'school_class', 'is_completed', 'is_cancelled']
+    search_fields = ['exam_name']
 
 @admin.register(QuestionBank)
 class QuestionBankAdmin(admin.ModelAdmin):
@@ -43,24 +43,42 @@ class QuestionBankAdmin(admin.ModelAdmin):
 
 @admin.register(ExamSchedule)
 class ExamScheduleAdmin(admin.ModelAdmin):
-    list_display = ['exam', 'subject', 'exam_date', 'start_time', 'duration_minutes']
-    list_filter = ['exam', 'exam_date', 'subject']
-    search_fields = ['exam__exam_name', 'subject__name']
+    list_display = ['schedule_name', 'exam_type', 'start_date', 'end_date', 'is_published']
+    list_filter = ['exam_type', 'start_date', 'is_published']
+    search_fields = ['schedule_name']
 
 @admin.register(ExamResult)
 class ExamResultAdmin(admin.ModelAdmin):
-    list_display = ['student', 'exam_schedule', 'marks_obtained', 'max_marks', 'percentage', 'grade']
-    list_filter = ['exam_schedule__exam', 'exam_schedule__subject', 'grade']
+    list_display = ['student', 'exam', 'total_marks_obtained', 'percentage', 'grade', 'is_passed']
+    list_filter = ['exam__schedule__exam_type', 'exam__subject', 'grade', 'is_passed']
     search_fields = ['student__admission_number', 'student__first_name']
 
 @admin.register(OnlineExam)
 class OnlineExamAdmin(admin.ModelAdmin):
-    list_display = ['exam_name', 'subject', 'total_questions', 'duration_minutes', 'start_datetime', 'is_active']
-    list_filter = ['subject', 'difficulty_level', 'is_active']
-    search_fields = ['exam_name']
+    list_display = ['exam', 'total_questions', 'auto_submit', 'randomize_questions', 'full_screen_required']
+    list_filter = ['auto_submit', 'randomize_questions', 'full_screen_required']
+    search_fields = ['exam__exam_name']
 
 @admin.register(StudentExamAttempt)
 class StudentExamAttemptAdmin(admin.ModelAdmin):
-    list_display = ['student', 'online_exam', 'start_time', 'end_time', 'total_score', 'percentage', 'status']
+    list_display = ['student', 'online_exam', 'start_time', 'end_time', 'total_marks_obtained', 'percentage', 'status']
     list_filter = ['online_exam', 'status', 'start_time']
-    search_fields = ['student__admission_number', 'student__first_name'] 
+    search_fields = ['student__admission_number', 'student__first_name']
+
+@admin.register(GradingScheme)
+class GradingSchemeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'school', 'academic_year', 'is_percentage_based', 'is_active']
+    list_filter = ['school', 'academic_year', 'is_percentage_based', 'is_active']
+    search_fields = ['name']
+
+@admin.register(HallTicket)
+class HallTicketAdmin(admin.ModelAdmin):
+    list_display = ['hall_ticket_number', 'student', 'exam_schedule', 'exam_center', 'is_issued']
+    list_filter = ['exam_schedule', 'is_issued', 'issued_date']
+    search_fields = ['hall_ticket_number', 'student__first_name', 'student__admission_number']
+
+@admin.register(ExamReport)
+class ExamReportAdmin(admin.ModelAdmin):
+    list_display = ['report_type', 'exam_schedule', 'generated_by', 'created_at']
+    list_filter = ['report_type', 'exam_schedule', 'created_at']
+    search_fields = ['report_type'] 

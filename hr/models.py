@@ -557,7 +557,7 @@ class LeaveApplication(UUIDModel, TimeStampedModel):
     applied_date = models.DateField(auto_now_add=True)
     
     # Approval process
-    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_leaves')
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='hr_approved_leaves')
     approved_date = models.DateField(blank=True, null=True)
     rejection_reason = models.TextField(blank=True, null=True)
     

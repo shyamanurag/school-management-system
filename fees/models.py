@@ -313,7 +313,7 @@ class FeeRefund(UUIDModel, TimeStampedModel):
     payment = models.ForeignKey(FeePayment, on_delete=models.CASCADE, related_name='refunds')
     
     # Refund details
-    refund_type = models.CharField(max_length=20, choices=REFUND_TYPES)
+    refund_type = models.CharField(max_length=25, choices=REFUND_TYPES)
     refund_amount = models.DecimalField(max_digits=12, decimal_places=2)
     reason = models.TextField()
     

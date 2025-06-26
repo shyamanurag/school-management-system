@@ -17,12 +17,12 @@ class Subject(TimeStampedModel):
         ('VOCATIONAL', 'Vocational'),
     ]
     
-    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='subjects')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='academics_subjects')
     name = models.CharField(max_length=200)
     code = models.CharField(max_length=20)
     description = models.TextField(blank=True, null=True)
     subject_type = models.CharField(max_length=20, choices=SUBJECT_TYPES, default='CORE')
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='subjects')
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='academics_subjects')
     
     # Academic details
     credit_hours = models.IntegerField(default=1)
@@ -88,10 +88,10 @@ class Exam(TimeStampedModel):
         ('SURPRISE', 'Surprise Test'),
     ]
     
-    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='exams')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='academics_exams')
     name = models.CharField(max_length=200)
     exam_type = models.CharField(max_length=20, choices=EXAM_TYPES)
-    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='exams')
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='academics_exams')
     
     # Schedule
     start_date = models.DateField()
@@ -163,7 +163,7 @@ class ExamSchedule(TimeStampedModel):
 class StudentExamResult(UUIDModel, TimeStampedModel):
     """Student exam results"""
     exam_schedule = models.ForeignKey(ExamSchedule, on_delete=models.CASCADE, related_name='student_results')
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='exam_results')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='academics_exam_results')
     
     # Marks
     marks_obtained = models.FloatField(validators=[MinValueValidator(0)])
@@ -335,7 +335,7 @@ class Attendance(TimeStampedModel):
     homework_given = models.TextField(blank=True, null=True)
     
     # Teacher
-    taken_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    taken_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='academics_attendance_taken')
     remarks = models.TextField(blank=True, null=True)
     
     # Status

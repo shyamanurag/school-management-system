@@ -12,8 +12,8 @@ import uuid
 
 class AcademicSession(TimeStampedModel):
     """Academic sessions for admissions"""
-    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='admission_sessions')
-    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='admission_sessions')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='admissions_academic_sessions')
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='admissions_academic_sessions')
     
     # Session details
     session_name = models.CharField(max_length=200)
@@ -458,7 +458,7 @@ class InterviewEvaluation(UUIDModel, TimeStampedModel):
     # Feedback
     strengths = models.TextField(blank=True, null=True)
     areas_for_improvement = models.TextField(blank=True, null=True)
-    recommendation = models.CharField(max_length=20, choices=[
+    recommendation = models.CharField(max_length=25, choices=[
         ('STRONGLY_RECOMMEND', 'Strongly Recommend'),
         ('RECOMMEND', 'Recommend'),
         ('NEUTRAL', 'Neutral'),

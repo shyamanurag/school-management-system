@@ -982,7 +982,7 @@ class Employee(TimeStampedModel):
     ]
     
     # Basic Information
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employee_profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='core_employee_profile')
     employee_id = models.CharField(max_length=50, unique=True)
     
     # Personal Details

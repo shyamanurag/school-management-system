@@ -4,6 +4,7 @@ Production settings for Render deployment
 import os
 import dj_database_url
 from .base import *
+import uuid
 
 # Security for production
 DEBUG = False
@@ -72,8 +73,21 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
 # Security settings
-SECURE_BROWSER_XSS_FILTER = True
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production-' + str(uuid.uuid4()))
+
+# SSL and HTTPS settings
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Secure cookies
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Other security headers
 SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
 
 # Logging for production

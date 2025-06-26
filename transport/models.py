@@ -46,6 +46,7 @@ class TransportVendor(TimeStampedModel):
     
     class Meta:
         unique_together = ['school', 'code']
+    
     def __str__(self):
         return f"{self.school.name} - {self.name}"
 
@@ -119,8 +120,8 @@ class Vehicle(UUIDModel, TimeStampedModel):
     monthly_lease_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     
     # Status
-    is_active = models.BooleanField(default=True)
-    is_available = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)  # type: ignore[arg-type]
+    is_available = models.BooleanField(default=True)  # type: ignore[arg-type]
     current_mileage = models.IntegerField(default=0, help_text="Current odometer reading")
     
     # Photos and documents
@@ -190,8 +191,8 @@ class Driver(UUIDModel, TimeStampedModel):
     ifsc_code = models.CharField(max_length=11, blank=True, null=True)
     
     # Status
-    is_active = models.BooleanField(default=True)
-    is_available = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)  # type: ignore[arg-type]
+    is_available = models.BooleanField(default=True)  # type: ignore[arg-type]
     
     # Photos and documents
     photo = models.ImageField(upload_to='driver_photos/', blank=True, null=True)
