@@ -53,4 +53,7 @@ else:
     print('Database already has data')
 EOF
 
+# Make start script executable
+chmod +x start.sh
+
 echo "=== Build completed successfully! ===" 
