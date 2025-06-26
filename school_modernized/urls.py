@@ -30,6 +30,11 @@ urlpatterns = [
     
     # School settings
     path('school-settings/', views.school_settings_view, name='school_settings'),
+    path('departments/', views.departments_list, name='departments_list'),
+    path('campuses/', views.campuses_list, name='campuses_list'),
+    path('campuses/<int:campus_id>/', views.campus_detail, name='campus_detail'),
+    path('rooms/', views.rooms_list, name='rooms_list'),
+    path('academic-years/', views.academic_years_list, name='academic_years_list'),
     
     # Core application (Dashboard, Settings, etc.)
     path('dashboard/', include('core.urls')),

@@ -46,7 +46,6 @@ class TransportVendor(TimeStampedModel):
     
     class Meta:
         unique_together = ['school', 'code']
-    
     def __str__(self):
         return f"{self.school.name} - {self.name}"
 
