@@ -27,24 +27,25 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
+    'phonenumber_field',
 ]
 
 LOCAL_APPS = [
     'core',
-    # 'authentication',
-    # 'students',
-    # 'academics',
-    # 'fees',
-    # 'library',
-    # 'hostel',
-    # 'transport',
-    # 'inventory',
-    # 'communication',
-    # 'analytics',
-    # 'notifications',
-    # 'admissions',
-    # 'hr',
-    # 'examinations',
+    'authentication',
+    'students',
+    'academics',
+    'fees',
+    'library',
+    'hostel',
+    'transport',
+    'inventory',
+    'communication',
+    'analytics',
+    'notifications',
+    'admissions',
+    'hr',
+    'examinations',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
