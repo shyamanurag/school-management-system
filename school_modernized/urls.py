@@ -18,76 +18,85 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.shortcuts import render, redirect
-from core.views import dashboard
-
-def redirect_to_dashboard(request):
-    """Redirect root URL to dashboard"""
-    return redirect('dashboard')
+from django.views.generic import TemplateView
+from . import views
 
 urlpatterns = [
-    # Root redirect to dashboard
-    path('', redirect_to_dashboard, name='home'),
-    
-    # Admin interface
+    # Admin
     path('admin/', admin.site.urls),
     
-    # Core application URLs (main dashboard and features)
-    path('dashboard/', dashboard, name='dashboard'),
+    # Landing page
+    path('', views.landing_page, name='landing'),
     
-    # Core application URLs
-    path('core/', include('core.urls', namespace='core')),
+    # Core application (Dashboard, Settings, etc.)
+    path('dashboard/', include('core.urls')),
     
-    # Main functional modules
-    path('students/', include('students.urls')),
+    # === ULTRA-PROFESSIONAL MODULES - FULLY ENABLED ===
+    
+    # Academic Management (Ultra-Professional)
     path('academics/', include('academics.urls')),
+    
+    # Student Information System (Comprehensive)
+    path('students/', include('students.urls')),
+    
+    # Financial Management (Advanced)
     path('fees/', include('fees.urls')),
+    
+    # Communication & Notifications (Multi-Channel)
     path('communication/', include('communication.urls')),
+    
+    # Library Management (Digital Library Platform)
     path('library/', include('library.urls')),
-    path('hostel/', include('hostel.urls')),
+    
+    # Transport Management (Fleet & GPS Tracking)
     path('transport/', include('transport.urls')),
+    
+    # Hostel Management (Residential Management)
+    path('hostel/', include('hostel.urls')),
+    
+    # Inventory Management (Complete ERP)
     path('inventory/', include('inventory.urls')),
     
-    # RESTORED ULTRA-PROFESSIONAL MODULES
-    # Teachers/HR Module - Complete HRMS
-    path('teachers/', include('core.hr_urls', namespace='hr')),
-    path('hr/', include('core.hr_urls', namespace='hr-main')),
+    # === ULTRA-PROFESSIONAL DASHBOARDS ===
     
-    # Examinations Module - Complete Online Exam Platform  
-    path('exams/', lambda request: render(request, 'examinations/exam_dashboard.html')),
-    path('examinations/', lambda request: render(request, 'examinations/exam_dashboard.html')),
+    # AI Analytics Dashboard (Machine Learning Insights)
+    path('analytics/', TemplateView.as_view(template_name='analytics/analytics_dashboard.html'), name='analytics_dashboard'),
     
-    # Analytics & Reports - AI Analytics Platform
-    path('ai-analytics/', lambda request: render(request, 'analytics/analytics_dashboard.html')),
-    path('analytics/', lambda request: render(request, 'analytics/analytics_dashboard.html')),
-    path('reports/', lambda request: render(request, 'analytics/reports_dashboard.html')),
+    # Examinations Dashboard (Online Exam Platform)
+    path('examinations/', TemplateView.as_view(template_name='examinations/exam_dashboard.html'), name='examinations_dashboard'),
     
-    # Infrastructure Management (from core models)
-    path('infrastructure/', lambda request: render(request, 'core/infrastructure_dashboard.html')),
+    # HR Dashboard (Enterprise HRMS)
+    path('hr/', TemplateView.as_view(template_name='hr/dashboard.html'), name='hr_dashboard'),
     
-    # Parent Portal (notifications + communication)
-    path('parent-portal/', lambda request: render(request, 'notifications/parent_portal.html')),
+    # === API ENDPOINTS ===
     
-    # Virtual Classrooms (communication + analytics)
-    path('virtual-classrooms/', lambda request: render(request, 'communication/virtual_classrooms.html')),
+    # Student Management API
+    path('api/students/', include('students.api')),
     
-    # Mobile App Interface
-    path('mobile-app/', lambda request: render(request, 'core/mobile_app_dashboard.html')),
+    # Fee Management API
+    path('api/fees/', include('fees.api')),
     
-    # Biometric Integration
-    path('biometric/', lambda request: render(request, 'core/biometric_dashboard.html')),
+    # Library Management API
+    path('api/library/', include('library.api')),
     
-    # API endpoints (already included in individual apps)
-    path('api/', include('students.urls')),
-    path('api/', include('fees.urls')),
-    path('api/', include('hostel.urls')),
-    path('api/', include('library.urls')),
-    path('api/', include('inventory.urls')),
-    path('api/', include('transport.urls')),
-    path('api/', include('communication.urls')),
+    # Transport Management API
+    path('api/transport/', include('transport.api')),
+    
+    # Hostel Management API
+    path('api/hostel/', include('hostel.api')),
+    
+    # Inventory Management API
+    path('api/inventory/', include('inventory.api')),
+    
+    # Communication API
+    path('api/communication/', include('communication.api')),
 ]
 
-# Add media files serving in development
+# Serve media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# Custom error handlers
+handler404 = 'school_modernized.views.handler404'
+handler500 = 'school_modernized.views.handler500'
