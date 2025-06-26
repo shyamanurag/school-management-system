@@ -16,6 +16,9 @@ dj-database-url==2.2.0
 # File Handling
 Pillow==10.4.0
 
+# Form and Model Fields
+django-phonenumber-field==7.3.0
+
 # Production Server
 gunicorn==22.0.0
 whitenoise==6.7.0 
