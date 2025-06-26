@@ -41,7 +41,7 @@ class Report(TimeStampedModel):
         ('HTML', 'HTML'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='reports')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='reports')
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     report_type = models.CharField(max_length=20, choices=REPORT_TYPES)
@@ -88,7 +88,7 @@ class Metric(TimeStampedModel):
         ('RATIO', 'Ratio'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='metrics')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='metrics')
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     metric_type = models.CharField(max_length=20, choices=METRIC_TYPES)
@@ -125,7 +125,7 @@ class AnalyticsEvent(UUIDModel, TimeStampedModel):
         ('COMMUNICATION_EVENT', 'Communication Event'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='analytics_events')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='analytics_events')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     session_id = models.CharField(max_length=40, blank=True, null=True)
     event_name = models.CharField(max_length=100)
@@ -147,9 +147,9 @@ class AnalyticsEvent(UUIDModel, TimeStampedModel):
     def __str__(self):
         return f"{self.event_name} - {self.created_at}"
 
-class StudentAnalytics(TimeStampedModel):
+class StudentAnalytics(UUIDModel, TimeStampedModel):
     """Student-specific analytics"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='student_analytics')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='student_analytics')
     student_id = models.IntegerField()  # Reference to student
     academic_year = models.CharField(max_length=20)
     
@@ -186,9 +186,9 @@ class StudentAnalytics(TimeStampedModel):
     def __str__(self):
         return f"Student {self.student_id} Analytics - {self.academic_year}"
 
-class TeacherAnalytics(TimeStampedModel):
+class TeacherAnalytics(UUIDModel, TimeStampedModel):
     """Teacher-specific analytics"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='teacher_analytics')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='teacher_analytics')
     teacher_id = models.IntegerField()  # Reference to teacher
     academic_year = models.CharField(max_length=20)
     
