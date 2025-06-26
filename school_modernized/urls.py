@@ -28,6 +28,9 @@ urlpatterns = [
     # Landing page
     path('', views.landing_page, name='landing'),
     
+    # School settings
+    path('school-settings/', views.school_settings_view, name='school_settings'),
+    
     # Core application (Dashboard, Settings, etc.)
     path('dashboard/', include('core.urls')),
     
@@ -111,7 +114,3 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-# Custom error handlers
-handler404 = 'school_modernized.views.handler404'
-handler500 = 'school_modernized.views.handler500'

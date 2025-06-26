@@ -77,3 +77,12 @@ def academic_years_list(request):
         'page_title': 'Academic Years'
     }
     return render(request, 'academic_years/list.html', context)
+
+# Error handlers
+def handler404(request, exception):
+    """Custom 404 error handler"""
+    return render(request, 'landing.html', {'error': 'Page not found'}, status=404)
+
+def handler500(request):
+    """Custom 500 error handler"""
+    return render(request, 'landing.html', {'error': 'Server error'}, status=500)
