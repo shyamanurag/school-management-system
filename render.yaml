@@ -14,7 +14,7 @@ services:
     plan: free
     region: oregon
     buildCommand: "./build.sh"
-    startCommand: "gunicorn school_modernized.wsgi:application --bind 0.0.0.0:$PORT"
+    startCommand: "cd /opt/render/project/src && gunicorn --bind 0.0.0.0:$PORT --timeout 120 --workers 1 school_modernized.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9

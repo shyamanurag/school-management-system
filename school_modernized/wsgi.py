@@ -11,6 +11,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'school_modernized.settings')
+# Ensure production settings are used in deployment
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'school_modernized.settings.production')
 
 application = get_wsgi_application()
