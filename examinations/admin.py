@@ -1,17 +1,35 @@
 from django.contrib import admin
-from .models import *
+from .models import (
+    Subject,
+    ExamType,
+    ExamSchedule,
+    Exam,
+    QuestionBank,
+    OnlineExam,
+    StudentExamAttempt,
+    ExamResult,
+    GradingScheme,
+    HallTicket,
+    ExamReport
+)
 
-@admin.register(ExaminationType)
-class ExaminationTypeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'code', 'school', 'is_active']
+@admin.register(Subject)
+class SubjectAdmin(admin.ModelAdmin):
+    list_display = ['name', 'code', 'school', 'subject_type', 'is_active']
+    list_filter = ['school', 'subject_type', 'is_active']
+    search_fields = ['name', 'code']
+
+@admin.register(ExamType)
+class ExamTypeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'code', 'school', 'weightage_percentage', 'is_active']
     list_filter = ['school', 'is_active']
     search_fields = ['name', 'code']
 
-@admin.register(Examination)
-class ExaminationAdmin(admin.ModelAdmin):
-    list_display = ['name', 'exam_type', 'session', 'start_date', 'end_date', 'status']
-    list_filter = ['exam_type', 'session', 'status']
-    search_fields = ['name', 'code']
+@admin.register(Exam)
+class ExamAdmin(admin.ModelAdmin):
+    list_display = ['exam_name', 'exam_type', 'school_class', 'start_date', 'end_date', 'status']
+    list_filter = ['exam_type', 'school_class', 'status']
+    search_fields = ['exam_name', 'exam_code']
 
 @admin.register(QuestionBank)
 class QuestionBankAdmin(admin.ModelAdmin):
@@ -25,20 +43,14 @@ class QuestionBankAdmin(admin.ModelAdmin):
 
 @admin.register(ExamSchedule)
 class ExamScheduleAdmin(admin.ModelAdmin):
-    list_display = ['examination', 'subject', 'exam_date', 'start_time', 'duration_minutes', 'room']
-    list_filter = ['examination', 'exam_date', 'subject']
-    search_fields = ['examination__name', 'subject__name']
-
-@admin.register(StudentExamRegistration)
-class StudentExamRegistrationAdmin(admin.ModelAdmin):
-    list_display = ['student', 'examination', 'registration_date', 'is_registered', 'hall_ticket_number']
-    list_filter = ['examination', 'is_registered', 'registration_date']
-    search_fields = ['student__admission_number', 'student__first_name', 'hall_ticket_number']
+    list_display = ['exam', 'subject', 'exam_date', 'start_time', 'duration_minutes']
+    list_filter = ['exam', 'exam_date', 'subject']
+    search_fields = ['exam__exam_name', 'subject__name']
 
 @admin.register(ExamResult)
 class ExamResultAdmin(admin.ModelAdmin):
-    list_display = ['student', 'examination', 'subject', 'marks_obtained', 'max_marks', 'percentage', 'grade']
-    list_filter = ['examination', 'subject', 'grade']
+    list_display = ['student', 'exam_schedule', 'marks_obtained', 'max_marks', 'percentage', 'grade']
+    list_filter = ['exam_schedule__exam', 'exam_schedule__subject', 'grade']
     search_fields = ['student__admission_number', 'student__first_name']
 
 @admin.register(OnlineExam)
