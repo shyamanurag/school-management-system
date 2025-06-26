@@ -4,13 +4,13 @@ from django.core.validators import MinValueValidator, MaxValueValidator, RegexVa
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericRelation
-from core.models import TimeStampedModel, School, UUIDModel, AcademicYear, Attachment
+from core.models import TimeStampedModel, SchoolSettings, UUIDModel, AcademicYear, Attachment
 from decimal import Decimal
 import uuid
 
 class Department(TimeStampedModel):
     """School departments"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='departments')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='departments')
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=20)
     description = models.TextField(blank=True, null=True)
@@ -31,7 +31,7 @@ class Department(TimeStampedModel):
 
 class Designation(TimeStampedModel):
     """Employee designations/positions"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='designations')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='designations')
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='designations')
     
     title = models.CharField(max_length=100)
@@ -94,7 +94,7 @@ class Employee(UUIDModel, TimeStampedModel):
     ]
     
     # Basic Information
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='employees')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='employees')
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='employee_profile')
     
     # Employee Identity
@@ -266,7 +266,7 @@ class EmployeeDocument(UUIDModel, TimeStampedModel):
 
 class SalaryStructure(TimeStampedModel):
     """Salary structure templates"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='salary_structures')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='salary_structures')
     name = models.CharField(max_length=200)
     code = models.CharField(max_length=20)
     description = models.TextField(blank=True, null=True)
@@ -358,7 +358,7 @@ class EmployeeSalary(UUIDModel, TimeStampedModel):
 
 class PayrollMonth(TimeStampedModel):
     """Payroll processing months"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='payroll_months')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='payroll_months')
     month = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(12)])
     year = models.IntegerField()
     
@@ -473,7 +473,7 @@ class Payslip(UUIDModel, TimeStampedModel):
 
 class LeaveType(TimeStampedModel):
     """Leave types configuration"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='leave_types')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='leave_types')
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=20)
     description = models.TextField(blank=True, null=True)

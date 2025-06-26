@@ -4,7 +4,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator, RegexVa
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericRelation
-from core.models import TimeStampedModel, School, UUIDModel, AcademicYear, Attachment
+from core.models import TimeStampedModel, SchoolSettings, UUIDModel, AcademicYear, Attachment
 from students.models import Student
 from hr.models import Employee
 from decimal import Decimal

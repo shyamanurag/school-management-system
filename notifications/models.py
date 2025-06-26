@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
-from core.models import TimeStampedModel, School, UUIDModel
+from core.models import TimeStampedModel, SchoolSettings, UUIDModel
 from phonenumber_field.modelfields import PhoneNumberField
 
 class NotificationChannel(TimeStampedModel):
@@ -16,7 +16,7 @@ class NotificationChannel(TimeStampedModel):
         ('TELEGRAM', 'Telegram'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='notification_channels')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='notification_channels')
     name = models.CharField(max_length=100)
     channel_type = models.CharField(max_length=20, choices=CHANNEL_TYPES)
     configuration = models.JSONField(default=dict)  # API keys, endpoints, etc.
@@ -44,7 +44,7 @@ class NotificationTemplate(TimeStampedModel):
         ('CUSTOM', 'Custom'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='notification_templates')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='notification_templates')
     name = models.CharField(max_length=200)
     category = models.CharField(max_length=20, choices=TEMPLATE_CATEGORIES)
     channel = models.ForeignKey(NotificationChannel, on_delete=models.CASCADE, related_name='templates')
@@ -73,7 +73,7 @@ class Notification(UUIDModel, TimeStampedModel):
         ('CANCELLED', 'Cancelled'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='notifications')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='notifications')
     template = models.ForeignKey(NotificationTemplate, on_delete=models.SET_NULL, null=True, blank=True)
     sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='sent_notifications')
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_notifications')

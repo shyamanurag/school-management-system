@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericRelation
-from core.models import TimeStampedModel, School, UUIDModel, AcademicYear, Room, Attachment, Department
+from core.models import TimeStampedModel, SchoolSettings, UUIDModel, AcademicYear, Room, Attachment, Department
 from students.models import Student, SchoolClass, Section
 import uuid
 
@@ -17,7 +17,7 @@ class Subject(TimeStampedModel):
         ('VOCATIONAL', 'Vocational'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='subjects')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='subjects')
     name = models.CharField(max_length=200)
     code = models.CharField(max_length=20)
     description = models.TextField(blank=True, null=True)
@@ -88,7 +88,7 @@ class Exam(TimeStampedModel):
         ('SURPRISE', 'Surprise Test'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='exams')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='exams')
     name = models.CharField(max_length=200)
     exam_type = models.CharField(max_length=20, choices=EXAM_TYPES)
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='exams')
@@ -197,7 +197,7 @@ class StudentExamResult(UUIDModel, TimeStampedModel):
 
 class Grade(TimeStampedModel):
     """Grading system configuration"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='grades')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='grades')
     name = models.CharField(max_length=10)  # A+, A, B+, etc.
     min_percentage = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(100)])
     max_percentage = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(100)])
@@ -382,7 +382,7 @@ class Holiday(TimeStampedModel):
         ('OPTIONAL', 'Optional Holiday'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='holidays')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='holidays')
     name = models.CharField(max_length=200)
     date = models.DateField()
     end_date = models.DateField(blank=True, null=True)  # For multi-day holidays

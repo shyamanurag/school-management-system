@@ -4,7 +4,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator, RegexVa
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericRelation
-from core.models import TimeStampedModel, School, UUIDModel, AcademicYear, Attachment
+from core.models import TimeStampedModel, SchoolSettings, UUIDModel, AcademicYear, Attachment
 from students.models import Student
 from hr.models import Employee
 from decimal import Decimal
@@ -12,7 +12,7 @@ import uuid
 
 class TransportVendor(TimeStampedModel):
     """Transport service vendors/contractors"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='transport_vendors')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='transport_vendors')
     
     # Vendor details
     name = models.CharField(max_length=200)
@@ -74,7 +74,7 @@ class Vehicle(UUIDModel, TimeStampedModel):
         ('CONTRACTED', 'Contracted'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='vehicles')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='vehicles')
     vendor = models.ForeignKey(TransportVendor, on_delete=models.SET_NULL, null=True, blank=True, related_name='vehicles')
     
     # Vehicle identification
@@ -147,7 +147,7 @@ class Driver(UUIDModel, TimeStampedModel):
         ('VENDOR', 'Vendor Driver'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='drivers')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='drivers')
     vendor = models.ForeignKey(TransportVendor, on_delete=models.SET_NULL, null=True, blank=True, related_name='drivers')
     employee = models.OneToOneField(Employee, on_delete=models.SET_NULL, null=True, blank=True, related_name='driver_profile')
     
@@ -214,7 +214,7 @@ class Driver(UUIDModel, TimeStampedModel):
 
 class TransportRoute(UUIDModel, TimeStampedModel):
     """Transport routes"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='transport_routes')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='transport_routes')
     
     # Route details
     route_name = models.CharField(max_length=200)
@@ -597,7 +597,7 @@ class TransportReport(UUIDModel, TimeStampedModel):
         ('SAFETY_REPORT', 'Safety Report'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='transport_reports')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='transport_reports')
     report_type = models.CharField(max_length=30, choices=REPORT_TYPES)
     generated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='generated_transport_reports')
     

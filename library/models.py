@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.utils import timezone
 from datetime import timedelta
-from core.models import TimeStampedModel, School, UUIDModel, AcademicYear
+from core.models import TimeStampedModel, SchoolSettings, UUIDModel, AcademicYear
 from students.models import Student, SchoolClass
 from hr.models import Employee
 from decimal import Decimal

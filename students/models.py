@@ -4,12 +4,12 @@ from django.core.validators import MinValueValidator, MaxValueValidator, RegexVa
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericRelation
-from core.models import TimeStampedModel, School, UUIDModel, AcademicYear, Campus, Attachment
+from core.models import TimeStampedModel, SchoolSettings, UUIDModel, AcademicYear, Campus, Attachment
 import uuid
 
 class Category(TimeStampedModel):
     """Student categories (General, OBC, SC, ST, etc.) - Indian Education System"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='student_categories')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='student_categories')
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=20)
     description = models.TextField(blank=True, null=True)
@@ -33,7 +33,7 @@ class Category(TimeStampedModel):
 
 class SchoolClass(TimeStampedModel):
     """Enhanced Class model for Indian education system"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='classes')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='classes')
     name = models.CharField(max_length=50)  # "Class 1", "Class 10", "Pre-KG"
     code = models.CharField(max_length=10)  # "1", "10", "PKG"
     
@@ -73,7 +73,7 @@ class SchoolClass(TimeStampedModel):
 
 class Section(TimeStampedModel):
     """Class sections"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='sections')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='sections')
     school_class = models.ForeignKey(SchoolClass, on_delete=models.CASCADE, related_name='sections')
     name = models.CharField(max_length=10)  # "A", "B", "C"
     
@@ -131,7 +131,7 @@ class Student(UUIDModel, TimeStampedModel):
     ]
     
     # Basic Information
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='students')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='students')
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='student_profile')
     
     # Identity

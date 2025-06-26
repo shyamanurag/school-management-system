@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericRelation
-from core.models import TimeStampedModel, School, UUIDModel, AcademicYear, Attachment
+from core.models import TimeStampedModel, SchoolSettings, UUIDModel, AcademicYear, Attachment
 from students.models import Student, SchoolClass, Section
 from hr.models import Employee
 from decimal import Decimal
@@ -11,7 +11,7 @@ import uuid
 
 class Subject(TimeStampedModel):
     """Academic subjects"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='exam_subjects')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='exam_subjects')
     
     # Subject details
     name = models.CharField(max_length=200)
@@ -61,7 +61,7 @@ class Subject(TimeStampedModel):
 
 class ExamType(TimeStampedModel):
     """Types of examinations"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='exam_types')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='exam_types')
     
     # Exam type details
     name = models.CharField(max_length=100)
@@ -107,7 +107,7 @@ class ExamType(TimeStampedModel):
 
 class ExamSchedule(UUIDModel, TimeStampedModel):
     """Examination schedules"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='exam_schedules')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='exam_schedules')
     exam_type = models.ForeignKey(ExamType, on_delete=models.CASCADE, related_name='schedules')
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='exam_schedules')
     
@@ -215,7 +215,7 @@ class QuestionBank(UUIDModel, TimeStampedModel):
         ('VERY_HARD', 'Very Hard'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='question_bank')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='question_bank')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='questions')
     school_class = models.ForeignKey(SchoolClass, on_delete=models.CASCADE, related_name='questions')
     
@@ -430,7 +430,7 @@ class ExamResult(UUIDModel, TimeStampedModel):
 
 class GradingScheme(TimeStampedModel):
     """Grading schemes for different classes"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='grading_schemes')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='grading_schemes')
     name = models.CharField(max_length=100)
     applicable_classes = models.ManyToManyField(SchoolClass, related_name='grading_schemes')
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='grading_schemes')
@@ -500,7 +500,7 @@ class ExamReport(UUIDModel, TimeStampedModel):
         ('EXAM_STATISTICS', 'Exam Statistics'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='exam_reports')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='exam_reports')
     exam_schedule = models.ForeignKey(ExamSchedule, on_delete=models.CASCADE, related_name='reports')
     report_type = models.CharField(max_length=30, choices=REPORT_TYPES)
     generated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='generated_exam_reports')

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User, AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
-from core.models import TimeStampedModel, School, UUIDModel
+from core.models import TimeStampedModel, SchoolSettings, UUIDModel
 import uuid
 
 class UserProfile(TimeStampedModel):
@@ -23,7 +23,7 @@ class UserProfile(TimeStampedModel):
     ]
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='user_profiles')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='user_profiles')
     employee_id = models.CharField(max_length=50, blank=True, null=True)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
@@ -114,7 +114,7 @@ class Role(TimeStampedModel):
         ('CUSTOM', 'Custom Role'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='roles')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='roles')
     name = models.CharField(max_length=100)
     role_type = models.CharField(max_length=20, choices=ROLE_TYPES)
     description = models.TextField(blank=True, null=True)
@@ -218,7 +218,7 @@ class SecurityEvent(UUIDModel, TimeStampedModel):
     ]
     
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='security_events')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='security_events')
     event_type = models.CharField(max_length=30, choices=EVENT_TYPES)
     severity = models.CharField(max_length=10, choices=SEVERITY_LEVELS, default='LOW')
     ip_address = models.GenericIPAddressField()

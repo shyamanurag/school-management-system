@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericRelation
-from core.models import TimeStampedModel, School, UUIDModel, AcademicYear, Attachment
+from core.models import TimeStampedModel, SchoolSettings, UUIDModel, AcademicYear, Attachment
 from hr.models import Employee
 from decimal import Decimal
 import uuid

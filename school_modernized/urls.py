@@ -70,6 +70,9 @@ urlpatterns = [
     
     # === API ENDPOINTS ===
     
+    # Academic Management API (Ultra-Professional)
+    path('api/academics/', include('academics.urls')),
+    
     # Student Management API
     path('api/students/', include('students.api')),
     
@@ -90,6 +93,18 @@ urlpatterns = [
     
     # Communication API
     path('api/communication/', include('communication.api')),
+    
+    # HR Management API (Enterprise HRMS)
+    path('api/hr/', include('hr.urls')),
+    
+    # Examinations API (Online Exam Platform)
+    path('api/examinations/', include('examinations.urls')),
+    
+    # Admissions API (Complete Admission Management)
+    path('api/admissions/', include('admissions.urls')),
+    
+    # AI Analytics API (Machine Learning Insights)
+    path('api/analytics/', include('analytics.api')),
 ]
 
 # Serve media files in development

@@ -3,13 +3,13 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from decimal import Decimal
-from core.models import TimeStampedModel, School, UUIDModel, AcademicYear
+from core.models import TimeStampedModel, SchoolSettings, UUIDModel, AcademicYear
 from students.models import Student, SchoolClass, Section, Category
 import uuid
 
 class FeeCategory(TimeStampedModel):
     """Fee categories (Tuition, Transport, etc.) for Indian schools"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='fee_categories')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='fee_categories')
     name = models.CharField(max_length=200)
     code = models.CharField(max_length=20)
     description = models.TextField(blank=True, null=True)
@@ -44,7 +44,7 @@ class FeeCategory(TimeStampedModel):
 
 class FeeStructure(TimeStampedModel):
     """Fee structure for different classes - Indian education system"""
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='fee_structures')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='fee_structures')
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='fee_structures')
     school_class = models.ForeignKey(SchoolClass, on_delete=models.CASCADE, related_name='fee_structures')
     student_category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='fee_structures')
@@ -125,7 +125,7 @@ class PaymentMethod(TimeStampedModel):
         ('GPAY', 'Google Pay'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='payment_methods')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='payment_methods')
     name = models.CharField(max_length=100)
     payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPES)
     
@@ -352,7 +352,7 @@ class FeeDiscount(TimeStampedModel):
         ('WAIVER', 'Complete Waiver'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='fee_discounts')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='fee_discounts')
     name = models.CharField(max_length=200)
     code = models.CharField(max_length=20)
     description = models.TextField(blank=True, null=True)
@@ -443,7 +443,7 @@ class FeeReport(UUIDModel, TimeStampedModel):
         ('CATEGORY_WISE', 'Category-wise Collection'),
     ]
     
-    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='fee_reports')
+    school = models.ForeignKey(SchoolSettings, on_delete=models.CASCADE, related_name='fee_reports')
     report_type = models.CharField(max_length=20, choices=REPORT_TYPES)
     generated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='generated_fee_reports')
     
