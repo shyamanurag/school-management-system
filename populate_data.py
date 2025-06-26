@@ -12,7 +12,7 @@ from decimal import Decimal
 import random
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'school_modernized.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'school_modernized.settings.production')
 django.setup()
 
 from django.contrib.auth.models import User

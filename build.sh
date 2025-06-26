@@ -15,9 +15,9 @@ timeout 300 python manage.py migrate --noinput || echo "⚠️ Migration timeout
 echo "🎨 Collecting static files..."
 python manage.py collectstatic --noinput --clear
 
-# Populate sample data if database is empty
-echo "📊 Populating sample data..."
-timeout 300 python populate_production_data.py || echo "⚠️ Sample data population failed or skipped"
+# Populate comprehensive sample data if database is empty
+echo "📊 Populating comprehensive sample data..."
+timeout 300 python populate_data.py || echo "⚠️ Sample data population failed or skipped"
 
 # Create superuser if needed
 echo "👤 Creating admin user..."
