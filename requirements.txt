@@ -19,13 +19,72 @@ Pillow==10.4.0
 # Form and Model Fields
 django-phonenumber-field==7.3.0
 
-# Data Processing (for migration scripts)
+# Data Processing (for migration scripts and analytics)
 pandas==2.2.2
 numpy==1.26.4
 
-# HTTP Requests (for testing scripts)
+# HTTP Requests (for API integrations)
 requests==2.32.3
+
+# AI/ML Dependencies for Analytics Platform
+scikit-learn==1.5.1
+scipy==1.13.1
+matplotlib==3.9.1
+seaborn==0.13.2
+
+# Advanced Analytics and Visualization
+plotly==5.22.0
+dash==2.17.1
+
+# Time Series Analysis
+statsmodels==0.14.2
+
+# Natural Language Processing
+nltk==3.8.1
+textblob==0.17.1
+
+# Caching and Performance
+redis==5.0.7
+django-redis==5.4.0
+
+# Background Tasks
+celery==5.4.0
+
+# API Documentation
+django-rest-swagger==2.2.0
+drf-yasg==1.21.7
+
+# Security Enhancements
+django-cors-headers==4.4.0
+django-ratelimit==4.1.0
+cryptography==42.0.8
+
+# File Processing
+openpyxl==3.1.5
+xlsxwriter==3.2.0
+reportlab==4.2.2
+
+# Image Processing
+opencv-python==4.10.0.84
+
+# Geospatial Support (for transport module)
+geopy==2.4.1
+folium==0.17.0
 
 # Production Server
 gunicorn==22.0.0
-whitenoise==6.7.0 
+whitenoise==6.7.0
+
+# Development and Testing
+coverage==7.6.0
+factory-boy==3.3.0
+faker==26.0.0
+
+# API Testing
+pytest==8.3.2
+pytest-django==4.8.0
+
+# Code Quality
+black==24.4.2
+isort==5.13.2
+flake8==7.1.0 
