@@ -2,10 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Count
-from core.models import SchoolSettings, AcademicYear, Campus, Department, Building, Room
 
 def landing_page(request):
     """Landing page with school management dashboard"""
+    # Import models locally to avoid module-level import failures
+    from core.models import SchoolSettings, AcademicYear, Campus, Department, Building, Room
+    
     # Get school settings
     school_settings = SchoolSettings.objects.first()
     
@@ -21,6 +23,8 @@ def landing_page(request):
 
 def school_settings_view(request):
     """School settings view"""
+    from core.models import SchoolSettings
+    
     school_settings = SchoolSettings.objects.first()
     context = {
         'school_settings': school_settings,
@@ -32,6 +36,8 @@ def school_settings_view(request):
 
 def departments_list(request):
     """List all departments"""
+    from core.models import Department
+    
     departments = Department.objects.filter(is_active=True).order_by('name')
     context = {
         'departments': departments,
@@ -41,6 +47,8 @@ def departments_list(request):
 
 def campuses_list(request):
     """List all campuses"""
+    from core.models import Campus
+    
     campuses = Campus.objects.filter(is_active=True).order_by('name')
     context = {
         'campuses': campuses,
@@ -50,6 +58,8 @@ def campuses_list(request):
 
 def campus_detail(request, campus_id):
     """Campus detail view"""
+    from core.models import Campus, Room
+    
     campus = get_object_or_404(Campus, id=campus_id, is_active=True)
     
     context = {
@@ -62,6 +72,8 @@ def campus_detail(request, campus_id):
 
 def rooms_list(request):
     """List all rooms"""
+    from core.models import Room
+    
     rooms = Room.objects.filter(is_active=True).select_related('building__campus').order_by('building__campus__name', 'building__name', 'room_number')
     context = {
         'rooms': rooms,
@@ -71,6 +83,8 @@ def rooms_list(request):
 
 def academic_years_list(request):
     """List all academic years"""
+    from core.models import AcademicYear
+    
     academic_years = AcademicYear.objects.filter(is_active=True).order_by('-start_date')
     context = {
         'academic_years': academic_years,
@@ -78,11 +92,31 @@ def academic_years_list(request):
     }
     return render(request, 'academic_years/list.html', context)
 
-# Error handlers
+# Error handlers - Keep these simple and independent of models
 def handler404(request, exception):
-    """Custom 404 error handler"""
-    return render(request, 'landing.html', {'error': 'Page not found'}, status=404)
+    """Custom 404 error handler - Simple version without model dependencies"""
+    from django.shortcuts import render
+    return render(request, 'landing.html', {
+        'error': 'Page not found',
+        'error_code': '404',
+        'school_settings': None,
+        'total_campuses': 0,
+        'total_departments': 0,
+        'total_rooms': 0,
+        'total_academic_years': 0,
+        'current_academic_year': None,
+    }, status=404)
 
 def handler500(request):
-    """Custom 500 error handler"""
-    return render(request, 'landing.html', {'error': 'Server error'}, status=500)
+    """Custom 500 error handler - Simple version without model dependencies"""
+    from django.shortcuts import render
+    return render(request, 'landing.html', {
+        'error': 'Server error. Please try again later.',
+        'error_code': '500',
+        'school_settings': None,
+        'total_campuses': 0,
+        'total_departments': 0,
+        'total_rooms': 0,
+        'total_academic_years': 0,
+        'current_academic_year': None,
+    }, status=500)

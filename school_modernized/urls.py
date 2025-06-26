@@ -41,8 +41,7 @@ urlpatterns = [
     
     # === ULTRA-PROFESSIONAL MODULES - FULLY ENABLED ===
     
-    # Academic Management (Ultra-Professional)
-    path('academics/', include('academics.urls')),
+    # Academic Management (Ultra-Professional) - API Only Module
     
     # Student Information System (Comprehensive)
     path('students/', include('students.urls')),
@@ -119,3 +118,7 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# Custom error handlers
+handler404 = 'school_modernized.views.handler404'
+handler500 = 'school_modernized.views.handler500'
