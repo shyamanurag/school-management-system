@@ -1,5 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from . import views
 from .api import (
     InventoryCategoryViewSet,
     SupplierViewSet,
@@ -14,6 +15,7 @@ from .api import (
     InventoryReportViewSet
 )
 
+# API Router
 router = DefaultRouter()
 router.register(r'categories', InventoryCategoryViewSet, basename='inventorycategory')
 router.register(r'suppliers', SupplierViewSet, basename='supplier')
@@ -28,5 +30,15 @@ router.register(r'audits', InventoryAuditViewSet, basename='inventoryaudit')
 router.register(r'reports', InventoryReportViewSet, basename='inventoryreport')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    # === WEB INTERFACE URLS ===
+    path('', views.ItemListView.as_view(), name='inventory-dashboard'),
+    path('items/', views.ItemListView.as_view(), name='items-list'),
+    
+    # Class-based views for CRUD operations
+    path('items/create/', views.ItemCreateView.as_view(), name='item-create'),
+    path('items/<int:pk>/update/', views.ItemUpdateView.as_view(), name='item-update'),
+    path('items/<int:pk>/delete/', views.ItemDeleteView.as_view(), name='item-delete'),
+    
+    # === API URLS ===
+    path('api/', include(router.urls)),
 ] 

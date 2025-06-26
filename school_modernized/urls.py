@@ -25,6 +25,10 @@ urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
     
+    # Authentication (Demo)
+    path('login/', views.simple_login, name='simple_login'),
+    path('logout/', views.simple_logout, name='simple_logout'),
+    
     # Landing page
     path('', views.landing_page, name='landing'),
     

@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.db.models import Count
 
@@ -18,8 +19,52 @@ def landing_page(request):
         'total_rooms': Room.objects.filter(is_active=True).count(),
         'total_academic_years': AcademicYear.objects.filter(is_active=True).count(),
         'current_academic_year': AcademicYear.objects.filter(is_current=True).first(),
+        'modules': [
+            {'name': 'Students', 'url': '/students/', 'icon': 'fas fa-users', 'description': 'Student Information System'},
+            {'name': 'Fees', 'url': '/fees/', 'icon': 'fas fa-money-bill-wave', 'description': 'Fee Management'},
+            {'name': 'Transport', 'url': '/transport/', 'icon': 'fas fa-bus', 'description': 'Fleet & GPS Tracking'},
+            {'name': 'Library', 'url': '/library/', 'icon': 'fas fa-book', 'description': 'Digital Library Platform'},
+            {'name': 'Hostel', 'url': '/hostel/', 'icon': 'fas fa-bed', 'description': 'Residential Management'},
+            {'name': 'Inventory', 'url': '/inventory/', 'icon': 'fas fa-boxes', 'description': 'Asset Management'},
+            {'name': 'Communication', 'url': '/communication/', 'icon': 'fas fa-comments', 'description': 'Multi-Channel Communication'},
+            {'name': 'Analytics', 'url': '/analytics/', 'icon': 'fas fa-chart-bar', 'description': 'AI Analytics Dashboard'},
+            {'name': 'Examinations', 'url': '/examinations/', 'icon': 'fas fa-clipboard-check', 'description': 'Online Exam Platform'},
+            {'name': 'HR', 'url': '/hr/', 'icon': 'fas fa-user-tie', 'description': 'Enterprise HRMS'},
+            {'name': 'Admin Panel', 'url': '/admin/', 'icon': 'fas fa-cog', 'description': 'System Administration'},
+        ]
     }
     return render(request, 'landing.html', context)
+
+def simple_login(request):
+    """Simple login for demo purposes"""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        # For demo purposes, create a simple authentication
+        if username == 'demo' and password == 'demo123':
+            # Create or get a demo user
+            from django.contrib.auth.models import User
+            user, created = User.objects.get_or_create(username='demo')
+            if created:
+                user.set_password('demo123')
+                user.is_staff = True
+                user.is_superuser = True
+                user.save()
+            
+            login(request, user)
+            messages.success(request, 'Welcome to the School Management System!')
+            return redirect('landing')
+        else:
+            messages.error(request, 'Invalid credentials. Use username: demo, password: demo123')
+    
+    return render(request, 'simple_login.html')
+
+def simple_logout(request):
+    """Simple logout"""
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('landing')
 
 def school_settings_view(request):
     """School settings view"""
@@ -31,8 +76,6 @@ def school_settings_view(request):
         'page_title': 'School Settings'
     }
     return render(request, 'school/settings.html', context)
-
-
 
 def departments_list(request):
     """List all departments"""
