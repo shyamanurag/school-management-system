@@ -48,6 +48,35 @@ urlpatterns = [
     path('transport/', include('transport.urls')),
     path('inventory/', include('inventory.urls')),
     
+    # RESTORED ULTRA-PROFESSIONAL MODULES
+    # Teachers/HR Module - Complete HRMS
+    path('teachers/', include('core.hr_urls', namespace='hr')),
+    path('hr/', include('core.hr_urls', namespace='hr-main')),
+    
+    # Examinations Module - Complete Online Exam Platform  
+    path('exams/', lambda request: render(request, 'examinations/exam_dashboard.html')),
+    path('examinations/', lambda request: render(request, 'examinations/exam_dashboard.html')),
+    
+    # Analytics & Reports - AI Analytics Platform
+    path('ai-analytics/', lambda request: render(request, 'analytics/analytics_dashboard.html')),
+    path('analytics/', lambda request: render(request, 'analytics/analytics_dashboard.html')),
+    path('reports/', lambda request: render(request, 'analytics/reports_dashboard.html')),
+    
+    # Infrastructure Management (from core models)
+    path('infrastructure/', lambda request: render(request, 'core/infrastructure_dashboard.html')),
+    
+    # Parent Portal (notifications + communication)
+    path('parent-portal/', lambda request: render(request, 'notifications/parent_portal.html')),
+    
+    # Virtual Classrooms (communication + analytics)
+    path('virtual-classrooms/', lambda request: render(request, 'communication/virtual_classrooms.html')),
+    
+    # Mobile App Interface
+    path('mobile-app/', lambda request: render(request, 'core/mobile_app_dashboard.html')),
+    
+    # Biometric Integration
+    path('biometric/', lambda request: render(request, 'core/biometric_dashboard.html')),
+    
     # API endpoints (already included in individual apps)
     path('api/', include('students.urls')),
     path('api/', include('fees.urls')),
@@ -56,17 +85,6 @@ urlpatterns = [
     path('api/', include('inventory.urls')),
     path('api/', include('transport.urls')),
     path('api/', include('communication.urls')),
-    
-    # Placeholder routes for modules under development
-    path('teachers/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'Teachers'})),
-    path('exams/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'Exams'})),
-    path('infrastructure/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'Infrastructure'})),
-    path('ai-analytics/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'AI Analytics'})), 
-    path('parent-portal/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'Parent Portal'})),
-    path('virtual-classrooms/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'Virtual Classrooms'})),
-    path('reports/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'Reports'})),
-    path('mobile-app/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'Mobile App'})),
-    path('biometric/', lambda request: render(request, 'modules/coming_soon.html', {'module': 'Biometric'})),
 ]
 
 # Add media files serving in development
