@@ -15,10 +15,25 @@ echo "DEBUG: ${DEBUG:-NOT SET}"
 echo "SECRET_KEY: ${SECRET_KEY:+SET}"
 echo "ALLOWED_HOSTS: ${ALLOWED_HOSTS:-NOT SET}"
 
+# Additional debugging
+echo "=== All Environment Variables ==="
+env | grep -E "(DATABASE|DJANGO|DEBUG|SECRET|ALLOWED)" || echo "No matching env vars found"
+
+# Test alternative environment variable access methods
+echo "=== Alternative Access Methods ==="
+python -c "import os; print(f'Python DATABASE_URL: {os.environ.get(\"DATABASE_URL\", \"NOT SET\")}')"
+
 # Ensure PORT is set
 if [ -z "$PORT" ]; then
     echo "ERROR: PORT environment variable not set"
     exit 1
+fi
+
+# TEMPORARY FIX: Set DATABASE_URL manually if not detected
+if [ -z "$DATABASE_URL" ]; then
+    echo "⚠️  DATABASE_URL not found in environment, setting manually..."
+    export DATABASE_URL="postgresql://school_admin:tyNNQs0QV34EA9ncxvLrUEyFoQmXkOhm@dpg-d1ejeveuk2gs73aq70gg-a/school_system_xf2c"
+    echo "✅ DATABASE_URL set manually: ${DATABASE_URL:0:30}..."
 fi
 
 # Run database migrations if needed
