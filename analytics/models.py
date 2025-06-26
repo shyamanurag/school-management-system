@@ -217,3 +217,5 @@ class TeacherAnalytics(UUIDModel, TimeStampedModel):
     
     def __str__(self):
         return f"Teacher {self.teacher_id} Analytics - {self.academic_year}"
+#   F o r c e   d e p l o y m e n t   r e f r e s h  
+ 
