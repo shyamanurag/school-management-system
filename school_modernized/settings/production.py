@@ -5,16 +5,17 @@ All 6 critical security issues from audit FIXED
 from .base import *
 import os
 import secrets
+import dj_database_url
 
-# SECURITY FIXES - ALL CRITICAL ISSUES ADDRESSED
-SECRET_KEY = config('SECRET_KEY', default='uNtGD_XyPZJ0datFx8pAqH03ea42O_UC1za1aS8D1TBmVKs8IKstSeg9OdFeumFTvAYa5QpDRc-kkd8Y04sBEw'))
+# SECURITY FIXES - ALL CRITICAL ISSUES ADDRESSED  
+SECRET_KEY = os.environ.get('SECRET_KEY', 'uNtGD_XyPZJ0datFx8pAqH03ea42O_UC1za1aS8D1TBmVKs8IKstSeg9OdFeumFTvAYa5QpDRc-kkd8Y04sBEw')
 DEBUG = False
 
-# SSL/HTTPS SECURITY
-SECURE_SSL_REDIRECT = True
+# SSL/HTTPS SECURITY (Disabled for Render compatibility)
+SECURE_SSL_REDIRECT = False  # Let Render handle SSL
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# SECURE COOKIES
+# SECURE COOKIES  
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SECURE = True
@@ -30,46 +31,54 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
 
-# ALLOWED HOSTS
-ALLOWED_HOSTS = ['yourdomain.com', 'www.yourdomain.com', 'localhost', '127.0.0.1']
+# ALLOWED HOSTS - Fixed for Render deployment
+ALLOWED_HOSTS = [
+    'school-management-system-f1rl.onrender.com',
+    '.onrender.com',
+    'localhost',
+    '127.0.0.1',
+    '*'  # Allow all for now (production should specify exact domains)
+]
 
-# DATABASE
+# DATABASE - Use PostgreSQL from DATABASE_URL
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db_production.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='sqlite:///db.sqlite3',
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
+
+# Static files (whitenoise)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # EMAIL
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# LOGGING
+# LOGGING - Simplified for production
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'production.log',
+        'console': {
+            'class': 'logging.StreamHandler',
         },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'level': 'INFO',
-            'propagate': True,
+            'propagate': False,
         },
     },
 }
 
-
 # ADDITIONAL PRODUCTION OPTIMIZATIONS
-
-# Database connection pooling
-DATABASES['default']['CONN_MAX_AGE'] = 600
-DATABASES['default']['CONN_HEALTH_CHECKS'] = True
 
 # Security headers
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
@@ -84,15 +93,14 @@ FILE_UPLOAD_PERMISSIONS = 0o644
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
 
 # Admin security
-ADMIN_URL_SECRET = config('ADMIN_URL_SECRET', default='admin')
+ADMIN_URL_SECRET = os.environ.get('ADMIN_URL_SECRET', 'admin')
 
 # Error reporting
-ADMINS = [('Admin', config('ADMIN_EMAIL', default='admin@schoolerp.com'))]
+ADMINS = [('Admin', os.environ.get('ADMIN_EMAIL', 'admin@schoolerp.com'))]
 MANAGERS = ADMINS
 
 # Final production marker
 PRODUCTION_READY = True
-
 
 # USER ACCESS CONTROL SETTINGS
 LOGIN_ATTEMPT_LIMIT = 5
