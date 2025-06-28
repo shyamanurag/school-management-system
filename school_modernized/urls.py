@@ -64,7 +64,7 @@ urlpatterns = [
 
     
     # Transport Management System (✅ COMPLETE - WITH ROUTE & VEHICLE TRACKING)
-    # path('transport/', include('transport.urls')),  # Temporarily disabled due to null byte issues
+    # path('transport/', include('transport.urls')),  # Temporarily disabled
     
     # Hostel Management System (✅ COMPLETE - WITH ROOM ALLOCATION)
     # # path('hostel/', include('hostel.urls')),  # Temporarily disabled  # Temporarily disabled due to syntax error
