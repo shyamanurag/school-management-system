@@ -1,89 +1,13 @@
-"""
-URL configuration for school_modernized project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import TemplateView
-from . import views
 
 urlpatterns = [
-    # Admin
     path('admin/', admin.site.urls),
-    
-    # Authentication (Demo)
-    path('login/', views.simple_login, name='simple_login'),
-    path('logout/', views.simple_logout, name='simple_logout'),
-    
-    # Landing page
-    path('', views.landing_page, name='landing'),
-    
-    # School settings
-    path('school-settings/', views.school_settings_view, name='school_settings'),
-    path('departments/', views.departments_list, name='departments_list'),
-    path('campuses/', views.campuses_list, name='campuses_list'),
-    path('campuses/<int:campus_id>/', views.campus_detail, name='campus_detail'),
-    path('rooms/', views.rooms_list, name='rooms_list'),
-    path('academic-years/', views.academic_years_list, name='academic_years_list'),
-    
-    # Core application (Dashboard, Settings, etc.)
-    path('dashboard/', include('core.urls')),
-    
-    # === NUCLEAR OPTION COMPLETE: ALL PROFESSIONAL MODULES REBUILT ===
-    
-    # Student Information System (✅ COMPLETE - 1,017 STUDENTS)
-    path('students/', include('students.urls')),
-    
-    # Fee Management System (✅ COMPLETE - 6,159 PAYMENTS)
-    path('fees/', include('fees.urls')),
-    
-    # Examinations System (✅ COMPLETE - 14,298 EXAM RESULTS)
-    path('examinations/', include('examinations.urls')),
-    
-    # Academics System (✅ COMPLETE - 20,214 ATTENDANCE RECORDS)
-    path('academics/', include('academics.urls')),
-    
-    # Library Management System (✅ COMPLETE - WITH PROFESSIONAL INTERFACE)
-    path('library/', include('library.urls')),
-    
-    # Communication System (✅ ENHANCED - PROFESSIONAL COMMUNICATION PLATFORM)
-
-    
-    # Transport Management System (✅ COMPLETE - WITH ROUTE & VEHICLE TRACKING)
-    # path('transport/', include('transport.urls')),  # Temporarily disabled
-    
-    # Hostel Management System (✅ COMPLETE - WITH ROOM ALLOCATION)
-    # # path('hostel/', include('hostel.urls')),  # Temporarily disabled  # Temporarily disabled due to syntax error
-    
-    # Inventory Management System (✅ COMPLETE - WITH STOCK TRACKING)
-    path('inventory/', include('inventory.urls')),
-    
-    # HR Management System (✅ COMPLETE - ENTERPRISE-GRADE HR PLATFORM)
-    # path('hr/', include('hr.urls')),  # Temporarily disabled
-    
-    # Analytics Dashboard (✅ COMPLETE - AI-POWERED ANALYTICS PLATFORM)
-    # path('analytics/', include('analytics.urls')),  # Temporarily disabled
+    path('', include('core.urls')),
 ]
 
-# Serve media files in development
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-# Custom error handlers - TEMPORARILY DISABLED FOR TESTING
-# handler404 = 'school_modernized.views.handler404'
-# handler500 = 'school_modernized.views.handler500'
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

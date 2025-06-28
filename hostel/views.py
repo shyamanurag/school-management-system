@@ -756,8 +756,8 @@ def hostel_analytics_api(request):
         month_end = (month_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
         
         occupants = HostelStudent.objects.filter(
-            admission_date__lte=month_end,
-            Q(checkout_date__gte=month_start) | Q(checkout_date__isnull=True)
+            Q(checkout_date__gte=month_start) | Q(checkout_date__isnull=True),
+            admission_date__lte=month_end
         ).count()
         
         capacity = Room.objects.aggregate(total=Sum('capacity'))['total'] or 0
@@ -865,3 +865,4 @@ def export_hostel_data_csv(request):
             ])
     
     return response
+

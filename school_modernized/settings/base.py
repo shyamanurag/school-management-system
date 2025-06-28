@@ -40,7 +40,7 @@ LOCAL_APPS = [
     'hostel',
     'transport',
     'inventory',
-    # 'communication',  # Temporarily disabled due to model conflicts
+    # 'communication',  # Temporarily disabled - fixing conflicts
     'analytics',
     'notifications',
     'admissions',

@@ -753,3 +753,31 @@ def api_global_search(request):
 
 def api_system_health(request):
     return JsonResponse({'status': 'success', 'message': 'API endpoint coming soon'})
+
+# Additional core views for production
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.contrib import messages
+
+def custom_404(request, exception):
+    """Custom 404 error page"""
+    return render(request, '404.html', status=404)
+
+def custom_500(request):
+    """Custom 500 error page"""  
+    return render(request, '500.html', status=500)
+
+def landing_page(request):
+    """Landing page for non-authenticated users"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return render(request, 'landing.html')
+
+def logout_view(request):
+    """Logout view"""
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('login')

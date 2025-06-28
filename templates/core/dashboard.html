@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ page_title }} - School ERP</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div style="padding: 20px;">
+        <header style="background: #007bff; color: white; padding: 15px; margin: -20px -20px 20px -20px;">
+            <h1> School ERP Dashboard</h1>
+            <p>Welcome, {{ user.first_name|default:user.username }}!</p>
+        </header>
+        
+        {% if error %}
+            <div style="background: #f8d7da; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                <strong>Error:</strong> {{ error }}
+            </div>
+        {% endif %}
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                <h3> Students</h3>
+                <p style="font-size: 24px; color: #007bff;">{{ stats.total_students|default:0 }}</p>
+            </div>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                <h3> Teachers</h3>
+                <p style="font-size: 24px; color: #28a745;">{{ stats.total_teachers|default:0 }}</p>
+            </div>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                <h3> Users</h3>
+                <p style="font-size: 24px; color: #17a2b8;">{{ stats.total_users|default:0 }}</p>
+            </div>
+        </div>
+        
+        <div style="background: #e9ecef; padding: 20px; border-radius: 10px; margin: 20px 0;">
+            <h3> System Status</h3>
+            <p><strong>Status:</strong> <span style="color: #28a745;"> Production Ready</span></p>
+            <p><strong>Version:</strong> Django School ERP v1.0</p>
+            {% if school_settings %}
+                <p><strong>School:</strong> {{ school_settings.name }}</p>
+            {% endif %}
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/admin/" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px; margin: 5px;">Admin Panel</a>
+            <a href="/logout/" style="padding: 10px 20px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px; margin: 5px;">Logout</a>
+        </div>
+    </div>
+</body>
+</html>
