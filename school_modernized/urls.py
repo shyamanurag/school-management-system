@@ -70,7 +70,7 @@ urlpatterns = [
     # # path('hostel/', include('hostel.urls')),  # Temporarily disabled  # Temporarily disabled due to syntax error
     
     # Inventory Management System (✅ COMPLETE - WITH STOCK TRACKING)
-    # path('inventory/', include('inventory.urls')),  # Temporarily disabled
+    path('inventory/', include('inventory.urls')),
     
     # HR Management System (✅ COMPLETE - ENTERPRISE-GRADE HR PLATFORM)
     # path('hr/', include('hr.urls')),  # Temporarily disabled
