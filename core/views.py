@@ -48,8 +48,11 @@ def safe_model_aggregate(model_class, aggregate_field, aggregate_func=Sum, filte
 def dashboard(request):
     """ULTRA-PROFESSIONAL dashboard with comprehensive real-time statistics and analytics"""
     try:
-        # Core Statistics with error handling
+        # Core Statistics with error handling - Fixed to match template expectations
         stats = {
+            'total_students': safe_model_count(Student),
+            'total_teachers': safe_model_count(Teacher),
+            'total_users': safe_model_count(Student) + safe_model_count(Teacher),
             'students': safe_model_count(Student),
             'teachers': safe_model_count(Teacher),
             'grades': safe_model_count(Grade),
@@ -184,9 +187,17 @@ def dashboard(request):
         # Professional error handling with fallback
         messages.error(request, f"Dashboard initialization error: {str(e)}")
         
-        # Fallback context with basic information
+        # Fallback context with basic information - Fixed to match template expectations
         fallback_context = {
-            'stats': {'students': 0, 'teachers': 0, 'grades': 0, 'subjects': 0},
+            'stats': {
+                'total_students': 0, 
+                'total_teachers': 0, 
+                'total_users': 0,
+                'students': 0, 
+                'teachers': 0, 
+                'grades': 0, 
+                'subjects': 0
+            },
             'user': request.user,
             'app_name': 'Ultra-Professional Educational ERP Platform',
             'version': '1.0 Production Ready',
@@ -225,7 +236,7 @@ def user_login(request):
         else:
             messages.error(request, "Please provide both username and password.")
     
-    return render(request, 'core/login.html')
+    return render(request, 'simple_login.html')
 
 @login_required
 def user_logout(request):
