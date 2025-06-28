@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css" rel="stylesheet">
+<style>
+    .hr-dashboard .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        color: white;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        transition: transform 0.3s ease;
+    }
+    .hr-dashboard .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .hr-dashboard .stat-card.payroll {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+    .hr-dashboard .stat-card.leaves {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    }
+    .hr-dashboard .stat-card.training {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    }
+    .hr-dashboard .metric-icon {
+        font-size: 3rem;
+        opacity: 0.7;
+        float: right;
+    }
+    .hr-dashboard .recent-activity {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .hr-dashboard .chart-container {
+        position: relative;
+        height: 400px;
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hr-dashboard">
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h3 mb-0 text-gray-800">{{ page_title }}</h1>
+                        <p class="text-muted">Manage your human resources with enterprise-grade tools</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'hr:employee-create' %}" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Add Employee
+                        </a>
+                        <a href="{% url 'hr:analytics' %}" class="btn btn-info">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a href="{% url 'hr:export-employees' %}" class="btn btn-success">
+                            <i class="fas fa-download"></i> Export
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics Row -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <div class="h4 mb-0 font-weight-bold">{{ total_employees }}</div>
+                        <div class="small">Active Employees</div>
+                        <div class="mt-2">
+                            <span class="badge badge-light">+{{ new_hires_month }} this month</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stat-card payroll">
+                    <div class="metric-icon">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div>
+                        <div class="h4 mb-0 font-weight-bold">₹{{ total_payroll_cost|floatformat:0 }}</div>
+                        <div class="small">Monthly Payroll</div>
+                        <div class="mt-2">
+                            <span class="badge badge-light">{{ pending_payroll }} pending</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stat-card leaves">
+                    <div class="metric-icon">
+                        <i class="fas fa-calendar-times"></i>
+                    </div>
+                    <div>
+                        <div class="h4 mb-0 font-weight-bold">{{ pending_leave_requests }}</div>
+                        <div class="small">Pending Leave Requests</div>
+                        <div class="mt-2">
+                            <span class="badge badge-light">{{ approved_leaves_month }} approved</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stat-card training">
+                    <div class="metric-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <div class="h4 mb-0 font-weight-bold">{{ active_training_programs }}</div>
+                        <div class="small">Active Training Programs</div>
+                        <div class="mt-2">
+                            <span class="badge badge-light">{{ employees_in_training }} enrolled</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Analytics Row -->
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <div class="chart-container">
+                    <h5 class="mb-3">Monthly Hiring Trends</h5>
+                    <canvas id="hiringChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-container">
+                    <h5 class="mb-3">Department Distribution</h5>
+                    <canvas id="departmentChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities and Department Stats -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="recent-activity">
+                    <h5 class="mb-3">Recent Leave Requests</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Leave Type</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leave in recent_leave_requests %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ leave.employee.full_name }}</strong><br>
+                                        <small class="text-muted">{{ leave.employee.employee_id }}</small>
+                                    </td>
+                                    <td>{{ leave.leave_type.name }}</td>
+                                    <td>
+                                        {{ leave.start_date|date:"M d" }} - {{ leave.end_date|date:"M d" }}<br>
+                                        <small class="text-muted">{{ leave.total_days }} days</small>
+                                    </td>
+                                    <td>
+                                        {% if leave.status == 'PENDING' %}
+                                            <span class="badge badge-warning">Pending</span>
+                                        {% elif leave.status == 'APPROVED' %}
+                                            <span class="badge badge-success">Approved</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if leave.status == 'PENDING' %}
+                                            <a href="{% url 'hr:approve-leave' leave.id %}" class="btn btn-sm btn-outline-primary">
+                                                Review
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="fas fa-clipboard-list fa-3x mb-3"></i>
+                                            <p>No recent leave requests</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'hr:leave-list' %}" class="btn btn-outline-primary">View All Leave Requests</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="recent-activity">
+                    <h5 class="mb-3">Department Statistics</h5>
+                    {% for dept in department_stats %}
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <div>
+                            <strong>{{ dept.department__name|default:"No Department" }}</strong><br>
+                            <small class="text-muted">Avg: ₹{{ dept.avg_salary|floatformat:0 }}</small>
+                        </div>
+                        <div class="text-right">
+                            <div class="h6 mb-0">{{ dept.employee_count }}</div>
+                            <small class="text-muted">employees</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center py-4">No department data available</p>
+                    {% endfor %}
+                </div>
+
+                <div class="recent-activity mt-4">
+                    <h5 class="mb-3">Recent Hires</h5>
+                    {% for employee in recent_hires %}
+                    <div class="d-flex align-items-center py-2">
+                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                            {{ employee.full_name|first }}
+                        </div>
+                        <div>
+                            <strong>{{ employee.full_name }}</strong><br>
+                            <small class="text-muted">{{ employee.designation }} - {{ employee.date_of_joining|date:"M d, Y" }}</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center py-4">No recent hires</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="recent-activity">
+                    <h5 class="mb-3">Quick Actions</h5>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'hr:employee-list' %}" class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-users mb-2"></i><br>
+                                Manage Employees
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'hr:payroll-list' %}" class="btn btn-outline-success btn-block">
+                                <i class="fas fa-money-check-alt mb-2"></i><br>
+                                Payroll Management
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'hr:performance-list' %}" class="btn btn-outline-info btn-block">
+                                <i class="fas fa-chart-line mb-2"></i><br>
+                                Performance Reviews
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'hr:training-list' %}" class="btn btn-outline-warning btn-block">
+                                <i class="fas fa-graduation-cap mb-2"></i><br>
+                                Training Programs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+// Monthly Hiring Trends Chart
+const hiringCtx = document.getElementById('hiringChart').getContext('2d');
+const hiringChart = new Chart(hiringCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [{
+            label: 'New Hires',
+            data: [
+                {% for month_data in monthly_hires %}
+                    {{ month_data.count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            borderColor: 'rgb(102, 126, 234)',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            tension: 0.1,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Department Distribution Chart
+const deptCtx = document.getElementById('departmentChart').getContext('2d');
+const departmentChart = new Chart(deptCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [
+            {% for dept in department_stats %}
+                '{{ dept.department__name|default:"No Department" }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for dept in department_stats %}
+                    {{ dept.employee_count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                '#9966FF', '#FF9F40', '#FF6384', '#36A2EB'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
+{% endblock %} 

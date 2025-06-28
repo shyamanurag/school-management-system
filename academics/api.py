@@ -48,6 +48,38 @@ class SubjectViewSet(viewsets.ModelViewSet):
         }
         return Response(analytics)
 
+class GradeViewSet(viewsets.ModelViewSet):
+    """API endpoints for Grade management"""
+    serializer_class = GradeSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return Grade.objects.filter(school=self.request.user.profile.school)
+    
+    @action(detail=True, methods=['get'])
+    def students(self, request, pk=None):
+        """Get all students in this grade"""
+        grade = self.get_object()
+        students = grade.students.filter(is_active=True)
+        from core.serializers import StudentSerializer
+        serializer = StudentSerializer(students, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'])
+    def performance_analytics(self, request, pk=None):
+        """Get performance analytics for this grade"""
+        grade = self.get_object()
+        students = grade.students.filter(is_active=True)
+        
+        analytics = {
+            'total_students': students.count(),
+            'male_students': students.filter(gender='MALE').count(),
+            'female_students': students.filter(gender='FEMALE').count(),
+            'attendance_rate': 0,  # Calculate from attendance records
+            'average_performance': 0,  # Calculate from exam results
+        }
+        return Response(analytics)
+
 class ExamViewSet(viewsets.ModelViewSet):
     """API endpoints for Exam management"""
     serializer_class = ExamSerializer

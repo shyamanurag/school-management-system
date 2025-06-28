@@ -1,17 +1,33 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from .api import BookViewSet, LibraryMemberViewSet, BookIssueViewSet
 
+# Create a router and register our viewsets (temporarily disabled)
 router = DefaultRouter()
-router.register(r'api/books', BookViewSet)
-router.register(r'api/librarymembers', LibraryMemberViewSet)
-router.register(r'api/bookissues', BookIssueViewSet)
+# router.register(r'books', BookViewSet, basename='library-book')
+# router.register(r'members', LibraryMemberViewSet, basename='library-member')
+# router.register(r'issues', BookIssueViewSet, basename='library-issue')
 
+# Web Interface URLs - NUCLEAR REBUILD OF LIBRARY MODULE
 urlpatterns = [
-    path('', views.BookListView.as_view(), name='book-list'),
-    path('add/', views.BookCreateView.as_view(), name='book-add'),
-    path('<int:pk>/edit/', views.BookUpdateView.as_view(), name='book-edit'),
-    path('<int:pk>/delete/', views.BookDeleteView.as_view(), name='book-delete'),
-    path('', include(router.urls)),
+    # Library Dashboard
+    path('', views.library_dashboard, name='dashboard'),
+    
+    # Book Management
+    path('books/', views.BookListView.as_view(), name='book-list'),
+    path('books/<int:pk>/', views.BookDetailView.as_view(), name='book-detail'),
+    path('books/export/', views.export_books, name='export-books'),
+    
+    # Book Circulation
+    path('issue/', views.issue_book, name='issue-book'),
+    path('return/<int:issue_id>/', views.return_book, name='return-book'),
+    
+    # Member Management
+    path('members/', views.LibraryMemberListView.as_view(), name='member-list'),
+    
+    # Reports
+    path('reports/', views.library_reports, name='reports'),
+    
+    # API URLs (temporarily disabled)
+    # path('api/', include(router.urls)),
 ]

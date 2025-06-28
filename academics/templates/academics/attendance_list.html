@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold text-primary mb-1">
+                        <i class="bi bi-person-check me-2"></i>Attendance Management
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Daily Attendance Tracking | Biometric Integration | Date: {{ selected_date|default:"Today" }}
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-success" onclick="markBulkAttendance()">
+                        <i class="bi bi-check2-all"></i> Mark All Present
+                    </button>
+                    <button class="btn btn-success" onclick="saveAttendance()">
+                        <i class="bi bi-floppy"></i> Save Attendance
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3">
+                            <div class="bg-success bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-person-check fs-3 mb-2"></i>
+                                <h5 class="fw-bold" id="presentCount">38</h5>
+                                <small>Present Today</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="bg-danger bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-person-x fs-3 mb-2"></i>
+                                <h5 class="fw-bold" id="absentCount">3</h5>
+                                <small>Absent Today</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="bg-warning bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-clock fs-3 mb-2"></i>
+                                <h5 class="fw-bold" id="lateCount">1</h5>
+                                <small>Late Arrivals</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="bg-info bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-percent fs-3 mb-2"></i>
+                                <h5 class="fw-bold" id="attendancePercent">90%</h5>
+                                <small>Attendance Rate</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date and Class Selection -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="date_filter" class="form-label">Attendance Date</label>
+                            <input type="date" class="form-control" id="date_filter" name="date" 
+                                   value="{{ selected_date|default:today }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="class_filter" class="form-label">Class</label>
+                            <select class="form-select" id="class_filter" name="class_id">
+                                <option value="">Select Class</option>
+                                <option value="1">Pre-KG A</option>
+                                <option value="2">LKG A</option>
+                                <option value="3">UKG A</option>
+                                <option value="4">Class I A</option>
+                                <option value="5">Class II A</option>
+                                <option value="6" selected>Class X A</option>
+                                <option value="7">Class XII Science</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="subject_filter" class="form-label">Subject/Period</label>
+                            <select class="form-select" id="subject_filter" name="subject_id">
+                                <option value="" selected>General Attendance</option>
+                                <option value="1">Mathematics</option>
+                                <option value="2">English</option>
+                                <option value="3">Physics</option>
+                                <option value="4">Chemistry</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> Load Attendance
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 fw-bold">
+                            <i class="bi bi-list-check me-2"></i>Class X A - Daily Attendance
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="importBiometric()">
+                                <i class="bi bi-fingerprint"></i> Import Biometric
+                            </button>
+                            <span class="badge bg-primary fs-6 py-2">42 Students</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 text-muted small fw-semibold">ROLL NO.</th>
+                                    <th class="border-0 text-muted small fw-semibold">STUDENT</th>
+                                    <th class="border-0 text-muted small fw-semibold">ATTENDANCE</th>
+                                    <th class="border-0 text-muted small fw-semibold">TIME IN</th>
+                                    <th class="border-0 text-muted small fw-semibold">REMARKS</th>
+                                    <th class="border-0 text-muted small fw-semibold">PARENT STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Student 1 - Present -->
+                                <tr>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary fs-6">001</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/student_images/no_image.png' %}" class="rounded-circle me-3" width="40" height="40" alt="Student">
+                                            <div>
+                                                <div class="fw-semibold">Aadhya Sharma</div>
+                                                <div class="text-muted small">Student ID: STU001</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group" role="group">
+                                            <input type="radio" class="btn-check" name="attendance_1" id="present_1" value="PRESENT" checked>
+                                            <label class="btn btn-outline-success btn-sm" for="present_1">
+                                                <i class="bi bi-check-circle"></i> Present
+                                            </label>
+                                            <input type="radio" class="btn-check" name="attendance_1" id="absent_1" value="ABSENT">
+                                            <label class="btn btn-outline-danger btn-sm" for="absent_1">
+                                                <i class="bi bi-x-circle"></i> Absent
+                                            </label>
+                                            <input type="radio" class="btn-check" name="attendance_1" id="late_1" value="LATE">
+                                            <label class="btn btn-outline-warning btn-sm" for="late_1">
+                                                <i class="bi bi-clock"></i> Late
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <input type="time" class="form-control form-control-sm" value="08:15" style="width: 120px;">
+                                    </td>
+                                    <td class="py-3">
+                                        <input type="text" class="form-control form-control-sm" placeholder="Add remarks..." style="width: 150px;">
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success">SMS Sent</span>
+                                    </td>
+                                </tr>
+                                <!-- Student 2 - Absent -->
+                                <tr>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary fs-6">002</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/student_images/no_image.png' %}" class="rounded-circle me-3" width="40" height="40" alt="Student">
+                                            <div>
+                                                <div class="fw-semibold">Arjun Patel</div>
+                                                <div class="text-muted small">Student ID: STU002</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group" role="group">
+                                            <input type="radio" class="btn-check" name="attendance_2" id="present_2" value="PRESENT">
+                                            <label class="btn btn-outline-success btn-sm" for="present_2">
+                                                <i class="bi bi-check-circle"></i> Present
+                                            </label>
+                                            <input type="radio" class="btn-check" name="attendance_2" id="absent_2" value="ABSENT" checked>
+                                            <label class="btn btn-outline-danger btn-sm" for="absent_2">
+                                                <i class="bi bi-x-circle"></i> Absent
+                                            </label>
+                                            <input type="radio" class="btn-check" name="attendance_2" id="late_2" value="LATE">
+                                            <label class="btn btn-outline-warning btn-sm" for="late_2">
+                                                <i class="bi bi-clock"></i> Late
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <input type="time" class="form-control form-control-sm" style="width: 120px;" disabled>
+                                    </td>
+                                    <td class="py-3">
+                                        <input type="text" class="form-control form-control-sm" placeholder="Reason for absence..." style="width: 150px;">
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-warning">SMS Pending</span>
+                                    </td>
+                                </tr>
+                                <!-- Student 3 - Late -->
+                                <tr>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary fs-6">003</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/student_images/no_image.png' %}" class="rounded-circle me-3" width="40" height="40" alt="Student">
+                                            <div>
+                                                <div class="fw-semibold">Priya Reddy</div>
+                                                <div class="text-muted small">Student ID: STU003</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group" role="group">
+                                            <input type="radio" class="btn-check" name="attendance_3" id="present_3" value="PRESENT">
+                                            <label class="btn btn-outline-success btn-sm" for="present_3">
+                                                <i class="bi bi-check-circle"></i> Present
+                                            </label>
+                                            <input type="radio" class="btn-check" name="attendance_3" id="absent_3" value="ABSENT">
+                                            <label class="btn btn-outline-danger btn-sm" for="absent_3">
+                                                <i class="bi bi-x-circle"></i> Absent
+                                            </label>
+                                            <input type="radio" class="btn-check" name="attendance_3" id="late_3" value="LATE" checked>
+                                            <label class="btn btn-outline-warning btn-sm" for="late_3">
+                                                <i class="bi bi-clock"></i> Late
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <input type="time" class="form-control form-control-sm" value="08:45" style="width: 120px;">
+                                    </td>
+                                    <td class="py-3">
+                                        <input type="text" class="form-control form-control-sm" value="Late due to transport" style="width: 150px;">
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success">SMS Sent</span>
+                                    </td>
+                                </tr>
+                                <!-- More students... -->
+                                <tr>
+                                    <td class="py-3"><span class="badge bg-primary fs-6">004</span></td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/student_images/no_image.png' %}" class="rounded-circle me-3" width="40" height="40" alt="Student">
+                                            <div><div class="fw-semibold">Vikram Singh</div><div class="text-muted small">STU004</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group" role="group">
+                                            <input type="radio" class="btn-check" name="attendance_4" id="present_4" value="PRESENT" checked>
+                                            <label class="btn btn-outline-success btn-sm" for="present_4"><i class="bi bi-check-circle"></i> Present</label>
+                                            <input type="radio" class="btn-check" name="attendance_4" id="absent_4" value="ABSENT">
+                                            <label class="btn btn-outline-danger btn-sm" for="absent_4"><i class="bi bi-x-circle"></i> Absent</label>
+                                            <input type="radio" class="btn-check" name="attendance_4" id="late_4" value="LATE">
+                                            <label class="btn btn-outline-warning btn-sm" for="late_4"><i class="bi bi-clock"></i> Late</label>
+                                        </div>
+                                    </td>
+                                    <td class="py-3"><input type="time" class="form-control form-control-sm" value="08:10" style="width: 120px;"></td>
+                                    <td class="py-3"><input type="text" class="form-control form-control-sm" placeholder="Add remarks..." style="width: 150px;"></td>
+                                    <td class="py-3"><span class="badge bg-success">SMS Sent</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3"><span class="badge bg-primary fs-6">005</span></td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/student_images/no_image.png' %}" class="rounded-circle me-3" width="40" height="40" alt="Student">
+                                            <div><div class="fw-semibold">Kavya Nair</div><div class="text-muted small">STU005</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group" role="group">
+                                            <input type="radio" class="btn-check" name="attendance_5" id="present_5" value="PRESENT" checked>
+                                            <label class="btn btn-outline-success btn-sm" for="present_5"><i class="bi bi-check-circle"></i> Present</label>
+                                            <input type="radio" class="btn-check" name="attendance_5" id="absent_5" value="ABSENT">
+                                            <label class="btn btn-outline-danger btn-sm" for="absent_5"><i class="bi bi-x-circle"></i> Absent</label>
+                                            <input type="radio" class="btn-check" name="attendance_5" id="late_5" value="LATE">
+                                            <label class="btn btn-outline-warning btn-sm" for="late_5"><i class="bi bi-clock"></i> Late</label>
+                                        </div>
+                                    </td>
+                                    <td class="py-3"><input type="time" class="form-control form-control-sm" value="08:20" style="width: 120px;"></td>
+                                    <td class="py-3"><input type="text" class="form-control form-control-sm" placeholder="Add remarks..." style="width: 150px;"></td>
+                                    <td class="py-3"><span class="badge bg-success">SMS Sent</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Last updated: Today at 08:30 AM | Biometric sync: Active</small>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary" onclick="generateReport()">
+                                <i class="bi bi-file-earmark-pdf"></i> Generate Report
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="sendNotifications()">
+                                <i class="bi bi-bell"></i> SMS to Parents
+                            </button>
+                            <button class="btn btn-success" onclick="saveAttendance()">
+                                <i class="bi bi-floppy"></i> Save All Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function markBulkAttendance() {
+    document.querySelectorAll('input[value="PRESENT"]').forEach(input => {
+        input.checked = true;
+    });
+    showToast('All students marked present', 'success');
+}
+
+function saveAttendance() {
+    showToast('Saving attendance...', 'info');
+    setTimeout(() => {
+        showToast('Attendance saved successfully!', 'success');
+    }, 1000);
+}
+
+function importBiometric() {
+    showToast('Importing biometric data...', 'info');
+    setTimeout(() => {
+        showToast('Biometric data imported successfully!', 'success');
+    }, 2000);
+}
+
+function generateReport() {
+    showToast('Generating attendance report...', 'info');
+    setTimeout(() => {
+        showToast('Report generated successfully!', 'success');
+    }, 1500);
+}
+
+function sendNotifications() {
+    showToast('Sending SMS notifications to parents...', 'info');
+    setTimeout(() => {
+        showToast('SMS notifications sent successfully!', 'success');
+    }, 2000);
+}
+
+// Listen for attendance changes and update stats
+document.addEventListener('change', function(e) {
+    if (e.target.type === 'radio' && e.target.name.startsWith('attendance_')) {
+        // Update real-time stats
+        const presentCount = document.querySelectorAll('input[value="PRESENT"]:checked').length;
+        const absentCount = document.querySelectorAll('input[value="ABSENT"]:checked').length;
+        const lateCount = document.querySelectorAll('input[value="LATE"]:checked').length;
+        const totalStudents = presentCount + absentCount + lateCount;
+        const attendancePercent = totalStudents > 0 ? Math.round((presentCount / totalStudents) * 100) : 0;
+        
+        document.getElementById('presentCount').textContent = presentCount;
+        document.getElementById('absentCount').textContent = absentCount;
+        document.getElementById('lateCount').textContent = lateCount;
+        document.getElementById('attendancePercent').textContent = attendancePercent + '%';
+    }
+});
+</script>
+{% endblock %} 

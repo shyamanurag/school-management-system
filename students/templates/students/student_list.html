@@ -1,246 +1,203 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
+{% block title %}Students Management - {{ total_students }} Students{% endblock %}
 {% block content %}
-{% block breadcrumbs %}
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
-    <li class="breadcrumb-item"><a href="/">Home</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Students</li>
-  </ol>
-</nav>
-{% endblock %}
-
-<div class="container mt-4">
-    <h2 class="mb-3">Student List</h2>
-    
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <input type="text" id="studentSearch" class="form-control" placeholder="Search by name, admission no, class...">
-        </div>
-        <div class="col-md-6 text-end">
-            <a href="/admin/students/student/add/" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add New Student
-            </a>
-        </div>
-    </div>
-    
-    <div id="studentError" class="alert alert-danger d-none"></div>
-    
-    <div class="table-responsive">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>
-                <button id="batchDeleteBtn" class="btn btn-danger btn-sm" disabled>
-                    <i class="fas fa-trash"></i> Delete Selected
-                </button>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h1 class="h3 mb-1">Students Management</h1>
+                    <p class="mb-0">Managing {{ total_students }} REAL students from database</p>
+                </div>
             </div>
         </div>
-        
-        <table class="table table-hover align-middle" id="studentsTable">
-            <thead>
-                <tr>
-                    <th><input type="checkbox" id="selectAllStudents"></th>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Roll Number</th>
-                    <th>Class</th>
-                    <th>Section</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="studentsTableBody">
-                <!-- Populated by JavaScript -->
-            </tbody>
-        </table>
-        
-        <div id="studentLoading" class="text-center my-3">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="h2 text-primary">{{ total_students }}</div>
+                    <div class="text-muted">Total Students</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="h2 text-info">{{ total_male }}</div>
+                    <div class="text-muted">Male Students</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="h2 text-success">{{ total_female }}</div>
+                    <div class="text-muted">Female Students</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Real Students from Database (No Hardcoded Data!)</h5>
+                    <p class="mb-0 text-muted">
+                        Showing {{ page_obj.start_index }} - {{ page_obj.end_index }} of {{ page_obj.paginator.count }} students
+                    </p>
+                </div>
+                <div class="card-body p-0">
+                    {% if students %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Student Details</th>
+                                        <th>Grade</th>
+                                        <th>Contact</th>
+                                        <th>Parent</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student in students %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold">{{ student.full_name }}</div>
+                                            <small class="text-muted">ID: {{ student.admission_number }}</small>
+                                        </td>
+                                        <td>
+                                            {% if student.grade %}
+                                                <span class="badge bg-info">{{ student.grade }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">No Grade</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if student.phone %}{{ student.phone }}<br>{% endif %}
+                                            <span class="badge bg-primary">{{ student.get_gender_display }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="small">
+                                                <div>{{ student.parent_name }}</div>
+                                                <div>{{ student.parent_phone }}</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if student.is_active %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'student-detail' student.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <h4>No Students Found</h4>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- PAGINATION CONTROLS - CRITICAL FIX -->
+                {% if is_paginated %}
+                <div class="card-footer bg-white">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <p class="mb-0 text-muted">
+                                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} students
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <nav aria-label="Students pagination">
+                                <ul class="pagination justify-content-end mb-0">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1">
+                                                <i class="bi bi-chevron-double-left"></i> First
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                                <i class="bi bi-chevron-left"></i> Previous
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    <!-- Page Numbers -->
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                                Next <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                                Last <i class="bi bi-chevron-double-right"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Page Jump -->
+                    <div class="row mt-3">
+                        <div class="col-12 text-center">
+                            <div class="d-inline-flex align-items-center">
+                                <span class="me-2">Jump to page:</span>
+                                <select class="form-select form-select-sm" style="width: auto;" onchange="window.location.href='?page=' + this.value">
+                                    {% for num in page_obj.paginator.page_range %}
+                                        <option value="{{ num }}" {% if page_obj.number == num %}selected{% endif %}>
+                                            Page {{ num }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <span class="ms-2 text-muted">of {{ page_obj.paginator.num_pages }} pages</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const tableBody = document.getElementById('studentsTableBody');
-    const loadingSpinner = document.getElementById('studentLoading');
-    const errorDiv = document.getElementById('studentError');
-    const searchInput = document.getElementById('studentSearch');
-    
-    // Sample data for demonstration
-    const studentsData = [
-        {
-            id: 1,
-            name: "Aarav Sharma",
-            roll_number: "S1001",
-            class_name: "10",
-            section: "A",
-            status: "Active"
-        },
-        {
-            id: 2,
-            name: "Priya Verma", 
-            roll_number: "S1002",
-            class_name: "10",
-            section: "B",
-            status: "Active"
-        },
-        {
-            id: 3,
-            name: "Rohan Gupta",
-            roll_number: "S1003", 
-            class_name: "9",
-            section: "A",
-            status: "Active"
-        },
-        {
-            id: 4,
-            name: "Simran Kaur",
-            roll_number: "S1004",
-            class_name: "8", 
-            section: "C",
-            status: "Active"
-        },
-        {
-            id: 5,
-            name: "Aditya Singh",
-            roll_number: "S1005",
-            class_name: "11",
-            section: "A", 
-            status: "Active"
-        }
-    ];
-    
-    let selectedStudents = new Set();
-    
-    function renderTable(data) {
-        tableBody.innerHTML = '';
-        
-        if (data.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No students found.</td></tr>';
-            return;
-        }
-        
-        data.forEach(function(student) {
-            const checked = selectedStudents.has(student.id) ? 'checked' : '';
-            const statusBadge = student.status === 'Active' 
-                ? '<span class="badge bg-success">Active</span>'
-                : '<span class="badge bg-secondary">Inactive</span>';
-                
-            const row = `
-                <tr>
-                    <td>
-                        <input type="checkbox" class="student-checkbox" data-id="${student.id}" ${checked}>
-                    </td>
-                    <td>${student.id}</td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
-                                ${student.name.charAt(0)}
-                            </div>
-                            <div>
-                                <div class="fw-semibold">${student.name}</div>
-                                ${statusBadge}
-                            </div>
-                        </div>
-                    </td>
-                    <td>${student.roll_number}</td>
-                    <td>${student.class_name}</td>
-                    <td>${student.section}</td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <a href="/admin/students/student/${student.id}/change/" class="btn btn-outline-primary">
-                                <i class="fas fa-edit"></i> Edit
-                            </a>
-                            <button class="btn btn-outline-danger" onclick="deleteStudent(${student.id}, '${student.name}')">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
-        
-        // Update checkbox listeners
-        document.querySelectorAll('.student-checkbox').forEach(cb => {
-            cb.addEventListener('change', function() {
-                const id = parseInt(this.getAttribute('data-id'));
-                if (this.checked) {
-                    selectedStudents.add(id);
-                } else {
-                    selectedStudents.delete(id);
-                }
-                updateBatchDeleteBtn();
-                updateSelectAllCheckbox();
-            });
-        });
-        
-        updateSelectAllCheckbox();
-    }
-    
-    function filterStudents() {
-        const query = searchInput.value.toLowerCase();
-        const filtered = studentsData.filter(student => 
-            student.name.toLowerCase().includes(query) ||
-            student.roll_number.toLowerCase().includes(query) ||
-            student.class_name.toLowerCase().includes(query) ||
-            student.section.toLowerCase().includes(query)
-        );
-        renderTable(filtered);
-    }
-    
-    function updateBatchDeleteBtn() {
-        const batchDeleteBtn = document.getElementById('batchDeleteBtn');
-        if (batchDeleteBtn) {
-            batchDeleteBtn.disabled = selectedStudents.size === 0;
-        }
-    }
-    
-    function updateSelectAllCheckbox() {
-        const selectAllCb = document.getElementById('selectAllStudents');
-        if (selectAllCb) {
-            selectAllCb.checked = studentsData.length > 0 && selectedStudents.size === studentsData.length;
-        }
-    }
-    
-    // Load students
-    function loadStudents() {
-        loadingSpinner.classList.remove('d-none');
-        errorDiv.classList.add('d-none');
-        
-        // Simulate loading delay
-        setTimeout(function() {
-            loadingSpinner.classList.add('d-none');
-            renderTable(studentsData);
-        }, 800);
-    }
-    
-    // Event listeners
-    searchInput.addEventListener('input', filterStudents);
-    
-    const selectAllCb = document.getElementById('selectAllStudents');
-    if (selectAllCb) {
-        selectAllCb.addEventListener('change', function() {
-            if (this.checked) {
-                studentsData.forEach(s => selectedStudents.add(s.id));
-            } else {
-                selectedStudents.clear();
-            }
-            renderTable(studentsData);
-            updateBatchDeleteBtn();
-        });
-    }
-    
-    // Initialize
-    loadStudents();
-});
-
-// Global functions
-function deleteStudent(id, name) {
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
-        alert('Delete functionality would be implemented here');
-    }
+<style>
+.pagination .page-link {
+    color: #0d6efd;
+    border-color: #dee2e6;
 }
-</script>
-
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+.pagination .page-link:hover {
+    color: #0a58ca;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+</style>
 {% endblock %}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fee Reports</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Fee Reports &amp; Analytics</h1>
+    
+    <div>
+        <h2>Monthly Collections</h2>
+        {% if monthly_collections %}
+            {% for item in monthly_collections %}
+                <p>Month {{ item.month }}: Rs. {{ item.total|default:"0" }}</p>
+            {% endfor %}
+        {% else %}
+            <p>No monthly data available</p>
+        {% endif %}
+    </div>
+    
+    <div>
+        <h2>Category-wise Collections</h2>
+        {% if category_collections %}
+            {% for item in category_collections %}
+                <p>{{ item.fee_structure__category__name|default:"Unknown" }}: Rs. {{ item.total|default:"0" }}</p>
+            {% endfor %}
+        {% else %}
+            <p>No category data available</p>
+        {% endif %}
+    </div>
+    
+    <div>
+        <h2>Status Breakdown</h2>
+        {% if status_breakdown %}
+            {% for item in status_breakdown %}
+                <p>{{ item.status }}: {{ item.count }} payments (Rs. {{ item.total_amount|default:"0" }})</p>
+            {% endfor %}
+        {% else %}
+            <p>No status data available</p>
+        {% endif %}
+    </div>
+</body>
+</html>

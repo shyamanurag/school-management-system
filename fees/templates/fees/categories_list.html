@@ -1,0 +1,27 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fee Categories</title>
+    <meta charset='utf-8'>
+</head>
+<body>
+    <h1>Fee Categories Management</h1>
+    <p>Total Categories: {{ total_categories }}</p>
+    
+    <table border='1'>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Status</th>
+        </tr>
+        {% for category in categories %}
+        <tr>
+            <td>{{ category.name }}</td>
+            <td>{{ category.description }}</td>
+            <td>Active</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

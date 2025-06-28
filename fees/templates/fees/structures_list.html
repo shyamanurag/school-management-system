@@ -1,0 +1,29 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fee Structures</title>
+    <meta charset='utf-8'>
+</head>
+<body>
+    <h1>Fee Structures Management</h1>
+    <p>Total Structures: {{ total_structures }}</p>
+    
+    <table border='1'>
+        <tr>
+            <th>Category</th>
+            <th>Grade</th>
+            <th>Amount</th>
+            <th>Academic Year</th>
+        </tr>
+        {% for structure in structures %}
+        <tr>
+            <td>{{ structure.category.name }}</td>
+            <td>{{ structure.grade.name }}</td>
+            <td>Rs. {{ structure.amount }}</td>
+            <td>{{ structure.academic_year.year }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

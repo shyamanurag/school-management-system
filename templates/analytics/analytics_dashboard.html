@@ -1,419 +1,482 @@
 {% extends "base.html" %}
-{% block title %}AI Analytics Dashboard - Ultra Professional Analytics Platform{% endblock %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<style>
+    .analytics-dashboard {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .analytics-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        margin-bottom: 2rem;
+    }
+    
+    .analytics-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+    }
+    
+    .metric-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(45deg);
+        transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover::before {
+        top: -40%;
+        right: -40%;
+    }
+    
+    .metric-card.students {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+    
+    .metric-card.financial {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    }
+    
+    .metric-card.academic {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    }
+    
+    .metric-card.infrastructure {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    }
+    
+    .metric-number {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .metric-label {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .metric-trend {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 2rem;
+        opacity: 0.7;
+        z-index: 2;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        height: 400px;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .activity-feed {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+        transition: all 0.3s ease;
+    }
+    
+    .activity-item:hover {
+        background: #f8f9fa;
+        transform: translateX(5px);
+    }
+    
+    .activity-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+    }
+    
+    .activity-icon.success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+    
+    .activity-icon.info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .ai-insights {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
+    }
+    
+    .performance-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .progress-ring {
+        transform: rotate(-90deg);
+    }
+    
+    .progress-ring-circle {
+        transition: stroke-dasharray 0.35s;
+        transform: rotate(0deg);
+        transform-origin: 50% 50%;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h3 mb-0 text-dark">
-                        <i class="bi bi-graph-up-arrow text-primary me-2"></i>
-                        AI Analytics Dashboard
-                    </h1>
-                    <p class="text-muted mb-0">Ultra-Professional Analytics & Business Intelligence Platform</p>
-                </div>
-                <div>
-                    <button class="btn btn-primary me-2">
-                        <i class="bi bi-plus-circle me-1"></i>Create Dashboard
-                    </button>
-                    <button class="btn btn-outline-primary">
-                        <i class="bi bi-file-earmark-bar-graph me-1"></i>Generate Report
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Key Metrics -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-success bg-opacity-10 rounded-circle p-3 me-3">
-                            <i class="bi bi-people text-success fs-4"></i>
-                        </div>
-                        <div>
-                            <h5 class="card-title mb-1">Student Performance</h5>
-                            <h2 class="mb-0 text-success">92.3%</h2>
-                            <small class="text-success">
-                                <i class="bi bi-arrow-up"></i> +3.2% this term
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
-                            <i class="bi bi-graph-up text-primary fs-4"></i>
-                        </div>
-                        <div>
-                            <h5 class="card-title mb-1">Engagement Score</h5>
-                            <h2 class="mb-0 text-primary">8.7/10</h2>
-                            <small class="text-muted">AI-calculated metric</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-warning bg-opacity-10 rounded-circle p-3 me-3">
-                            <i class="bi bi-calendar-check text-warning fs-4"></i>
-                        </div>
-                        <div>
-                            <h5 class="card-title mb-1">Attendance Rate</h5>
-                            <h2 class="mb-0 text-warning">96.8%</h2>
-                            <small class="text-success">
-                                <i class="bi bi-arrow-up"></i> +1.5% this month
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-info bg-opacity-10 rounded-circle p-3 me-3">
-                            <i class="bi bi-cpu text-info fs-4"></i>
-                        </div>
-                        <div>
-                            <h5 class="card-title mb-1">AI Insights</h5>
-                            <h2 class="mb-0 text-info">247</h2>
-                            <small class="text-muted">Active predictions</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- AI-Powered Features -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-transparent border-0">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-robot text-primary me-2"></i>
-                        AI-Powered Analytics Engine
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="border rounded p-3 h-100">
-                                <div class="d-flex align-items-start">
-                                    <i class="bi bi-brain text-primary me-2 mt-1 fs-5"></i>
-                                    <div>
-                                        <h6 class="mb-1">Predictive Analytics</h6>
-                                        <small class="text-muted">AI models predict student performance, dropout risk, and intervention needs</small>
-                                        <div class="mt-2">
-                                            <span class="badge bg-success">Active</span>
-                                            <span class="badge bg-light text-dark">247 Predictions</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="border rounded p-3 h-100">
-                                <div class="d-flex align-items-start">
-                                    <i class="bi bi-graph-up-arrow text-success me-2 mt-1 fs-5"></i>
-                                    <div>
-                                        <h6 class="mb-1">Performance Optimization</h6>
-                                        <small class="text-muted">Identifies improvement opportunities and suggests targeted interventions</small>
-                                        <div class="mt-2">
-                                            <span class="badge bg-info">Smart Insights</span>
-                                            <span class="badge bg-light text-dark">89 Recommendations</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="border rounded p-3 h-100">
-                                <div class="d-flex align-items-start">
-                                    <i class="bi bi-shield-check text-warning me-2 mt-1 fs-5"></i>
-                                    <div>
-                                        <h6 class="mb-1">Behavioral Analysis</h6>
-                                        <small class="text-muted">Real-time monitoring of student engagement and behavioral patterns</small>
-                                        <div class="mt-2">
-                                            <span class="badge bg-warning">Monitoring</span>
-                                            <span class="badge bg-light text-dark">1,013 Students</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="border rounded p-3 h-100">
-                                <div class="d-flex align-items-start">
-                                    <i class="bi bi-lightning text-info me-2 mt-1 fs-5"></i>
-                                    <div>
-                                        <h6 class="mb-1">Real-time Insights</h6>
-                                        <small class="text-muted">Live dashboard updates with instant alerts and notifications</small>
-                                        <div class="mt-2">
-                                            <span class="badge bg-danger">Live</span>
-                                            <span class="badge bg-light text-dark">24/7 Monitoring</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Custom Dashboards -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-transparent border-0">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-layout-wtf text-info me-2"></i>
-                        Custom Dashboards
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item border-0 px-0">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Principal Dashboard</h6>
-                                    <small class="text-muted">Executive overview & KPIs</small>
-                                </div>
-                                <button class="btn btn-sm btn-outline-primary">View</button>
-                            </div>
-                        </div>
-                        <div class="list-group-item border-0 px-0">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Teacher Dashboard</h6>
-                                    <small class="text-muted">Class performance & analytics</small>
-                                </div>
-                                <button class="btn btn-sm btn-outline-primary">View</button>
-                            </div>
-                        </div>
-                        <div class="list-group-item border-0 px-0">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Parent Dashboard</h6>
-                                    <small class="text-muted">Student progress & insights</small>
-                                </div>
-                                <button class="btn btn-sm btn-outline-primary">View</button>
-                            </div>
-                        </div>
-                        <div class="list-group-item border-0 px-0">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Financial Dashboard</h6>
-                                    <small class="text-muted">Revenue & fee analytics</small>
-                                </div>
-                                <button class="btn btn-sm btn-outline-primary">View</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <button class="btn btn-primary btn-sm w-100">
-                            <i class="bi bi-plus me-1"></i>Create Custom Dashboard
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Advanced Reports -->
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0">
+<div class="analytics-dashboard">
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="analytics-card animate__animated animate__fadeInDown">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-file-earmark-bar-graph text-success me-2"></i>
-                            Advanced Reports
-                        </h5>
-                        <button class="btn btn-outline-success btn-sm">View All</button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-sm-6">
-                            <div class="text-center p-3 border rounded">
-                                <i class="bi bi-people text-primary fs-1 mb-2"></i>
-                                <h6>Student Analytics</h6>
-                                <small class="text-muted">Performance, behavior & engagement</small>
-                                <div class="mt-2">
-                                    <button class="btn btn-sm btn-outline-primary">Generate</button>
-                                </div>
-                            </div>
+                        <div>
+                            <h1 class="h2 mb-0 text-dark">🚀 {{ page_title }}</h1>
+                            <p class="text-muted mb-0">AI-Powered Real-Time School Analytics & Insights</p>
                         </div>
-                        <div class="col-sm-6">
-                            <div class="text-center p-3 border rounded">
-                                <i class="bi bi-person-workspace text-success fs-1 mb-2"></i>
-                                <h6>Teacher Analytics</h6>
-                                <small class="text-muted">Performance & effectiveness metrics</small>
-                                <div class="mt-2">
-                                    <button class="btn btn-sm btn-outline-success">Generate</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="text-center p-3 border rounded">
-                                <i class="bi bi-currency-dollar text-warning fs-1 mb-2"></i>
-                                <h6>Financial Reports</h6>
-                                <small class="text-muted">Revenue, expenses & profitability</small>
-                                <div class="mt-2">
-                                    <button class="btn btn-sm btn-outline-warning">Generate</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="text-center p-3 border rounded">
-                                <i class="bi bi-graph-up text-info fs-1 mb-2"></i>
-                                <h6>Predictive Analysis</h6>
-                                <small class="text-muted">AI-powered forecasting & trends</small>
-                                <div class="mt-2">
-                                    <button class="btn btn-sm btn-outline-info">Generate</button>
-                                </div>
-                            </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exportModal">
+                                <i class="fas fa-download"></i> Export Data
+                            </button>
+                            <button class="btn btn-info" onclick="refreshDashboard()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <a href="{% url 'analytics:predictive-analytics' %}" class="btn btn-warning">
+                                <i class="fas fa-brain"></i> AI Predictions
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Real-time Metrics -->
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-speedometer text-danger me-2"></i>
-                        Real-time Metrics
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <div class="text-center">
-                                <div class="text-primary fs-4 fw-bold">1,013</div>
-                                <small class="text-muted">Active Students</small>
-                            </div>
+        <!-- AI Insights Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="ai-insights animate__animated animate__fadeInLeft">
+                    <h4><i class="fas fa-robot"></i> AI-Powered Insights</h4>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>📈 Performance Trend</h6>
+                            <p>Academic performance is trending upward with {{ avg_performance.avg_percentage|floatformat:1 }}% average across all subjects.</p>
                         </div>
-                        <div class="col-6">
-                            <div class="text-center">
-                                <div class="text-success fs-4 fw-bold">48</div>
-                                <small class="text-muted">Teachers Online</small>
-                            </div>
+                        <div class="col-md-4">
+                            <h6>💰 Financial Health</h6>
+                            <p>Fee collection efficiency at {{ fee_growth_rate|floatformat:1 }}% growth rate. Collection optimization recommended.</p>
                         </div>
-                        <div class="col-6">
-                            <div class="text-center">
-                                <div class="text-warning fs-4 fw-bold">24</div>
-                                <small class="text-muted">Active Exams</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-center">
-                                <div class="text-info fs-4 fw-bold">156</div>
-                                <small class="text-muted">Parent Logins</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <hr>
-                    
-                    <h6 class="mb-3">AI Insights & Alerts</h6>
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item border-0 px-0 py-2">
-                            <div class="d-flex">
-                                <i class="bi bi-exclamation-triangle text-warning me-2"></i>
-                                <div>
-                                    <small class="text-muted">5 students at risk of poor performance detected</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-group-item border-0 px-0 py-2">
-                            <div class="d-flex">
-                                <i class="bi bi-check-circle text-success me-2"></i>
-                                <div>
-                                    <small class="text-muted">Class X-A showing 15% improvement in Math</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-group-item border-0 px-0 py-2">
-                            <div class="d-flex">
-                                <i class="bi bi-info-circle text-info me-2"></i>
-                                <div>
-                                    <small class="text-muted">Peak usage time: 10 AM - 12 PM</small>
-                                </div>
-                            </div>
+                        <div class="col-md-4">
+                            <h6>🎯 Attendance Alert</h6>
+                            <p>Current attendance rate: {{ attendance_rate }}%. Intervention needed for students below 75%.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Advanced Analytics Features -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-stars text-warning me-2"></i>
-                        Advanced Analytics Features
-                    </h5>
+        <!-- Key Performance Indicators -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-lg-6 mb-4">
+                <div class="metric-card students animate__animated animate__fadeInUp" data-animate-delay="100">
+                    <div class="metric-trend">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="metric-number">{{ total_students }}</div>
+                    <div class="metric-label">Active Students</div>
+                    <small class="text-light">+{{ new_admissions_month }} this month</small>
                 </div>
-                <div class="card-body">
-                    <div class="row g-4">
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <div class="bg-primary bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
-                                    <i class="bi bi-graph-up-arrow text-primary fs-4"></i>
+            </div>
+            
+            <div class="col-xl-3 col-lg-6 mb-4">
+                <div class="metric-card financial animate__animated animate__fadeInUp" data-animate-delay="200">
+                    <div class="metric-trend">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="metric-number">₹{{ total_fee_collected|floatformat:0 }}</div>
+                    <div class="metric-label">Monthly Collection</div>
+                    <small class="text-light">{{ fee_growth_rate|floatformat:1 }}% growth</small>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-lg-6 mb-4">
+                <div class="metric-card academic animate__animated animate__fadeInUp" data-animate-delay="300">
+                    <div class="metric-trend">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="metric-number">{{ avg_performance.avg_percentage|floatformat:1 }}%</div>
+                    <div class="metric-label">Avg Performance</div>
+                    <small class="text-light">Across all subjects</small>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-lg-6 mb-4">
+                <div class="metric-card infrastructure animate__animated animate__fadeInUp" data-animate-delay="400">
+                    <div class="metric-trend">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <div class="metric-number">{{ total_employees }}</div>
+                    <div class="metric-label">Staff Members</div>
+                    <small class="text-light">{{ pending_leaves }} pending leaves</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <div class="analytics-card animate__animated animate__fadeInLeft">
+                    <h5 class="mb-3"><i class="fas fa-chart-area"></i> Monthly Fee Collection Trends</h5>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="analytics-card animate__animated animate__fadeInRight">
+                    <h5 class="mb-3"><i class="fas fa-chart-pie"></i> Student Distribution</h5>
+                    <div class="chart-container">
+                        <canvas id="gradeDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Analytics -->
+        <div class="row mb-4">
+            <div class="col-lg-6">
+                <div class="analytics-card animate__animated animate__fadeInUp">
+                    <h5 class="mb-3"><i class="fas fa-trophy"></i> Subject Performance Analysis</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Avg Marks</th>
+                                    <th>Students</th>
+                                    <th>Pass Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subject in subject_performance %}
+                                <tr>
+                                    <td><strong>{{ subject.subject__name }}</strong></td>
+                                    <td>{{ subject.avg_marks|floatformat:1 }}</td>
+                                    <td>{{ subject.total_students }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            {% widthratio subject.pass_count subject.total_students 100 as pass_rate %}
+                                            <div class="progress-bar bg-success" style="width: {{ pass_rate }}%">
+                                                {{ pass_rate }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">No performance data available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="analytics-card animate__animated animate__fadeInUp">
+                    <h5 class="mb-3"><i class="fas fa-calendar-check"></i> Attendance Overview</h5>
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <div class="performance-indicator">
+                                <div>
+                                    <div class="h4 text-success">{{ attendance_stats.total_present }}</div>
+                                    <small class="text-muted">Present</small>
                                 </div>
-                                <h6>Trend Analysis</h6>
-                                <small class="text-muted">Historical data analysis with pattern recognition</small>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
-                                    <i class="bi bi-cpu text-success fs-4"></i>
+                        <div class="col-4">
+                            <div class="performance-indicator">
+                                <div>
+                                    <div class="h4 text-danger">{{ attendance_stats.total_absent }}</div>
+                                    <small class="text-muted">Absent</small>
                                 </div>
-                                <h6>Machine Learning</h6>
-                                <small class="text-muted">AI-powered insights and predictions</small>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <div class="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
-                                    <i class="bi bi-bullseye text-warning fs-4"></i>
+                        <div class="col-4">
+                            <div class="performance-indicator">
+                                <div>
+                                    <div class="h4 text-warning">{{ attendance_stats.total_late }}</div>
+                                    <small class="text-muted">Late</small>
                                 </div>
-                                <h6>Goal Tracking</h6>
-                                <small class="text-muted">KPI monitoring and achievement tracking</small>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <div class="bg-info bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
-                                    <i class="bi bi-share text-info fs-4"></i>
-                                </div>
-                                <h6>Data Integration</h6>
-                                <small class="text-muted">Seamless integration with all school modules</small>
+                    </div>
+                    
+                    <!-- Attendance Rate Circular Progress -->
+                    <div class="text-center">
+                        <svg class="progress-ring" width="120" height="120">
+                            <circle class="progress-ring-circle" stroke="#e6e6e6" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
+                            <circle class="progress-ring-circle" stroke="#28a745" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"
+                                    stroke-dasharray="{{ attendance_rate|floatformat:0 }} 327" stroke-linecap="round"/>
+                        </svg>
+                        <div class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                            <div class="h4 mb-0">{{ attendance_rate }}%</div>
+                            <small class="text-muted">Attendance</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Infrastructure & Activities -->
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <div class="analytics-card animate__animated animate__fadeInLeft">
+                    <h5 class="mb-3"><i class="fas fa-activity"></i> Recent Activities</h5>
+                    <div class="activity-feed">
+                        {% for activity in recent_activities %}
+                        <div class="activity-item">
+                            <div class="activity-icon {{ activity.color }}">
+                                <i class="{{ activity.icon }}"></i>
                             </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">{{ activity.description }}</div>
+                                <small class="text-muted">{{ activity.timestamp|timesince }} ago</small>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="fas fa-history fa-3x mb-3"></i>
+                                <p>No recent activities</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="analytics-card animate__animated animate__fadeInRight">
+                    <h5 class="mb-3"><i class="fas fa-building"></i> Infrastructure Status</h5>
+                    
+                    <div class="performance-indicator">
+                        <span><i class="fas fa-book text-primary"></i> Library Books</span>
+                        <strong>{{ total_books }}</strong>
+                    </div>
+                    
+                    <div class="performance-indicator">
+                        <span><i class="fas fa-book-open text-info"></i> Books Issued</span>
+                        <strong>{{ books_issued }}</strong>
+                    </div>
+                    
+                    <div class="performance-indicator">
+                        <span><i class="fas fa-bus text-warning"></i> Vehicles</span>
+                        <strong>{{ total_vehicles }}</strong>
+                    </div>
+                    
+                    <div class="performance-indicator">
+                        <span><i class="fas fa-route text-success"></i> Transport Users</span>
+                        <strong>{{ students_using_transport }}</strong>
+                    </div>
+                    
+                    <div class="performance-indicator">
+                        <span><i class="fas fa-bed text-secondary"></i> Hostel Residents</span>
+                        <strong>{{ hostel_residents }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Navigation -->
+        <div class="row">
+            <div class="col-12">
+                <div class="analytics-card animate__animated animate__fadeInUp">
+                    <h5 class="mb-3"><i class="fas fa-rocket"></i> Advanced Analytics</h5>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'analytics:student-analytics' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="fas fa-user-graduate mb-2 d-block"></i>
+                                Student Analytics
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'analytics:financial-analytics' %}" class="btn btn-outline-success btn-lg w-100">
+                                <i class="fas fa-chart-line mb-2 d-block"></i>
+                                Financial Analytics
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'analytics:attendance-analytics' %}" class="btn btn-outline-info btn-lg w-100">
+                                <i class="fas fa-calendar-check mb-2 d-block"></i>
+                                Attendance Analytics
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'analytics:performance-analytics' %}" class="btn btn-outline-warning btn-lg w-100">
+                                <i class="fas fa-trophy mb-2 d-block"></i>
+                                Performance Analytics
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -422,18 +485,210 @@
     </div>
 </div>
 
-<style>
-.card {
-    transition: transform 0.2s ease-in-out;
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Analytics Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Select Data Type</label>
+                    <select class="form-select" id="exportType">
+                        <option value="students">Student Performance Data</option>
+                        <option value="financial">Financial Analytics</option>
+                        <option value="attendance">Attendance Records</option>
+                        <option value="overall">Complete Dashboard Data</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Date Range</label>
+                    <select class="form-select" id="dateRange">
+                        <option value="current_month">Current Month</option>
+                        <option value="last_quarter">Last Quarter</option>
+                        <option value="current_year">Current Year</option>
+                        <option value="all_time">All Time</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="exportData()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+// Revenue Chart
+const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+const revenueChart = new Chart(revenueCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [{
+            label: 'Fee Collection (₹)',
+            data: [
+                {% for month_data in monthly_collections %}
+                    {{ month_data.total_amount|default:0 }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0,0,0,0.05)'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+
+// Grade Distribution Chart
+const gradeCtx = document.getElementById('gradeDistributionChart').getContext('2d');
+const gradeChart = new Chart(gradeCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [
+            {% for grade in grade_distribution %}
+                '{{ grade.current_grade__name|default:"No Grade" }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for grade in grade_distribution %}
+                    {{ grade.count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#667eea', '#764ba2', '#11998e', '#38ef7d', 
+                '#ff9a9e', '#fecfef', '#ffecd2', '#fcb69f'
+            ],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    usePointStyle: true,
+                    padding: 20
+                }
+            }
+        }
+    }
+});
+
+// Real-time data refresh
+function refreshDashboard() {
+    // Add loading animation
+    const refreshBtn = document.querySelector('[onclick="refreshDashboard()"]');
+    const icon = refreshBtn.querySelector('i');
+    icon.classList.add('fa-spin');
+    
+    // Simulate data refresh
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
 }
-.card:hover {
-    transform: translateY(-2px);
+
+// Export functionality
+function exportData() {
+    const exportType = document.getElementById('exportType').value;
+    const dateRange = document.getElementById('dateRange').value;
+    
+    window.location.href = `{% url 'analytics:export-data' %}?type=${exportType}&range=${dateRange}`;
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('exportModal'));
+    modal.hide();
 }
-.fs-4 {
-    font-size: 1.5rem;
+
+// Animate numbers on scroll
+const animateNumbers = () => {
+    const numberElements = document.querySelectorAll('.metric-number');
+    
+    numberElements.forEach(element => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const target = parseInt(element.textContent.replace(/[^0-9]/g, ''));
+                    animateNumber(element, 0, target, 2000);
+                    observer.unobserve(element);
+                }
+            });
+        });
+        
+        observer.observe(element);
+    });
+};
+
+function animateNumber(element, start, end, duration) {
+    const startTime = performance.now();
+    const originalText = element.textContent;
+    
+    function updateNumber(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        const current = Math.floor(start + (end - start) * progress);
+        
+        if (originalText.includes('₹')) {
+            element.textContent = '₹' + current.toLocaleString();
+        } else if (originalText.includes('%')) {
+            element.textContent = current + '%';
+        } else {
+            element.textContent = current.toLocaleString();
+        }
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateNumber);
+        }
+    }
+    
+    requestAnimationFrame(updateNumber);
 }
-.border:hover {
-    border-color: #0d6efd !important;
-}
-</style>
+
+// Initialize animations
+document.addEventListener('DOMContentLoaded', () => {
+    animateNumbers();
+    
+    // Add staggered animation delays
+    const animatedElements = document.querySelectorAll('.animate__animated');
+    animatedElements.forEach((element, index) => {
+        const delay = element.dataset.animateDelay || (index * 100);
+        element.style.animationDelay = delay + 'ms';
+    });
+});
+</script>
 {% endblock %} 

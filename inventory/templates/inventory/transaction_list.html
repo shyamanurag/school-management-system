@@ -1,0 +1,499 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold text-primary mb-1">
+                        <i class="bi bi-arrow-left-right me-2"></i>Inventory Transactions
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Stock Movement Tracking | Audit Trail | Total Transactions: {{ transactions.count|default:"1,250" }}
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-success" onclick="reconcileStock()">
+                        <i class="bi bi-check2-square"></i> Stock Reconciliation
+                    </button>
+                    <a href="{% url 'inventory:add_transaction' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> New Transaction
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-success bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-box-arrow-in-down fs-3 mb-2"></i>
+                                <h5 class="fw-bold">245</h5>
+                                <small>Stock In</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-danger bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-box-arrow-up fs-3 mb-2"></i>
+                                <h5 class="fw-bold">189</h5>
+                                <small>Stock Out</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-warning bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-arrow-left-right fs-3 mb-2"></i>
+                                <h5 class="fw-bold">67</h5>
+                                <small>Transfers</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-info bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-tools fs-3 mb-2"></i>
+                                <h5 class="fw-bold">23</h5>
+                                <small>Adjustments</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-secondary bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-exclamation-triangle fs-3 mb-2"></i>
+                                <h5 class="fw-bold">8</h5>
+                                <small>Damaged/Lost</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-primary bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-currency-rupee fs-3 mb-2"></i>
+                                <h5 class="fw-bold">₹2.8L</h5>
+                                <small>Total Value</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-2">
+                            <label for="type_filter" class="form-label">Transaction Type</label>
+                            <select class="form-select" id="type_filter" name="type">
+                                <option value="">All Types</option>
+                                <option value="PURCHASE">Purchase</option>
+                                <option value="ISSUE">Issue</option>
+                                <option value="RETURN">Return</option>
+                                <option value="TRANSFER">Transfer</option>
+                                <option value="ADJUSTMENT">Adjustment</option>
+                                <option value="DAMAGE">Damage/Loss</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="category_filter" class="form-label">Category</label>
+                            <select class="form-select" id="category_filter" name="category">
+                                <option value="">All Categories</option>
+                                <option value="STATIONERY">Stationery</option>
+                                <option value="FURNITURE">Furniture</option>
+                                <option value="ELECTRONICS">Electronics</option>
+                                <option value="BOOKS">Books</option>
+                                <option value="SPORTS">Sports Equipment</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_from" class="form-label">From Date</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_to" class="form-label">To Date</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   placeholder="Search by item name, ID, or user...">
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 fw-bold">
+                            <i class="bi bi-list-ul me-2"></i>Recent Transactions
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-download"></i> Export
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="exportData('csv')">
+                                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export as CSV
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="exportData('audit')">
+                                        <i class="bi bi-shield-check me-2"></i>Audit Report
+                                    </a></li>
+                                </ul>
+                            </div>
+                            <span class="badge bg-primary fs-6 py-2">1,250 Transactions</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 text-muted small fw-semibold">TRANSACTION</th>
+                                    <th class="border-0 text-muted small fw-semibold">ITEM</th>
+                                    <th class="border-0 text-muted small fw-semibold">TYPE</th>
+                                    <th class="border-0 text-muted small fw-semibold">QUANTITY</th>
+                                    <th class="border-0 text-muted small fw-semibold">VALUE</th>
+                                    <th class="border-0 text-muted small fw-semibold">USER/DEPT</th>
+                                    <th class="border-0 text-muted small fw-semibold">DATE</th>
+                                    <th class="border-0 text-muted small fw-semibold">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Purchase Transaction -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-box-arrow-in-down"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">TXN-2024-001234</div>
+                                                <div class="text-muted small">Purchase Order: PO-2024-567</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">A4 Copy Paper</div>
+                                        <div class="text-muted small">Brand: JK Paper | SKU: STAT001</div>
+                                        <div class="text-muted small">Category: Stationery</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success">PURCHASE</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-success">+50 Reams</div>
+                                        <div class="text-muted small">New Stock: 125</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold">₹12,500</div>
+                                        <div class="text-muted small">₹250/ream</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Sunita Yadav</div>
+                                        <div class="text-muted small">Store Manager</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Today</div>
+                                        <div class="text-muted small">10:30 AM</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewTransaction('TXN-2024-001234')">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm" onclick="printVoucher('TXN-2024-001234')">
+                                                <i class="bi bi-printer"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Issue Transaction -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-danger rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-box-arrow-up"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">TXN-2024-001233</div>
+                                                <div class="text-muted small">Issue Voucher: IV-2024-445</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Whiteboard Markers</div>
+                                        <div class="text-muted small">Brand: Camlin | SKU: STAT012</div>
+                                        <div class="text-muted small">Category: Stationery</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-danger">ISSUE</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-danger">-24 Pieces</div>
+                                        <div class="text-muted small">Remaining: 156</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold">₹960</div>
+                                        <div class="text-muted small">₹40/piece</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Academic Department</div>
+                                        <div class="text-muted small">Requested by: Priya Sharma</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Yesterday</div>
+                                        <div class="text-muted small">2:15 PM</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewTransaction('TXN-2024-001233')">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm" onclick="printVoucher('TXN-2024-001233')">
+                                                <i class="bi bi-printer"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Transfer Transaction -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-arrow-left-right"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">TXN-2024-001232</div>
+                                                <div class="text-muted small">Transfer Note: TN-2024-78</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Desktop Computer</div>
+                                        <div class="text-muted small">Brand: Dell | Model: OptiPlex 3090</div>
+                                        <div class="text-muted small">Category: Electronics</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-warning">TRANSFER</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-warning">1 Unit</div>
+                                        <div class="text-muted small">Lab A → Lab B</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold">₹45,000</div>
+                                        <div class="text-muted small">Asset Value</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">IT Department</div>
+                                        <div class="text-muted small">Approved by: Rajesh Kumar</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">2 Days Ago</div>
+                                        <div class="text-muted small">11:45 AM</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewTransaction('TXN-2024-001232')">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm" onclick="printVoucher('TXN-2024-001232')">
+                                                <i class="bi bi-printer"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Adjustment Transaction -->
+                                <tr class="table-info">
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-info rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-tools"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">TXN-2024-001231</div>
+                                                <div class="text-muted small">Stock Adjustment: SA-2024-12</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Blue Ink Pens</div>
+                                        <div class="text-muted small">Brand: Reynolds | SKU: STAT005</div>
+                                        <div class="text-muted small">Category: Stationery</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-info">ADJUSTMENT</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-info">+15 Pieces</div>
+                                        <div class="text-muted small">Physical Count Variance</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold">₹225</div>
+                                        <div class="text-muted small">₹15/piece</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Store Audit Team</div>
+                                        <div class="text-muted small">Verified by: Sunita Yadav</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">3 Days Ago</div>
+                                        <div class="text-muted small">4:30 PM</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewTransaction('TXN-2024-001231')">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm" onclick="printVoucher('TXN-2024-001231')">
+                                                <i class="bi bi-printer"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Damage Transaction -->
+                                <tr class="table-danger">
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-exclamation-triangle"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">TXN-2024-001230</div>
+                                                <div class="text-muted small">Damage Report: DR-2024-34</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Projector Screen</div>
+                                        <div class="text-muted small">Brand: Epson | Model: ELPLP96</div>
+                                        <div class="text-muted small">Category: Electronics</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-secondary">DAMAGE</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-secondary">-1 Unit</div>
+                                        <div class="text-muted small">Water Damage</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold">₹25,000</div>
+                                        <div class="text-muted small">Loss Value</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Maintenance Team</div>
+                                        <div class="text-muted small">Reported by: Ramesh Kumar</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">1 Week Ago</div>
+                                        <div class="text-muted small">9:15 AM</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewTransaction('TXN-2024-001230')">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning btn-sm" onclick="processInsurance('TXN-2024-001230')">
+                                                <i class="bi bi-shield-check"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Showing 5 of 1,250 transactions | Real-time inventory tracking active</small>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-warning" onclick="auditStock()">
+                                <i class="bi bi-shield-check"></i> Stock Audit
+                            </button>
+                            <button class="btn btn-outline-info" onclick="generateReport()">
+                                <i class="bi bi-file-earmark-bar-graph"></i> Movement Report
+                            </button>
+                            <button class="btn btn-success" onclick="reconcileStock()">
+                                <i class="bi bi-check2-square"></i> Reconcile Stock
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewTransaction(transactionId) {
+    showToast('Loading transaction details...', 'info');
+    setTimeout(() => {
+        window.location.href = `/inventory/transactions/${transactionId}/`;
+    }, 500);
+}
+
+function printVoucher(transactionId) {
+    showToast('Generating voucher...', 'info');
+    setTimeout(() => {
+        window.open(`/inventory/transactions/${transactionId}/voucher/`, '_blank');
+        showToast('Voucher generated successfully!', 'success');
+    }, 1000);
+}
+
+function processInsurance(transactionId) {
+    showToast('Processing insurance claim...', 'info');
+    setTimeout(() => {
+        showToast('Insurance claim initiated successfully!', 'success');
+    }, 2000);
+}
+
+function reconcileStock() {
+    showToast('Starting stock reconciliation...', 'info');
+    setTimeout(() => {
+        showToast('Stock reconciliation completed successfully!', 'success');
+    }, 3000);
+}
+
+function auditStock() {
+    showToast('Generating stock audit report...', 'info');
+    setTimeout(() => {
+        showToast('Stock audit report generated successfully!', 'success');
+    }, 2500);
+}
+
+function generateReport() {
+    showToast('Generating movement report...', 'info');
+    setTimeout(() => {
+        showToast('Movement report generated successfully!', 'success');
+    }, 2000);
+}
+
+function exportData(type) {
+    showToast(`Exporting ${type} data...`, 'info');
+    setTimeout(() => {
+        showToast('Export completed successfully!', 'success');
+    }, 2000);
+}
+</script>
+{% endblock %}

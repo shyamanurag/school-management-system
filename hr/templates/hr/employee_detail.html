@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Employee Detail{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h4>Employee Details</h4>
+    <div class="card">
+        <div class="card-body">
+            <h5>{{ employee.get_full_name }}</h5>
+            <p>Employee ID: {{ employee.employee_id }}</p>
+            <p>Department: {{ employee.department }}</p>
+            <p>Position: {{ employee.position }}</p>
+            <p>Email: {{ employee.email }}</p>
+            <p>Phone: {{ employee.phone }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

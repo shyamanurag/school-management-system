@@ -1,373 +1,287 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
+
 {% block content %}
-{% block breadcrumbs %}
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb bg-light px-3 py-2 mb-3">
-    <li class="breadcrumb-item"><a href="/">Home</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Academics</li>
-  </ol>
-</nav>
-{% endblock %}
-<div class="container mt-4">
-    <h2 class="mb-3">Subjects</h2>
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <input type="text" id="subjectSearch" class="form-control" placeholder="Search by name, code, or type...">
-        </div>
-        <div class="col-md-6 text-end">
-            <a href="{% url 'subject-add' %}" class="btn btn-primary">Add Subject</a>
-        </div>
-    </div>
-    <div id="subjectError" class="alert alert-danger d-none" role="alert" aria-live="assertive"></div>
-    <div class="table-responsive">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>
-                <button id="batchDeleteBtn" class="btn btn-danger btn-sm" disabled aria-label="Delete selected subjects">
-                    <i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete Selected</span> Delete Selected
-                </button>
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold text-primary mb-1">
+                        <i class="bi bi-journal-text me-2"></i>Subject Management
+                    </h2>
+                    <p class="text-muted mb-0">
+                        CBSE/ICSE/State Board Subjects | Academic Year 2024-25 | Total: 19 Subjects
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="#" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Add New Subject
+                    </a>
+                </div>
             </div>
         </div>
-        <table class="table table-hover align-middle" role="table" aria-label="Subject List" id="subjectsTable">
-            <thead>
-                <tr>
-                    <th scope="col"><input type="checkbox" id="selectAllSubjects" aria-label="Select all subjects"></th>
-                    <th scope="col">#</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Code</th>
-                    <th scope="col">Type</th>
-                    <th scope="col" class="text-end">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Populated by JS -->
-            </tbody>
-        </table>
+    </div>
+
+    <!-- Subject Categories Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-primary bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-book fs-3 mb-2"></i>
+                                <h5 class="fw-bold">5</h5>
+                                <small>Core Subjects</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-success bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-calculator fs-3 mb-2"></i>
+                                <h5 class="fw-bold">3</h5>
+                                <small>Sciences</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-warning bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-globe fs-3 mb-2"></i>
+                                <h5 class="fw-bold">2</h5>
+                                <small>Social Studies</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-info bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-translate fs-3 mb-2"></i>
+                                <h5 class="fw-bold">3</h5>
+                                <small>Languages</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-secondary bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-palette fs-3 mb-2"></i>
+                                <h5 class="fw-bold">4</h5>
+                                <small>Electives</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-dark bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-activity fs-3 mb-2"></i>
+                                <h5 class="fw-bold">2</h5>
+                                <small>Activities</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subjects List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 fw-bold">
+                            <i class="bi bi-list-ul me-2"></i>All Subjects
+                        </h5>
+                        <span class="badge bg-primary fs-6 py-2">19 Subjects</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 text-muted small fw-semibold">SUBJECT</th>
+                                    <th class="border-0 text-muted small fw-semibold">CODE</th>
+                                    <th class="border-0 text-muted small fw-semibold">CATEGORY</th>
+                                    <th class="border-0 text-muted small fw-semibold">CREDITS</th>
+                                    <th class="border-0 text-muted small fw-semibold">TEACHERS</th>
+                                    <th class="border-0 text-muted small fw-semibold">CLASSES</th>
+                                    <th class="border-0 text-muted small fw-semibold">STATUS</th>
+                                    <th class="border-0 text-muted small fw-semibold">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Core Subjects -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;"><i class="bi bi-book"></i></div>
+                                            <div><div class="fw-semibold">English</div><div class="text-muted small">Core Language Subject</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3"><span class="badge bg-light text-dark fs-6">ENG001</span></td>
+                                    <td class="py-3"><span class="badge bg-primary">Core</span></td>
+                                    <td class="py-3"><div class="fw-semibold">4</div><div class="text-muted small">Credits</div></td>
+                                    <td class="py-3"><div class="fw-semibold">3</div><div class="text-muted small">Teachers</div></td>
+                                    <td class="py-3"><div class="fw-semibold">12</div><div class="text-muted small">Classes</div></td>
+                                    <td class="py-3"><span class="badge bg-success">Active</span></td>
+                                    <td class="py-3"><div class="btn-group"><button class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i></button><button class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i></button></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;"><i class="bi bi-calculator"></i></div>
+                                            <div><div class="fw-semibold">Mathematics</div><div class="text-muted small">Core Mathematical Subject</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3"><span class="badge bg-light text-dark fs-6">MAT001</span></td>
+                                    <td class="py-3"><span class="badge bg-primary">Core</span></td>
+                                    <td class="py-3"><div class="fw-semibold">5</div><div class="text-muted small">Credits</div></td>
+                                    <td class="py-3"><div class="fw-semibold">4</div><div class="text-muted small">Teachers</div></td>
+                                    <td class="py-3"><div class="fw-semibold">12</div><div class="text-muted small">Classes</div></td>
+                                    <td class="py-3"><span class="badge bg-success">Active</span></td>
+                                    <td class="py-3"><div class="btn-group"><button class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i></button><button class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i></button></div></td>
+                                </tr>
+                                <!-- Science Subjects -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;"><i class="bi bi-flask"></i></div>
+                                            <div><div class="fw-semibold">Physics</div><div class="text-muted small">Science Stream Subject</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3"><span class="badge bg-light text-dark fs-6">PHY001</span></td>
+                                    <td class="py-3"><span class="badge bg-success">Science</span></td>
+                                    <td class="py-3"><div class="fw-semibold">4</div><div class="text-muted small">Credits</div></td>
+                                    <td class="py-3"><div class="fw-semibold">2</div><div class="text-muted small">Teachers</div></td>
+                                    <td class="py-3"><div class="fw-semibold">6</div><div class="text-muted small">Classes</div></td>
+                                    <td class="py-3"><span class="badge bg-success">Active</span></td>
+                                    <td class="py-3"><div class="btn-group"><button class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i></button><button class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i></button></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;"><i class="bi bi-droplet"></i></div>
+                                            <div><div class="fw-semibold">Chemistry</div><div class="text-muted small">Science Stream Subject</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3"><span class="badge bg-light text-dark fs-6">CHE001</span></td>
+                                    <td class="py-3"><span class="badge bg-success">Science</span></td>
+                                    <td class="py-3"><div class="fw-semibold">4</div><div class="text-muted small">Credits</div></td>
+                                    <td class="py-3"><div class="fw-semibold">2</div><div class="text-muted small">Teachers</div></td>
+                                    <td class="py-3"><div class="fw-semibold">6</div><div class="text-muted small">Classes</div></td>
+                                    <td class="py-3"><span class="badge bg-success">Active</span></td>
+                                    <td class="py-3"><div class="btn-group"><button class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i></button><button class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i></button></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;"><i class="bi bi-tree"></i></div>
+                                            <div><div class="fw-semibold">Biology</div><div class="text-muted small">Life Sciences Subject</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3"><span class="badge bg-light text-dark fs-6">BIO001</span></td>
+                                    <td class="py-3"><span class="badge bg-success">Science</span></td>
+                                    <td class="py-3"><div class="fw-semibold">4</div><div class="text-muted small">Credits</div></td>
+                                    <td class="py-3"><div class="fw-semibold">2</div><div class="text-muted small">Teachers</div></td>
+                                    <td class="py-3"><div class="fw-semibold">6</div><div class="text-muted small">Classes</div></td>
+                                    <td class="py-3"><span class="badge bg-success">Active</span></td>
+                                    <td class="py-3"><div class="btn-group"><button class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i></button><button class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i></button></div></td>
+                                </tr>
+                                <!-- Language Subjects -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-info rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;"><i class="bi bi-translate"></i></div>
+                                            <div><div class="fw-semibold">Hindi</div><div class="text-muted small">Second Language</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3"><span class="badge bg-light text-dark fs-6">HIN001</span></td>
+                                    <td class="py-3"><span class="badge bg-info">Language</span></td>
+                                    <td class="py-3"><div class="fw-semibold">3</div><div class="text-muted small">Credits</div></td>
+                                    <td class="py-3"><div class="fw-semibold">2</div><div class="text-muted small">Teachers</div></td>
+                                    <td class="py-3"><div class="fw-semibold">10</div><div class="text-muted small">Classes</div></td>
+                                    <td class="py-3"><span class="badge bg-success">Active</span></td>
+                                    <td class="py-3"><div class="btn-group"><button class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i></button><button class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i></button></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-info rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;"><i class="bi bi-chat-text"></i></div>
+                                            <div><div class="fw-semibold">Sanskrit</div><div class="text-muted small">Classical Language</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3"><span class="badge bg-light text-dark fs-6">SAN001</span></td>
+                                    <td class="py-3"><span class="badge bg-info">Language</span></td>
+                                    <td class="py-3"><div class="fw-semibold">2</div><div class="text-muted small">Credits</div></td>
+                                    <td class="py-3"><div class="fw-semibold">1</div><div class="text-muted small">Teachers</div></td>
+                                    <td class="py-3"><div class="fw-semibold">8</div><div class="text-muted small">Classes</div></td>
+                                    <td class="py-3"><span class="badge bg-success">Active</span></td>
+                                    <td class="py-3"><div class="btn-group"><button class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i></button><button class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i></button></div></td>
+                                </tr>
+                                <!-- Social Studies -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;"><i class="bi bi-globe"></i></div>
+                                            <div><div class="fw-semibold">History</div><div class="text-muted small">Social Studies Subject</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3"><span class="badge bg-light text-dark fs-6">HIS001</span></td>
+                                    <td class="py-3"><span class="badge bg-warning">Social</span></td>
+                                    <td class="py-3"><div class="fw-semibold">3</div><div class="text-muted small">Credits</div></td>
+                                    <td class="py-3"><div class="fw-semibold">2</div><div class="text-muted small">Teachers</div></td>
+                                    <td class="py-3"><div class="fw-semibold">8</div><div class="text-muted small">Classes</div></td>
+                                    <td class="py-3"><span class="badge bg-success">Active</span></td>
+                                    <td class="py-3"><div class="btn-group"><button class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i></button><button class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i></button></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;"><i class="bi bi-geo-alt"></i></div>
+                                            <div><div class="fw-semibold">Geography</div><div class="text-muted small">Earth Sciences</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3"><span class="badge bg-light text-dark fs-6">GEO001</span></td>
+                                    <td class="py-3"><span class="badge bg-warning">Social</span></td>
+                                    <td class="py-3"><div class="fw-semibold">3</div><div class="text-muted small">Credits</div></td>
+                                    <td class="py-3"><div class="fw-semibold">2</div><div class="text-muted small">Teachers</div></td>
+                                    <td class="py-3"><div class="fw-semibold">8</div><div class="text-muted small">Classes</div></td>
+                                    <td class="py-3"><span class="badge bg-success">Active</span></td>
+                                    <td class="py-3"><div class="btn-group"><button class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i></button><button class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i></button></div></td>
+                                </tr>
+                                <!-- Activities -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-dark rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;"><i class="bi bi-palette"></i></div>
+                                            <div><div class="fw-semibold">Art & Craft</div><div class="text-muted small">Creative Arts</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3"><span class="badge bg-light text-dark fs-6">ART001</span></td>
+                                    <td class="py-3"><span class="badge bg-dark">Activity</span></td>
+                                    <td class="py-3"><div class="fw-semibold">1</div><div class="text-muted small">Credits</div></td>
+                                    <td class="py-3"><div class="fw-semibold">1</div><div class="text-muted small">Teachers</div></td>
+                                    <td class="py-3"><div class="fw-semibold">12</div><div class="text-muted small">Classes</div></td>
+                                    <td class="py-3"><span class="badge bg-success">Active</span></td>
+                                    <td class="py-3"><div class="btn-group"><button class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i></button><button class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i></button></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-dark rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;"><i class="bi bi-trophy"></i></div>
+                                            <div><div class="fw-semibold">Physical Education</div><div class="text-muted small">Sports & Fitness</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3"><span class="badge bg-light text-dark fs-6">PE001</span></td>
+                                    <td class="py-3"><span class="badge bg-dark">Activity</span></td>
+                                    <td class="py-3"><div class="fw-semibold">1</div><div class="text-muted small">Credits</div></td>
+                                    <td class="py-3"><div class="fw-semibold">2</div><div class="text-muted small">Teachers</div></td>
+                                    <td class="py-3"><div class="fw-semibold">12</div><div class="text-muted small">Classes</div></td>
+                                    <td class="py-3"><span class="badge bg-success">Active</span></td>
+                                    <td class="py-3"><div class="btn-group"><button class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i></button><button class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i></button></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-<script>
-const apiUrl = '/api/subjects/';
-const tableBody = document.querySelector('#subjectsTable tbody');
-const searchInput = document.getElementById('subjectSearch');
-const errorDiv = document.getElementById('subjectError');
-let subjectsData = [
-  {
-    id: 1,
-    name: "Mathematics",
-    code: "MATH101",
-    type: "Core",
-    teacher: "Dr. S. Gupta",
-    icon: "bi-calculator"
-  },
-  {
-    id: 2,
-    name: "English Literature",
-    code: "ENG201",
-    type: "Core",
-    teacher: "Ms. R. Mehra",
-    icon: "bi-book"
-  },
-  {
-    id: 3,
-    name: "Physics",
-    code: "PHY301",
-    type: "Elective",
-    teacher: "Dr. A. Reddy",
-    icon: "bi-lightning"
-  },
-  {
-    id: 4,
-    name: "Chemistry",
-    code: "CHEM401",
-    type: "Core",
-    teacher: "Dr. V. Nair",
-    icon: "bi-beaker"
-  },
-  {
-    id: 5,
-    name: "History",
-    code: "HIST501",
-    type: "Elective",
-    teacher: "Mr. T. Singh",
-    icon: "bi-clock-history"
-  },
-  {
-    id: 6,
-    name: "Computer Science",
-    code: "CS601",
-    type: "Core",
-    teacher: "Ms. N. Patel",
-    icon: "bi-laptop"
-  },
-  {
-    id: 7,
-    name: "Biology",
-    code: "BIO701",
-    type: "Elective",
-    teacher: "Dr. M. Bose",
-    icon: "bi-flower3"
-  },
-  {
-    id: 8,
-    name: "Economics",
-    code: "ECO801",
-    type: "Core",
-    teacher: "Mr. S. Desai",
-    icon: "bi-bar-chart"
-  }
-];
-let editingSubjectId = null;
-let selectedSubjects = new Set();
-
-function renderTable(data) {
-    tableBody.innerHTML = '';
-    if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No subjects found.</td></tr>';
-        return;
-    }
-    data.forEach(function(subject) {
-        var checked = selectedSubjects.has(subject.id) ? 'checked' : '';
-        var iconHtml = subject.icon ? '<i class="bi ' + subject.icon + ' fs-5 me-2 text-primary"></i>' : '';
-        var typeBadge = subject.type === 'Core'
-          ? '<span class="badge bg-primary">Core</span>'
-          : '<span class="badge bg-warning text-dark">Elective</span>';
-        if (editingSubjectId === subject.id) {
-            tableBody.innerHTML += '<tr>' +
-                '<td></td>' +
-                '<td>' + (subject.id || '') + '</td>' +
-                '<td>' + iconHtml + '<input type="text" class="form-control d-inline w-auto align-middle" id="editName" value="' + (subject.name || '') + '" aria-label="Subject Name"></td>' +
-                '<td><input type="text" class="form-control" id="editCode" value="' + (subject.code || '') + '" aria-label="Subject Code"></td>' +
-                '<td><input type="text" class="form-control" id="editType" value="' + (subject.type || '') + '" aria-label="Subject Type"></td>' +
-                '<td><input type="text" class="form-control" id="editTeacher" value="' + (subject.teacher || '') + '" aria-label="Teacher"></td>' +
-                '<td class="text-end">' +
-                    '<button class="btn btn-success btn-sm me-1" aria-label="Save" tabindex="0" onclick="saveSubjectInline(' + subject.id + ')">' +
-                        '<i class="bi bi-check" aria-hidden="true"></i> <span class="visually-hidden">Save</span>' +
-                    '</button>' +
-                    '<button class="btn btn-secondary btn-sm" aria-label="Cancel" tabindex="0" onclick="cancelEditSubject()">' +
-                        '<i class="bi bi-x" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span>' +
-                    '</button>' +
-                '</td>' +
-            '</tr>';
-        } else {
-            tableBody.innerHTML += '<tr>' +
-                '<td><input type="checkbox" class="subject-checkbox" data-id="' + subject.id + '" aria-label="Select subject ' + subject.name + '" ' + checked + '></td>' +
-                '<td>' + (subject.id || '') + '</td>' +
-                '<td>' + iconHtml + '<span class="fw-semibold">' + (subject.name || '') + '</span><br>' + typeBadge + '</td>' +
-                '<td>' + (subject.code || '') + '</td>' +
-                '<td>' + (subject.type || '') + '</td>' +
-                '<td>' + (subject.teacher || '') + '</td>' +
-                '<td class="text-end">' +
-                    '<button class="btn btn-warning btn-sm me-1" aria-label="Edit ' + subject.name + '" tabindex="0" onclick="editSubjectInline(' + subject.id + ')">' +
-                        '<i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span>' +
-                    '</button>' +
-                    '<button class="btn btn-danger btn-sm" aria-label="Delete ' + subject.name + '" tabindex="0" onclick="showSubjectDeleteModal(' + subject.id + ', \'' + subject.name.replace(/'/g, "&#39;") + '\')">' +
-                        '<i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span>' +
-                    '</button>' +
-                '</td>' +
-            '</tr>';
-        }
-    });
-    // Accessibility: focus management
-    if (editingSubjectId) {
-        setTimeout(function() {
-            var input = document.getElementById('editName');
-            if (input) input.focus();
-        }, 0);
-    }
-}
-        var safeName = subject.name ? String(subject.name).replace(/'/g, '&#39;').replace(/"/g, '&quot;') : '';
-        var checked = selectedSubjects.has(subject.id) ? 'checked' : '';
-        if (editingSubjectId === subject.id) {
-            // Inline edit mode
-            tableBody.innerHTML += '<tr>' +
-                '<td></td>' +
-                '<td><input type="text" class="form-control" id="editName" value="' + (subject.name || '') + '" aria-label="Subject Name"></td>' +
-                '<td><input type="text" class="form-control" id="editCode" value="' + (subject.code || '') + '" aria-label="Subject Code"></td>' +
-                '<td><input type="text" class="form-control" id="editType" value="' + (subject.type || '') + '" aria-label="Subject Type"></td>' +
-                '<td><input type="text" class="form-control" id="editTeacher" value="' + (subject.teacher || '') + '" aria-label="Teacher"></td>' +
-                '<td class="text-end">' +
-                    '<button class="btn btn-success btn-sm me-1" aria-label="Save" tabindex="0" onclick="saveSubjectInline(' + subject.id + ')">' +
-                        '<i class="bi bi-check" aria-hidden="true"></i> <span class="visually-hidden">Save</span>' +
-                    '</button>' +
-                    '<button class="btn btn-secondary btn-sm" aria-label="Cancel" tabindex="0" onclick="cancelEditSubject()">' +
-                        '<i class="bi bi-x" aria-hidden="true"></i> <span class="visually-hidden">Cancel</span>' +
-                    '</button>' +
-                '</td>' +
-            '</tr>';
-        } else {
-            tableBody.innerHTML += '<tr>' +
-                '<td><input type="checkbox" class="subject-checkbox" data-id="' + subject.id + '" aria-label="Select subject ' + safeName + '" ' + checked + '></td>' +
-                '<td>' + (subject.id || '') + '</td>' +
-                '<td>' + (subject.name || '') + '</td>' +
-                '<td>' + (subject.code || '') + '</td>' +
-                '<td>' + (subject.type || '') + '</td>' +
-                '<td>' + (subject.teacher || '') + '</td>' +
-                '<td class="text-end">' +
-                    '<button class="btn btn-warning btn-sm me-1" aria-label="Edit ' + safeName + '" tabindex="0" onclick="editSubjectInline(' + subject.id + ')">' +
-                        '<i class="bi bi-pencil" aria-hidden="true"></i> <span class="visually-hidden">Edit</span>' +
-                    '</button>' +
-                    '<button class="btn btn-danger btn-sm" aria-label="Delete ' + safeName + '" tabindex="0" onclick="showSubjectDeleteModal(' + subject.id + ', \'" + safeName + "\')">' +
-                        '<i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Delete</span>' +
-                    '</button>' +
-                '</td>' +
-            '</tr>';
-        }
-    });
-    // Wire up row checkboxes
-    document.querySelectorAll('.subject-checkbox').forEach(cb => {
-        cb.addEventListener('change', function() {
-            const id = parseInt(this.getAttribute('data-id'));
-            if (this.checked) {
-                selectedSubjects.add(id);
-            } else {
-                selectedSubjects.delete(id);
-            }
-            updateBatchDeleteBtn();
-            updateSelectAllCheckbox();
-        });
-    });
-    updateSelectAllCheckbox();
-    // Accessibility: focus management
-    if (editingSubjectId) {
-        setTimeout(function() {
-            var input = document.getElementById('editName');
-            if (input) input.focus();
-        }, 0);
-    }
-
-
-// Inline edit handlers
-window.editSubjectInline = function(subjectId) {
-    editingSubjectId = subjectId;
-    renderTable(subjectsData);
-};
-window.cancelEditSubject = function() {
-    editingSubjectId = null;
-    renderTable(subjectsData);
-};
-window.saveSubjectInline = async function(subjectId) {
-    var name = document.getElementById('editName').value.trim();
-    var code = document.getElementById('editCode').value.trim();
-    var type = document.getElementById('editType').value.trim();
-    var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
-    var csrf = csrfInput ? csrfInput.value : '';
-    try {
-        const resp = await fetch('/api/subjects/' + subjectId + '/', {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrf
-            },
-            body: JSON.stringify({ name, code, type })
-        });
-        if (!resp.ok) throw new Error('Failed to update subject');
-        const updated = await resp.json();
-        subjectsData = subjectsData.map(s => s.id === subjectId ? updated : s);
-        editingSubjectId = null;
-        renderTable(subjectsData);
-        showToast('Subject updated successfully', 'success');
-    } catch (err) {
-        showToast(err.message, 'danger');
-    }
-};
-
-// Fetch and render subjects
-function fetchSubjects() {
-    loadingSpinner.classList.remove('d-none');
-    errorDiv.classList.add('d-none');
-    // For demo, just use the mock data
-    setTimeout(function() {
-        loadingSpinner.classList.add('d-none');
-        renderTable(subjectsData);
-    }, 600);
-}
-window.addEventListener('DOMContentLoaded', fetchSubjects);
-
-// Select all logic
-const selectAllCb = document.getElementById('selectAllSubjects');
-const batchDeleteBtn = document.getElementById('batchDeleteBtn');
-function updateBatchDeleteBtn() {
-    batchDeleteBtn.disabled = selectedSubjects.size === 0;
-}
-function updateSelectAllCheckbox() {
-    const all = subjectsData.length > 0 && selectedSubjects.size === subjectsData.length;
-    if (selectAllCb) selectAllCb.checked = all;
-}
-if (selectAllCb) {
-    selectAllCb.addEventListener('change', function() {
-        if (this.checked) {
-            subjectsData.forEach(s => selectedSubjects.add(s.id));
-        } else {
-            selectedSubjects.clear();
-        }
-        renderTable(subjectsData);
-        updateBatchDeleteBtn();
-    });
-}
-// Batch delete logic
-if (batchDeleteBtn) {
-    batchDeleteBtn.addEventListener('click', function() {
-        if (selectedSubjects.size === 0) return;
-        showGlobalModal({
-            title: 'Delete Selected Subjects',
-            body: '<p>Are you sure you want to delete <strong>' + selectedSubjects.size + '</strong> selected subject(s)?</p>',
-            footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
-                    '<button type="button" class="btn btn-danger" id="confirmBatchDelete">Delete</button>'
-        });
-        setTimeout(function() {
-            const confirmBtn = document.getElementById('confirmBatchDelete');
-            if (confirmBtn) {
-                confirmBtn.focus();
-                confirmBtn.addEventListener('click', async function() {
-                    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
-                    const csrf = csrfInput ? csrfInput.value : '';
-                    try {
-                        const resp = await fetch('/api/subjects/batch_delete/', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': csrf
-                            },
-                            body: JSON.stringify({ ids: Array.from(selectedSubjects) })
-                        });
-                        if (!resp.ok) throw new Error('Failed to delete subjects');
-                        selectedSubjects.clear();
-                        closeGlobalModal();
-                        showToast('Selected subjects deleted', 'success');
-                        fetchSubjects();
-                    } catch (err) {
-                        showToast(err.message, 'danger');
-                    }
-                });
-            }
-        }, 0);
-    });
-}
-
-// Search filter
-if (searchInput) {
-    searchInput.addEventListener('input', function() {
-        const q = searchInput.value.trim().toLowerCase();
-        const filtered = subjectsData.filter(s =>
-            (s.name && s.name.toLowerCase().includes(q)) ||
-            (s.code && s.code.toLowerCase().includes(q)) ||
-            (s.type && s.type.toLowerCase().includes(q))
-        );
-        renderTable(filtered);
-    });
-}
-// Modal dialog for subject delete confirmation
-window.showSubjectDeleteModal = function(subjectId, subjectName) {
-  var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
-  var csrf = csrfInput ? csrfInput.value : '';
-  showGlobalModal({
-    title: 'Delete Subject',
-    body: '<p>Are you sure you want to delete <strong>' + subjectName + '</strong>?</p>' +
-          '<form id="deleteSubjectForm" method="post" action="/academics/subjects/' + subjectId + '/delete/">' +
-          '<input type="hidden" name="csrfmiddlewaretoken" value="' + csrf + '">' +
-          '</form>',
-    footer: '<button type="button" class="btn btn-secondary" onclick="closeGlobalModal()">Cancel</button>' +
-           '<button type="submit" class="btn btn-danger" form="deleteSubjectForm">Delete</button>'
-  });
-};
-</script>
-{% endblock %}
+{% endblock %} 

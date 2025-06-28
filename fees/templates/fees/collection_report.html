@@ -1,0 +1,25 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fee Collection Report</title>
+    <meta charset='utf-8'>
+</head>
+<body>
+    <h1>Fee Collection Report</h1>
+    
+    <div>
+        <h2>Summary</h2>
+        <p>Total Collection: Rs. {{ total_collection }}</p>
+        <p>Total Due: Rs. {{ total_due }}</p>
+        <p>Collection Efficiency: {{ collection_efficiency }}%</p>
+    </div>
+    
+    <div>
+        <h2>Grade-wise Collection</h2>
+        {% for item in grade_wise_collection %}
+            <p>{{ item.student__grade__name }}: Rs. {{ item.total_amount }}</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

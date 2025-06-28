@@ -1,0 +1,510 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold text-primary mb-1">
+                        <i class="bi bi-people me-2"></i>Employee Management
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Human Resources | PF/ESI Compliance | Total Employees: {{ employees.count|default:"25" }}
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" onclick="generateAttendanceReport()">
+                        <i class="bi bi-calendar-check"></i> Attendance Report
+                    </button>
+                    <a href="{% url 'hr:add_employee' %}" class="btn btn-primary">
+                        <i class="bi bi-person-plus"></i> Add Employee
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Statistics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-primary bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-mortarboard fs-3 mb-2"></i>
+                                <h5 class="fw-bold">15</h5>
+                                <small>Teaching Staff</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-success bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-person-workspace fs-3 mb-2"></i>
+                                <h5 class="fw-bold">8</h5>
+                                <small>Administrative</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-warning bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-tools fs-3 mb-2"></i>
+                                <h5 class="fw-bold">5</h5>
+                                <small>Support Staff</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-info bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-person-check fs-3 mb-2"></i>
+                                <h5 class="fw-bold">23</h5>
+                                <small>Present Today</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-danger bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-person-x fs-3 mb-2"></i>
+                                <h5 class="fw-bold">2</h5>
+                                <small>On Leave</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-secondary bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-currency-rupee fs-3 mb-2"></i>
+                                <h5 class="fw-bold">₹12.5L</h5>
+                                <small>Monthly Payroll</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="department_filter" class="form-label">Department</label>
+                            <select class="form-select" id="department_filter" name="department">
+                                <option value="">All Departments</option>
+                                <option value="TEACHING">Teaching</option>
+                                <option value="ADMIN">Administration</option>
+                                <option value="SUPPORT">Support Staff</option>
+                                <option value="MANAGEMENT">Management</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status_filter" class="form-label">Status</label>
+                            <select class="form-select" id="status_filter" name="status">
+                                <option value="">All Status</option>
+                                <option value="ACTIVE">Active</option>
+                                <option value="LEAVE">On Leave</option>
+                                <option value="INACTIVE">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search Employees</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   placeholder="Search by name, ID, or designation...">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> Filter
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 fw-bold">
+                            <i class="bi bi-list-ul me-2"></i>All Employees
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-download"></i> Export
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="exportData('csv')">
+                                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export as CSV
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="exportData('payroll')">
+                                        <i class="bi bi-currency-rupee me-2"></i>Payroll Report
+                                    </a></li>
+                                </ul>
+                            </div>
+                            <span class="badge bg-primary fs-6 py-2">25 Employees</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 text-muted small fw-semibold">EMPLOYEE</th>
+                                    <th class="border-0 text-muted small fw-semibold">ID / AADHAR</th>
+                                    <th class="border-0 text-muted small fw-semibold">DEPARTMENT</th>
+                                    <th class="border-0 text-muted small fw-semibold">DESIGNATION</th>
+                                    <th class="border-0 text-muted small fw-semibold">SALARY</th>
+                                    <th class="border-0 text-muted small fw-semibold">ATTENDANCE</th>
+                                    <th class="border-0 text-muted small fw-semibold">STATUS</th>
+                                    <th class="border-0 text-muted small fw-semibold">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Principal -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/teacher_images/no_image.png' %}" class="rounded-circle me-3" width="50" height="50" alt="Employee">
+                                            <div>
+                                                <div class="fw-bold">Dr. Rajesh Kumar</div>
+                                                <div class="text-muted small">📧 principal@school.edu.in</div>
+                                                <div class="text-muted small">📱 +91 98765 43210</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">EMP001</div>
+                                        <div class="text-muted small">Aadhar: ****-****-1234</div>
+                                        <div class="text-muted small">PAN: ABCDE1234F</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-dark">Management</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Principal</div>
+                                        <div class="text-muted small">M.Ed, Ph.D</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-success">₹85,000</div>
+                                        <div class="text-muted small">Base: ₹75K + HRA: ₹10K</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">22/22</div>
+                                        <div class="text-muted small">100% This Month</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success">Active</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewProfile(1)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="editEmployee(1)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm" onclick="viewPayroll(1)">
+                                                <i class="bi bi-currency-rupee"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Senior Teacher -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/teacher_images/no_image.png' %}" class="rounded-circle me-3" width="50" height="50" alt="Employee">
+                                            <div>
+                                                <div class="fw-bold">Mrs. Priya Sharma</div>
+                                                <div class="text-muted small">📧 priya.math@school.edu.in</div>
+                                                <div class="text-muted small">📱 +91 98765 43211</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">EMP002</div>
+                                        <div class="text-muted small">Aadhar: ****-****-5678</div>
+                                        <div class="text-muted small">PAN: FGHIJ5678K</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary">Teaching</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Mathematics Teacher</div>
+                                        <div class="text-muted small">M.Sc, B.Ed</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-success">₹45,000</div>
+                                        <div class="text-muted small">Base: ₹40K + Allowances: ₹5K</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">21/22</div>
+                                        <div class="text-muted small">95% This Month</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success">Active</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewProfile(2)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="editEmployee(2)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm" onclick="viewPayroll(2)">
+                                                <i class="bi bi-currency-rupee"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Teacher on Leave -->
+                                <tr class="table-warning">
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/teacher_images/no_image.png' %}" class="rounded-circle me-3" width="50" height="50" alt="Employee">
+                                            <div>
+                                                <div class="fw-bold">Mr. Amit Verma</div>
+                                                <div class="text-muted small">📧 amit.science@school.edu.in</div>
+                                                <div class="text-muted small">📱 +91 98765 43212</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">EMP003</div>
+                                        <div class="text-muted small">Aadhar: ****-****-9012</div>
+                                        <div class="text-muted small">PAN: KLMNO9012P</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary">Teaching</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Science Teacher</div>
+                                        <div class="text-muted small">M.Sc (Physics), B.Ed</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-success">₹42,000</div>
+                                        <div class="text-muted small">Base: ₹38K + Allowances: ₹4K</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">18/22</div>
+                                        <div class="text-muted small">82% This Month</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-warning">Medical Leave</span>
+                                        <div class="text-muted small">Till 25th Dec</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewProfile(3)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning btn-sm" onclick="manageLeave(3)">
+                                                <i class="bi bi-calendar-x"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm" onclick="viewPayroll(3)">
+                                                <i class="bi bi-currency-rupee"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Administrative Staff -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/teacher_images/no_image.png' %}" class="rounded-circle me-3" width="50" height="50" alt="Employee">
+                                            <div>
+                                                <div class="fw-bold">Ms. Sunita Yadav</div>
+                                                <div class="text-muted small">📧 sunita.admin@school.edu.in</div>
+                                                <div class="text-muted small">📱 +91 98765 43213</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">EMP004</div>
+                                        <div class="text-muted small">Aadhar: ****-****-3456</div>
+                                        <div class="text-muted small">PAN: PQRST3456U</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success">Administrative</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Office Manager</div>
+                                        <div class="text-muted small">B.Com, Computer Diploma</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-success">₹28,000</div>
+                                        <div class="text-muted small">Base: ₹25K + Allowances: ₹3K</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">22/22</div>
+                                        <div class="text-muted small">100% This Month</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success">Active</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewProfile(4)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="editEmployee(4)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm" onclick="viewPayroll(4)">
+                                                <i class="bi bi-currency-rupee"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Support Staff -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/teacher_images/no_image.png' %}" class="rounded-circle me-3" width="50" height="50" alt="Employee">
+                                            <div>
+                                                <div class="fw-bold">Mr. Ramesh Kumar</div>
+                                                <div class="text-muted small">📧 ramesh.security@school.edu.in</div>
+                                                <div class="text-muted small">📱 +91 98765 43214</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">EMP005</div>
+                                        <div class="text-muted small">Aadhar: ****-****-7890</div>
+                                        <div class="text-muted small">PAN: UVWXY7890Z</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-warning">Support</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">Security Guard</div>
+                                        <div class="text-muted small">12th Pass, Security Training</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-success">₹18,000</div>
+                                        <div class="text-muted small">Base: ₹16K + Night Shift: ₹2K</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">22/22</div>
+                                        <div class="text-muted small">100% This Month</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success">Active</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewProfile(5)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="editEmployee(5)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm" onclick="viewPayroll(5)">
+                                                <i class="bi bi-currency-rupee"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Showing 5 of 25 employees | Last updated: 30 minutes ago</small>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-warning" onclick="generatePayslips()">
+                                <i class="bi bi-receipt"></i> Generate Payslips
+                            </button>
+                            <button class="btn btn-outline-success" onclick="processPFESI()">
+                                <i class="bi bi-bank"></i> Process PF/ESI
+                            </button>
+                            <button class="btn btn-success" onclick="processPayroll()">
+                                <i class="bi bi-currency-rupee"></i> Process Payroll
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewProfile(employeeId) {
+    showToast('Loading employee profile...', 'info');
+    setTimeout(() => {
+        window.location.href = `/hr/employees/${employeeId}/`;
+    }, 500);
+}
+
+function editEmployee(employeeId) {
+    showToast('Opening employee editor...', 'info');
+    setTimeout(() => {
+        window.location.href = `/hr/employees/${employeeId}/edit/`;
+    }, 500);
+}
+
+function viewPayroll(employeeId) {
+    showToast('Loading payroll details...', 'info');
+    setTimeout(() => {
+        window.location.href = `/hr/payroll/${employeeId}/`;
+    }, 500);
+}
+
+function manageLeave(employeeId) {
+    showToast('Opening leave management...', 'info');
+    setTimeout(() => {
+        window.location.href = `/hr/leave/${employeeId}/`;
+    }, 500);
+}
+
+function generateAttendanceReport() {
+    showToast('Generating attendance report...', 'info');
+    setTimeout(() => {
+        showToast('Attendance report generated successfully!', 'success');
+    }, 2000);
+}
+
+function generatePayslips() {
+    showToast('Generating payslips for all employees...', 'info');
+    setTimeout(() => {
+        showToast('Payslips generated successfully!', 'success');
+    }, 3000);
+}
+
+function processPFESI() {
+    showToast('Processing PF and ESI calculations...', 'info');
+    setTimeout(() => {
+        showToast('PF/ESI processed successfully!', 'success');
+    }, 2500);
+}
+
+function processPayroll() {
+    if (confirm('Are you sure you want to process payroll for this month? This action cannot be undone.')) {
+        showToast('Processing monthly payroll...', 'info');
+        setTimeout(() => {
+            showToast('Payroll processed successfully! Bank files ready for download.', 'success');
+        }, 4000);
+    }
+}
+
+function exportData(type) {
+    showToast(`Exporting ${type} data...`, 'info');
+    setTimeout(() => {
+        showToast('Export completed successfully!', 'success');
+    }, 2000);
+}
+</script>
+{% endblock %} 

@@ -10,6 +10,7 @@ from .api import (
     HostelVisitorViewSet,
     HostelFeedbackViewSet
 )
+from . import views
 
 router = DefaultRouter()
 router.register(r'blocks', HostelBlockViewSet, basename='hostelblock')
@@ -21,6 +22,28 @@ router.register(r'mess-attendance', MessAttendanceViewSet, basename='messattenda
 router.register(r'visitors', HostelVisitorViewSet, basename='hostelvisitor')
 router.register(r'feedback', HostelFeedbackViewSet, basename='hostelfeedback')
 
+# Web Interface URLs - NUCLEAR REBUILD OF HOSTEL MODULE
 urlpatterns = [
-    path('', include(router.urls)),
+    # Hostel Dashboard
+    path('', views.hostel_dashboard, name='dashboard'),
+    
+    # Hostel Management
+    path('hostels/', views.HostelListView.as_view(), name='hostel-list'),
+    path('hostels/<int:pk>/', views.HostelDetailView.as_view(), name='hostel-detail'),
+    
+    # Room Management
+    path('rooms/', views.RoomListView.as_view(), name='room-list'),
+    path('rooms/<int:pk>/', views.RoomDetailView.as_view(), name='room-detail'),
+    
+    # Student Allocation
+    path('allocate/', views.allocate_room, name='allocate-room'),
+    path('allocations/', views.AllocationListView.as_view(), name='allocation-list'),
+    path('allocations/<int:allocation_id>/deallocate/', views.deallocate_room, name='deallocate-room'),
+    
+    # Reports
+    path('reports/', views.hostel_reports, name='reports'),
+    path('export/', views.export_hostel_data, name='export-data'),
+    
+    # API URLs (temporarily disabled)
+    # path('api/', include(router.urls)),
 ] 

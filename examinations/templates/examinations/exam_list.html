@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold text-primary mb-1">
+                        <i class="bi bi-journal-check me-2"></i>Examination Management
+                    </h2>
+                    <p class="text-muted mb-0">
+                        CBSE/ICSE/State Board Examinations | Academic Year 2024-25 | Total: 8 Exams
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="#" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Schedule New Exam
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Types Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-primary bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-calendar-week fs-3 mb-2"></i>
+                                <h5 class="fw-bold">2</h5>
+                                <small>Unit Tests</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-success bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-calendar-month fs-3 mb-2"></i>
+                                <h5 class="fw-bold">2</h5>
+                                <small>Term Exams</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-warning bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-calendar-event fs-3 mb-2"></i>
+                                <h5 class="fw-bold">1</h5>
+                                <small>Half Yearly</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-danger bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-award fs-3 mb-2"></i>
+                                <h5 class="fw-bold">1</h5>
+                                <small>Annual Exam</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-info bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-clipboard-check fs-3 mb-2"></i>
+                                <h5 class="fw-bold">1</h5>
+                                <small>Board Exam</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-secondary bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-pencil-square fs-3 mb-2"></i>
+                                <h5 class="fw-bold">1</h5>
+                                <small>Practical</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exams List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 fw-bold">
+                            <i class="bi bi-list-ul me-2"></i>Scheduled Examinations
+                        </h5>
+                        <span class="badge bg-primary fs-6 py-2">8 Exams</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 text-muted small fw-semibold">EXAM</th>
+                                    <th class="border-0 text-muted small fw-semibold">TYPE</th>
+                                    <th class="border-0 text-muted small fw-semibold">CLASSES</th>
+                                    <th class="border-0 text-muted small fw-semibold">DURATION</th>
+                                    <th class="border-0 text-muted small fw-semibold">SUBJECTS</th>
+                                    <th class="border-0 text-muted small fw-semibold">STATUS</th>
+                                    <th class="border-0 text-muted small fw-semibold">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-calendar-week"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">Unit Test 1</div>
+                                                <div class="text-muted small">March 15-22, 2024</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary">Unit Test</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">I - XII</div>
+                                        <div class="text-muted small">All Classes</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">7 Days</div>
+                                        <div class="text-muted small">1.5 hrs/exam</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">5</div>
+                                        <div class="text-muted small">Core Subjects</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success">Completed</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm">
+                                                <i class="bi bi-file-earmark"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-calendar-event"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">Half Yearly Examination</div>
+                                                <div class="text-muted small">September 15-30, 2024</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-warning">Half Yearly</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">I - XII</div>
+                                        <div class="text-muted small">All Classes</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">15 Days</div>
+                                        <div class="text-muted small">3 hrs/exam</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">8</div>
+                                        <div class="text-muted small">All Subjects</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-info">Scheduled</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-danger rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-award"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">Annual Examination</div>
+                                                <div class="text-muted small">March 1-20, 2025</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-danger">Annual</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">I - XII</div>
+                                        <div class="text-muted small">All Classes</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">20 Days</div>
+                                        <div class="text-muted small">3 hrs/exam</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">8</div>
+                                        <div class="text-muted small">All Subjects</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-secondary">Draft</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-info rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-clipboard-check"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">CBSE Board Examination</div>
+                                                <div class="text-muted small">February 15 - March 15, 2025</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-info">Board Exam</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">X, XII</div>
+                                        <div class="text-muted small">Board Classes</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">30 Days</div>
+                                        <div class="text-muted small">3 hrs/exam</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">6</div>
+                                        <div class="text-muted small">Board Subjects</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-warning">Pending</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm">
+                                                <i class="bi bi-file-earmark"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">Science Practical Exams</div>
+                                                <div class="text-muted small">January 15-25, 2025</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-secondary">Practical</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">XI, XII</div>
+                                        <div class="text-muted small">Science Stream</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">10 Days</div>
+                                        <div class="text-muted small">2 hrs/exam</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">3</div>
+                                        <div class="text-muted small">Science Subjects</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-secondary">Draft</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

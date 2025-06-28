@@ -1,4 +1,4 @@
-"""
+﻿"""
 Base Django settings for school_modernized project.
 """
 
@@ -40,7 +40,7 @@ LOCAL_APPS = [
     'hostel',
     'transport',
     'inventory',
-    'communication',
+    # 'communication',  # Temporarily disabled due to model conflicts
     'analytics',
     'notifications',
     'admissions',
@@ -131,6 +131,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Site ID
 SITE_ID = 1
 
+# Authentication Settings
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/login/'
+
 # Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -165,3 +170,7 @@ LOGGING = {
         },
     },
 } 
+# Authentication Settings
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+

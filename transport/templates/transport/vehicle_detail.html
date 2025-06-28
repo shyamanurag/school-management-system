@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Vehicle Detail{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h4>Vehicle Details - {{ vehicle.vehicle_number }}</h4>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Vehicle Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Vehicle Number:</strong> {{ vehicle.vehicle_number }}</p>
+                    <p><strong>Type:</strong> {{ vehicle.vehicle_type }}</p>
+                    <p><strong>Capacity:</strong> {{ vehicle.capacity }}</p>
+                    <p><strong>Driver:</strong> {{ vehicle.driver_name|default:"Not assigned" }}</p>
+                    <p><strong>Driver Phone:</strong> {{ vehicle.driver_phone|default:"N/A" }}</p>
+                    <p><strong>Status:</strong> 
+                        {% if vehicle.is_active %}
+                        <span class="badge bg-success">Active</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Assigned Students</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Grade</th>
+                                    <th>Pickup Point</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assignment in vehicle.student_assignments.all %}
+                                <tr>
+                                    <td>{{ assignment.student.get_full_name }}</td>
+                                    <td>{{ assignment.student.grade.name }}</td>
+                                    <td>{{ assignment.pickup_point }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No students assigned</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

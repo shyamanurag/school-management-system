@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Student Transport Assignments{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h4>Student Transport Assignments</h4>
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Grade</th>
+                            <th>Vehicle</th>
+                            <th>Route</th>
+                            <th>Pickup Point</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assignment in assignments %}
+                        <tr>
+                            <td>{{ assignment.student.get_full_name }}</td>
+                            <td>{{ assignment.student.grade.name }}</td>
+                            <td>{{ assignment.vehicle.vehicle_number }}</td>
+                            <td>{{ assignment.route.name }}</td>
+                            <td>{{ assignment.pickup_point }}</td>
+                            <td>
+                                {% if assignment.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary">Edit</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No assignments found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

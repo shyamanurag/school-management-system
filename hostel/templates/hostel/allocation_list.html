@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Room Allocations{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h4>Room Allocations</h4>
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Room</th>
+                            <th>Hostel</th>
+                            <th>Check-in Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for allocation in allocations %}
+                        <tr>
+                            <td>{{ allocation.student.get_full_name }}</td>
+                            <td>{{ allocation.room.room_number }}</td>
+                            <td>{{ allocation.room.hostel.name }}</td>
+                            <td>{{ allocation.check_in_date|date:"d M Y" }}</td>
+                            <td>
+                                {% if allocation.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No allocations found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

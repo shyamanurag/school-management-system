@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.name }} - Exam Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>{{ exam.name }} - Exam Details</h4>
+                <div>
+                    <a href="{% url 'examinations:exam_list' %}" class="btn btn-secondary">
+                        <i class="mdi mdi-arrow-left"></i> Back to Exams
+                    </a>
+                    <button class="btn btn-primary" onclick="editExam({{ exam.id }})">
+                        <i class="mdi mdi-pencil"></i> Edit Exam
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Exam Information</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Name:</dt>
+                        <dd class="col-sm-8">{{ exam.name }}</dd>
+                        
+                        <dt class="col-sm-4">Type:</dt>
+                        <dd class="col-sm-8">{{ exam.exam_type }}</dd>
+                        
+                        <dt class="col-sm-4">Date:</dt>
+                        <dd class="col-sm-8">{{ exam.exam_date|date:"d M Y" }}</dd>
+                        
+                        <dt class="col-sm-4">Duration:</dt>
+                        <dd class="col-sm-8">{{ exam.duration }} minutes</dd>
+                        
+                        <dt class="col-sm-4">Total Marks:</dt>
+                        <dd class="col-sm-8">{{ exam.total_marks }}</dd>
+                        
+                        <dt class="col-sm-4">Status:</dt>
+                        <dd class="col-sm-8">
+                            {% if exam.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Exam Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Marks</th>
+                                    <th>Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in exam.results.all %}
+                                <tr>
+                                    <td>{{ result.student.get_full_name }}</td>
+                                    <td>{{ result.marks_obtained }}/{{ exam.total_marks }}</td>
+                                    <td>{{ result.grade }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No results available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

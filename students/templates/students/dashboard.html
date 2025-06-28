@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold text-primary mb-1">
+                        <i class="bi bi-people-fill me-2"></i>Student Management Dashboard
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Academic Year: {{ current_academic_year|default:"2024-25" }} | 
+                        Total Students: {{ total_students|default:"0" }} | 
+                        Active: {{ active_students|default:"0" }}
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" onclick="showBulkOperationsModal()">
+                        <i class="bi bi-arrow-repeat"></i> Bulk Operations
+                    </button>
+                    <a href="/students/add/" class="btn btn-primary">
+                        <i class="bi bi-person-plus"></i> Add New Student
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indian Education System Metrics -->
+    <div class="row mb-4">
+        <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+            <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white text-center py-4">
+                    <i class="bi bi-people-fill fs-1 mb-2 opacity-75"></i>
+                    <div class="fw-bold fs-4">{{ total_students|default:"0" }}</div>
+                    <div class="small opacity-90">Total Students</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+            <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card-body text-white text-center py-4">
+                    <i class="bi bi-person-check fs-1 mb-2 opacity-75"></i>
+                    <div class="fw-bold fs-4">{{ active_students|default:"0" }}</div>
+                    <div class="small opacity-90">Active Students</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+            <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="card-body text-white text-center py-4">
+                    <i class="bi bi-person-plus fs-1 mb-2 opacity-75"></i>
+                    <div class="fw-bold fs-4">{{ new_admissions|default:"0" }}</div>
+                    <div class="small opacity-90">New This Month</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+            <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="card-body text-white text-center py-4">
+                    <i class="bi bi-gender-male fs-1 mb-2 opacity-75"></i>
+                    <div class="fw-bold fs-4">{{ male_students|default:"0" }}</div>
+                    <div class="small opacity-90">Male Students</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+            <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <div class="card-body text-white text-center py-4">
+                    <i class="bi bi-gender-female fs-1 mb-2 opacity-75"></i>
+                    <div class="fw-bold fs-4">{{ female_students|default:"0" }}</div>
+                    <div class="small opacity-90">Female Students</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+            <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                <div class="card-body text-dark text-center py-4">
+                    <i class="bi bi-building fs-1 mb-2 opacity-75"></i>
+                    <div class="fw-bold fs-4">{{ total_classes|default:"0" }}</div>
+                    <div class="small opacity-75">Total Classes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indian Education Classes Distribution -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="card-title mb-0 fw-bold">
+                        <i class="bi bi-diagram-3 text-primary me-2"></i>Class-wise Distribution (Indian Education System)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Pre-Primary Section -->
+                        <div class="col-md-3 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="fw-bold text-info mb-3">
+                                    <i class="bi bi-flower1 me-2"></i>Pre-Primary
+                                </h6>
+                                <div class="small mb-2">
+                                    <span class="badge bg-light text-dark me-2">Pre-KG</span>
+                                    <span class="fw-bold">{{ pre_kg_count|default:"0" }}</span>
+                                </div>
+                                <div class="small mb-2">
+                                    <span class="badge bg-light text-dark me-2">LKG</span>
+                                    <span class="fw-bold">{{ lkg_count|default:"0" }}</span>
+                                </div>
+                                <div class="small">
+                                    <span class="badge bg-light text-dark me-2">UKG</span>
+                                    <span class="fw-bold">{{ ukg_count|default:"0" }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Primary Section -->
+                        <div class="col-md-3 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="fw-bold text-success mb-3">
+                                    <i class="bi bi-book me-2"></i>Primary (I-V)
+                                </h6>
+                                {% for class in primary_classes %}
+                                <div class="small mb-2">
+                                    <span class="badge bg-light text-dark me-2">{{ class.name }}</span>
+                                    <span class="fw-bold">{{ class.count|default:"0" }}</span>
+                                </div>
+                                {% empty %}
+                                <div class="small text-muted">No data available</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Upper Primary Section -->
+                        <div class="col-md-3 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="fw-bold text-warning mb-3">
+                                    <i class="bi bi-journal-bookmark me-2"></i>Upper Primary (VI-VIII)
+                                </h6>
+                                {% for class in upper_primary_classes %}
+                                <div class="small mb-2">
+                                    <span class="badge bg-light text-dark me-2">{{ class.name }}</span>
+                                    <span class="fw-bold">{{ class.count|default:"0" }}</span>
+                                </div>
+                                {% empty %}
+                                <div class="small text-muted">No data available</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Secondary Section -->
+                        <div class="col-md-3 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="fw-bold text-danger mb-3">
+                                    <i class="bi bi-mortarboard me-2"></i>Secondary+ (IX-XII)
+                                </h6>
+                                {% for class in secondary_classes %}
+                                <div class="small mb-2">
+                                    <span class="badge bg-light text-dark me-2">{{ class.name }}</span>
+                                    <span class="fw-bold">{{ class.count|default:"0" }}</span>
+                                </div>
+                                {% empty %}
+                                <div class="small text-muted">No data available</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities and Quick Actions -->
+    <div class="row">
+        <!-- Recent Student Activities -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 fw-bold">Recent Student Activities</h5>
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm" style="width: auto;">
+                                <option>All Activities</option>
+                                <option>New Admissions</option>
+                                <option>Profile Updates</option>
+                                <option>Document Uploads</option>
+                            </select>
+                            <a href="/students/" class="btn btn-outline-primary btn-sm">View All Students</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_students %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="border-0 text-muted small fw-semibold">STUDENT</th>
+                                        <th class="border-0 text-muted small fw-semibold">CLASS</th>
+                                        <th class="border-0 text-muted small fw-semibold">ADMISSION NO.</th>
+                                        <th class="border-0 text-muted small fw-semibold">STATUS</th>
+                                        <th class="border-0 text-muted small fw-semibold">ADMISSION DATE</th>
+                                        <th class="border-0 text-muted small fw-semibold">ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student in recent_students %}
+                                    <tr>
+                                        <td class="py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 40px; height: 40px; font-size: 14px;">
+                                                    {{ student.first_name|first }}{{ student.last_name|first }}
+                                                </div>
+                                                <div class="ms-3">
+                                                    <div class="fw-semibold">{{ student.first_name }} {{ student.last_name }}</div>
+                                                    <div class="text-muted small">{{ student.father_name|default:"" }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge bg-info">{{ student.grade.name|default:"N/A" }}</span>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="fw-bold">{{ student.admission_number|default:"N/A" }}</span>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge {% if student.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                                {% if student.is_active %}Active{% else %}Inactive{% endif %}
+                                            </span>
+                                        </td>
+                                        <td class="py-3">
+                                            <div class="text-muted small">{{ student.admission_date|date:"d M Y"|default:"N/A" }}</div>
+                                        </td>
+                                        <td class="py-3">
+                                            <div class="btn-group" role="group">
+                                                <a href="/students/{{ student.id }}/" class="btn btn-outline-primary btn-sm">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="/students/{{ student.id }}/edit/" class="btn btn-outline-secondary btn-sm">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+                            <h6 class="text-muted mt-3">No student data found</h6>
+                            <p class="text-muted small">Add students to see them listed here</p>
+                            <a href="/students/add/" class="btn btn-primary">Add First Student</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Analytics -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="card-title mb-0 fw-bold">
+                        <i class="bi bi-lightning-charge text-warning me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="/students/add/" class="btn btn-primary btn-lg">
+                            <i class="bi bi-person-plus me-2"></i>Add New Student
+                        </a>
+                        <button class="btn btn-outline-success" onclick="showBulkAdmissionModal()">
+                            <i class="bi bi-file-earmark-spreadsheet me-2"></i>Bulk Student Import
+                        </button>
+                        <button class="btn btn-outline-info" onclick="generateStudentCards()">
+                            <i class="bi bi-card-text me-2"></i>Generate ID Cards
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="exportStudentData()">
+                            <i class="bi bi-download me-2"></i>Export Student Data
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="showAttendanceModal()">
+                            <i class="bi bi-calendar-check me-2"></i>Mark Attendance
+                        </button>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h6 class="fw-bold mb-3">Student Performance Overview</h6>
+                    <div class="bg-light rounded-3 p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small">Top Performers</span>
+                            <span class="fw-bold">{{ top_performers|default:"0" }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small">Average Attendance</span>
+                            <span class="fw-bold text-success">{{ avg_attendance|default:"0"|floatformat:1 }}%</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted small">Need Attention</span>
+                            <span class="fw-bold text-warning">{{ needs_attention|default:"0" }}</span>
+                        </div>
+                        <div class="progress mb-2" style="height: 8px;">
+                            <div class="progress-bar bg-success" style="width: {{ avg_attendance|default:"0" }}%"></div>
+                        </div>
+                        <small class="text-muted">Overall class attendance rate</small>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h6 class="fw-bold mb-3">Pending Tasks</h6>
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">Incomplete Documents</small>
+                                <div class="fw-semibold">{{ incomplete_docs|default:"0" }} students</div>
+                            </div>
+                            <span class="badge bg-danger rounded-pill">{{ incomplete_docs|default:"0" }}</span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">Fee Pending</small>
+                                <div class="fw-semibold">{{ fee_pending|default:"0" }} students</div>
+                            </div>
+                            <span class="badge bg-warning rounded-pill">{{ fee_pending|default:"0" }}</span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">Profile Updates Needed</small>
+                                <div class="fw-semibold">{{ profile_updates|default:"0" }} students</div>
+                            </div>
+                            <span class="badge bg-info rounded-pill">{{ profile_updates|default:"0" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Operations Modal -->
+<div class="modal fade" id="bulkOperationsModal" tabindex="-1" aria-labelledby="bulkOperationsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="bulkOperationsModalLabel">
+                    <i class="bi bi-arrow-repeat me-2"></i>Bulk Student Operations
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-primary">
+                            <div class="card-body text-center">
+                                <i class="bi bi-file-earmark-spreadsheet text-primary fs-2 mb-2"></i>
+                                <h6 class="fw-bold">Import Students</h6>
+                                <p class="small text-muted">Upload Excel/CSV file with student data</p>
+                                <button class="btn btn-primary btn-sm">Choose File</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <i class="bi bi-download text-success fs-2 mb-2"></i>
+                                <h6 class="fw-bold">Export Students</h6>
+                                <p class="small text-muted">Download student data in Excel format</p>
+                                <button class="btn btn-success btn-sm" onclick="exportStudentData()">Export Now</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-warning">
+                            <div class="card-body text-center">
+                                <i class="bi bi-card-text text-warning fs-2 mb-2"></i>
+                                <h6 class="fw-bold">Generate ID Cards</h6>
+                                <p class="small text-muted">Create student ID cards in bulk</p>
+                                <button class="btn btn-warning btn-sm" onclick="generateStudentCards()">Generate</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-info">
+                            <div class="card-body text-center">
+                                <i class="bi bi-envelope text-info fs-2 mb-2"></i>
+                                <h6 class="fw-bold">Send Notifications</h6>
+                                <p class="small text-muted">Send bulk SMS/Email to parents</p>
+                                <button class="btn btn-info btn-sm" onclick="showNotificationModal()">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showBulkOperationsModal() {
+    const modal = new bootstrap.Modal(document.getElementById('bulkOperationsModal'));
+    modal.show();
+}
+
+function showBulkAdmissionModal() {
+    showToast('Opening bulk admission interface...', 'info');
+}
+
+function generateStudentCards() {
+    showToast('Generating student ID cards...', 'info');
+    setTimeout(() => {
+        showToast('ID cards generated successfully!', 'success');
+    }, 2000);
+}
+
+function exportStudentData() {
+    showToast('Preparing student data export...', 'info');
+    setTimeout(() => {
+        showToast('Student data exported successfully!', 'success');
+    }, 1500);
+}
+
+function showAttendanceModal() {
+    showToast('Opening attendance marking interface...', 'info');
+}
+
+function showNotificationModal() {
+    showToast('Opening notification interface...', 'info');
+}
+</script>
+{% endblock %} 

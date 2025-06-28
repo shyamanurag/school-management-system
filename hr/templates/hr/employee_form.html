@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Employee Form{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h4>{% if object %}Edit Employee{% else %}Add Employee{% endif %}</h4>
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">First Name</label>
+                    <input type="text" class="form-control" name="first_name" value="{{ form.first_name.value|default:'' }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" class="form-control" name="last_name" value="{{ form.last_name.value|default:'' }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Employee ID</label>
+                    <input type="text" class="form-control" name="employee_id" value="{{ form.employee_id.value|default:'' }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Department</label>
+                    <input type="text" class="form-control" name="department" value="{{ form.department.value|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Position</label>
+                    <input type="text" class="form-control" name="position" value="{{ form.position.value|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" name="email" value="{{ form.email.value|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" class="form-control" name="phone" value="{{ form.phone.value|default:'' }}">
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="{% url 'hr:employee_list' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

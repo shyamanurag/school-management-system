@@ -1,0 +1,449 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold text-primary mb-1">
+                        <i class="bi bi-trophy me-2"></i>Examination Results
+                    </h2>
+                    <p class="text-muted mb-0">
+                        CBSE/ICSE Result Analysis | Class Performance Reports | Academic Year 2024-25
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" onclick="generateReportCard()">
+                        <i class="bi bi-file-earmark-pdf"></i> Generate Report Cards
+                    </button>
+                    <button class="btn btn-primary" onclick="publishResults()">
+                        <i class="bi bi-megaphone"></i> Publish Results
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Analytics Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-success bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-award fs-3 mb-2"></i>
+                                <h5 class="fw-bold">85%</h5>
+                                <small>Pass Percentage</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-primary bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-star fs-3 mb-2"></i>
+                                <h5 class="fw-bold">7.8</h5>
+                                <small>Average CGPA</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-warning bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-person-check fs-3 mb-2"></i>
+                                <h5 class="fw-bold">342</h5>
+                                <small>Students Appeared</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-info bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-trophy fs-3 mb-2"></i>
+                                <h5 class="fw-bold">15</h5>
+                                <small>Distinction</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-secondary bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-graph-up fs-3 mb-2"></i>
+                                <h5 class="fw-bold">98%</h5>
+                                <small>Class Average</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <div class="bg-danger bg-gradient rounded-3 p-3 text-white">
+                                <i class="bi bi-exclamation-triangle fs-3 mb-2"></i>
+                                <h5 class="fw-bold">12</h5>
+                                <small>Need Support</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Class and Exam Selection -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="exam_filter" class="form-label">Examination</label>
+                            <select class="form-select" id="exam_filter" name="exam_id">
+                                <option value="">Select Examination</option>
+                                <option value="1" selected>Half Yearly Examination 2024</option>
+                                <option value="2">Unit Test 1</option>
+                                <option value="3">Annual Examination 2024</option>
+                                <option value="4">CBSE Board Exam 2024</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="class_filter" class="form-label">Class</label>
+                            <select class="form-select" id="class_filter" name="class_id">
+                                <option value="">All Classes</option>
+                                <option value="1">Class I</option>
+                                <option value="5">Class V</option>
+                                <option value="6" selected>Class X</option>
+                                <option value="7">Class XII Science</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="subject_filter" class="form-label">Subject</label>
+                            <select class="form-select" id="subject_filter" name="subject_id">
+                                <option value="" selected>All Subjects</option>
+                                <option value="1">Mathematics</option>
+                                <option value="2">English</option>
+                                <option value="3">Physics</option>
+                                <option value="4">Chemistry</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> Load Results
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 fw-bold">
+                            <i class="bi bi-list-check me-2"></i>Class X - Half Yearly Results
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-download"></i> Export
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="exportResults('csv')">
+                                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export as CSV
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="exportResults('pdf')">
+                                        <i class="bi bi-file-earmark-pdf me-2"></i>Export as PDF
+                                    </a></li>
+                                </ul>
+                            </div>
+                            <span class="badge bg-primary fs-6 py-2">42 Students</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 text-muted small fw-semibold">RANK</th>
+                                    <th class="border-0 text-muted small fw-semibold">STUDENT</th>
+                                    <th class="border-0 text-muted small fw-semibold">PERCENTAGE</th>
+                                    <th class="border-0 text-muted small fw-semibold">CGPA</th>
+                                    <th class="border-0 text-muted small fw-semibold">GRADE</th>
+                                    <th class="border-0 text-muted small fw-semibold">SUBJECTS</th>
+                                    <th class="border-0 text-muted small fw-semibold">RESULT</th>
+                                    <th class="border-0 text-muted small fw-semibold">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Top Performer -->
+                                <tr class="table-success">
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-award text-warning fs-4 me-2"></i>
+                                            <span class="badge bg-warning text-dark fs-6">1st</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/student_images/no_image.png' %}" class="rounded-circle me-3" width="40" height="40" alt="Student">
+                                            <div>
+                                                <div class="fw-semibold">Aadhya Sharma</div>
+                                                <div class="text-muted small">Roll: 001 | STU001</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-success fs-5">95.2%</div>
+                                        <div class="text-muted small">Excellent</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-success fs-5">9.5</div>
+                                        <div class="text-muted small">A1 Grade</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success fs-6">A1</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">5/5</div>
+                                        <div class="text-muted small">All Passed</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success">PASS</span>
+                                        <div class="text-muted small">Distinction</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewDetailedResult(1)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success btn-sm" onclick="generateReportCard(1)">
+                                                <i class="bi bi-file-earmark-pdf"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Second Position -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-award text-secondary fs-5 me-2"></i>
+                                            <span class="badge bg-secondary fs-6">2nd</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/student_images/no_image.png' %}" class="rounded-circle me-3" width="40" height="40" alt="Student">
+                                            <div>
+                                                <div class="fw-semibold">Vikram Singh</div>
+                                                <div class="text-muted small">Roll: 004 | STU004</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-primary fs-5">92.8%</div>
+                                        <div class="text-muted small">Excellent</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-primary fs-5">9.3</div>
+                                        <div class="text-muted small">A1 Grade</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success fs-6">A1</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">5/5</div>
+                                        <div class="text-muted small">All Passed</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success">PASS</span>
+                                        <div class="text-muted small">Distinction</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewDetailedResult(4)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success btn-sm" onclick="generateReportCard(4)">
+                                                <i class="bi bi-file-earmark-pdf"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Third Position -->
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-award text-warning fs-5 me-2"></i>
+                                            <span class="badge bg-warning text-dark fs-6">3rd</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/student_images/no_image.png' %}" class="rounded-circle me-3" width="40" height="40" alt="Student">
+                                            <div>
+                                                <div class="fw-semibold">Kavya Nair</div>
+                                                <div class="text-muted small">Roll: 005 | STU005</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-primary fs-5">89.6%</div>
+                                        <div class="text-muted small">Very Good</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-primary fs-5">8.9</div>
+                                        <div class="text-muted small">A2 Grade</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary fs-6">A2</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-semibold">5/5</div>
+                                        <div class="text-muted small">All Passed</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success">PASS</span>
+                                        <div class="text-muted small">First Class</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewDetailedResult(5)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success btn-sm" onclick="generateReportCard(5)">
+                                                <i class="bi bi-file-earmark-pdf"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Regular Students -->
+                                <tr>
+                                    <td class="py-3"><span class="badge bg-light text-dark fs-6">4th</span></td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/student_images/no_image.png' %}" class="rounded-circle me-3" width="40" height="40" alt="Student">
+                                            <div><div class="fw-semibold">Priya Reddy</div><div class="text-muted small">Roll: 003 | STU003</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-info fs-5">78.4%</div>
+                                        <div class="text-muted small">Good</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-info fs-5">7.8</div>
+                                        <div class="text-muted small">B1 Grade</div>
+                                    </td>
+                                    <td class="py-3"><span class="badge bg-info fs-6">B1</span></td>
+                                    <td class="py-3"><div class="fw-semibold">5/5</div><div class="text-muted small">All Passed</div></td>
+                                    <td class="py-3"><span class="badge bg-success">PASS</span><div class="text-muted small">Second Class</div></td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewDetailedResult(3)"><i class="bi bi-eye"></i></button>
+                                            <button class="btn btn-outline-success btn-sm" onclick="generateReportCard(3)"><i class="bi bi-file-earmark-pdf"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Student needing support -->
+                                <tr class="table-warning">
+                                    <td class="py-3"><span class="badge bg-warning text-dark fs-6">15th</span></td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'uploads/student_images/no_image.png' %}" class="rounded-circle me-3" width="40" height="40" alt="Student">
+                                            <div><div class="fw-semibold">Arjun Patel</div><div class="text-muted small">Roll: 002 | STU002</div></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-warning fs-5">45.2%</div>
+                                        <div class="text-muted small">Needs Support</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-warning fs-5">4.5</div>
+                                        <div class="text-muted small">D Grade</div>
+                                    </td>
+                                    <td class="py-3"><span class="badge bg-warning text-dark fs-6">D</span></td>
+                                    <td class="py-3"><div class="fw-semibold">3/5</div><div class="text-muted small">2 Failed</div></td>
+                                    <td class="py-3"><span class="badge bg-danger">COMPARTMENT</span><div class="text-muted small">Math, Science</div></td>
+                                    <td class="py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewDetailedResult(2)"><i class="bi bi-eye"></i></button>
+                                            <button class="btn btn-outline-warning btn-sm" onclick="scheduleRemedial(2)"><i class="bi bi-person-plus"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Results processed: 42/42 students | Last updated: 2 hours ago</small>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-warning" onclick="identifyWeakStudents()">
+                                <i class="bi bi-exclamation-triangle"></i> Identify Weak Students
+                            </button>
+                            <button class="btn btn-outline-success" onclick="generateMeritList()">
+                                <i class="bi bi-list-ol"></i> Generate Merit List
+                            </button>
+                            <button class="btn btn-success" onclick="publishResults()">
+                                <i class="bi bi-megaphone"></i> Publish Results
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewDetailedResult(studentId) {
+    showToast('Loading detailed result...', 'info');
+    setTimeout(() => {
+        window.location.href = `/examinations/results/${studentId}/`;
+    }, 500);
+}
+
+function generateReportCard(studentId) {
+    showToast('Generating report card...', 'info');
+    setTimeout(() => {
+        showToast('Report card generated successfully!', 'success');
+    }, 2000);
+}
+
+function scheduleRemedial(studentId) {
+    showToast('Scheduling remedial classes...', 'info');
+    setTimeout(() => {
+        showToast('Remedial classes scheduled successfully!', 'success');
+    }, 1500);
+}
+
+function exportResults(format) {
+    showToast(`Exporting results as ${format.toUpperCase()}...`, 'info');
+    setTimeout(() => {
+        showToast('Export completed successfully!', 'success');
+    }, 2000);
+}
+
+function publishResults() {
+    if (confirm('Are you sure you want to publish results? This will notify all parents via SMS.')) {
+        showToast('Publishing results...', 'info');
+        setTimeout(() => {
+            showToast('Results published successfully! SMS sent to all parents.', 'success');
+        }, 3000);
+    }
+}
+
+function identifyWeakStudents() {
+    showToast('Analyzing student performance...', 'info');
+    setTimeout(() => {
+        showToast('Weak students identified. Remedial plan ready.', 'warning');
+    }, 2000);
+}
+
+function generateMeritList() {
+    showToast('Generating merit list...', 'info');
+    setTimeout(() => {
+        showToast('Merit list generated successfully!', 'success');
+    }, 1500);
+}
+</script>
+{% endblock %} 
